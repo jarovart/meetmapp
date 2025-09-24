@@ -1,7 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'ui/widgets/auth_service.dart'; // <-- deine AuthService Klasse
+import 'ui/screens/home_page.dart';
+import 'ui/screens/login_page.dart';
+
+
+final supabase = Supabase.instance.client;
+final authService = AuthService();
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  supabaseInit();
   runApp(const MyApp());
+}
+
+void supabaseInit() async{
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://bzvorbqrctkptzzorakk.supabase.co',       // dein Supabase URL
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6dm9yYnFyY3RrcHR6em9yYWtrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2MjY5ODYsImV4cCI6MjA3NDIwMjk4Nn0.5MqcM4Ucgk-OvOWuU80HnBGsmNuEEW7OAcTKbU4TvhA',                 // dein anon Key
+  );
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -28,10 +49,23 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        /*colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+    );*/
+        primarySwatch: Colors.blue),
+        home: StreamBuilder<AuthState>(
+          stream: authService.onAuthStateChange(),
+          builder: (context, snapshot) {
+            final session = authService.getCurrentSession();
+            if (session != null) {
+              return HomePage(); // Eingeloggt
+            } else {
+              return LoginPage(); // Nicht eingeloggt
+            }
+          },
+        ),
+      );
   }
 }
 
@@ -119,4 +153,62 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+
+  Future<void> signIn(String email, String password) async {
+    try{
+      final response = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      final user = response.user;
+      if (user != null) {
+        print('✅ Erfolgreich eingeloggt: ${user.email}');
+      }
+    } on AuthException catch (e) {
+      print('⚠️ Auth-Fehler: ${e.message}');
+    } catch (e) {
+      print('❌ Unerwarteter Fehler: $e');
+    }
+  }
+
+  // Daten abrufen
+  Future<void> fetchUsers() async {
+    final response = await supabase.from('users').select();
+    if (response.error == null) {
+      print(response.data);
+    }
+  }
+
+// Daten einfügen
+  Future<void> addUser(String email, String name) async {
+    final response = await supabase.from('users').insert({
+      'email': email,
+      'name': name,
+    });
+
+    if (response.error == null) {
+      print('User hinzugefügt');
+    }
+  }
+
+  // Daten updated
+  Future<void> updateUser(String uuid, String email, String name) async {
+    final response = await supabase
+        .from('users')
+        .update({'name': name, 'email': email})
+        .eq('id', uuid);
+  }
+
+  // Daten updated
+  Future<void> deleteUser(String uuid) async {
+    final response = await supabase
+        .from('users')
+        .delete()
+        .eq('id', uuid);
+  }
+
+
+
 }
