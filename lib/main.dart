@@ -96,8 +96,18 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _currentPosition = latLng;
     });
-    // Karte zentrieren und zoomen
+
+    // Karte beim Start auf Position bewegen
     _mapController.move(latLng, 15);
+  }
+
+  void _centerOnUser() async {
+    if (_currentPosition == null) {
+      await _determinePosition(); // falls noch nicht gesetzt
+    }
+    if (_currentPosition != null) {
+      _mapController.move(_currentPosition!, 15);
+    }
   }
 
   void _addLocation(LocationData location) {
@@ -146,77 +156,101 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
-          initialCenter: initialCenter,
-          initialZoom: 6,
-          onLongPress: (tapPosition, point) async {
-            final newLocation = await Navigator.push<LocationData>(
-              context,
-              MaterialPageRoute(
-                builder: (context) => LocationFormPage(point: point),
-              ),
-            );
-            if (newLocation != null) {
-              _addLocation(newLocation);
-            }
-          },
-        ),
+      body: Stack(
         children: [
-          TileLayer(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-            userAgentPackageName: 'com.example.app',
-          ),
-          MarkerLayer(
-            markers: _locations
-                .map(
-                  (loc) => Marker(
-                point: loc.position,
-                width: 80,
-                height: 80,
-                child: GestureDetector(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: Text(loc.name),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Image.network(loc.imageUrl, height: 100),
-                            const SizedBox(height: 8),
-                            Text(loc.description),
-                          ],
-                        ),
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: initialCenter,
+              initialZoom: 6,
+              onLongPress: (tapPosition, point) async {
+                final newLocation = await Navigator.push<LocationData>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LocationFormPage(point: point),
+                  ),
+                );
+                if (newLocation != null) {
+                  _addLocation(newLocation);
+                }
+              },
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                userAgentPackageName: 'com.example.app',
+              ),
+              MarkerLayer(
+                markers: _locations
+                    .map(
+                      (loc) => Marker(
+                    point: loc.position,
+                    width: 80,
+                    height: 80,
+                    child: GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: Text(loc.name),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.network(loc.imageUrl, height: 100),
+                                const SizedBox(height: 8),
+                                Text(loc.description),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 40,
                       ),
-                    );
-                  },
-                  child: const Icon(
-                    Icons.location_on,
-                    color: Colors.red,
-                    size: 40,
+                    ),
+                  ),
+                )
+                    .toList(),
+              ),
+              if (_currentPosition != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _currentPosition!,
+                      width: 60,
+                      height: 60,
+                      child: const Icon(
+                        Icons.my_location,
+                        color: Colors.blue,
+                        size: 40,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+
+          // GPS-Button unten rechts
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: ClipOval(
+              child: Material(
+                color: Colors.white.withValues(alpha: 0.7),
+                child: InkWell(
+                  splashColor: Colors.blue.withValues(alpha: 0.3),
+                  onTap: _centerOnUser,
+                  child: const SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: Icon(Icons.gps_fixed, color: Colors.blue, size: 28),
                   ),
                 ),
               ),
-            )
-                .toList(),
-          ),
-          if (_currentPosition != null)
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: _currentPosition!,
-                  width: 60,
-                  height: 60,
-                  child: const Icon(
-                    Icons.my_location,
-                    color: Colors.blue,
-                    size: 40,
-                  ),
-                ),
-              ],
             ),
+          ),
         ],
       ),
     );
