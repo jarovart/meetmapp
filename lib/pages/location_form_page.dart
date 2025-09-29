@@ -13,9 +13,35 @@ class LocationFormPage extends StatefulWidget {
 
 class _LocationFormPageState extends State<LocationFormPage> {
   final _formKey = GlobalKey<FormState>();
+
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _imageController = TextEditingController();
+
+  static const String _defaultImage =
+      "https://via.placeholder.com/150"; // Konstante statt Magic String
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _imageController.dispose();
+    super.dispose();
+  }
+
+  void _onSave() {
+    if (_formKey.currentState!.validate()) {
+      final newLocation = LocationData(
+        name: _nameController.text.trim(),
+        description: _descriptionController.text.trim(),
+        imageUrl: _imageController.text.trim().isNotEmpty
+            ? _imageController.text.trim()
+            : _defaultImage,
+        position: widget.point,
+      );
+      Navigator.pop(context, newLocation);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,52 +53,57 @@ class _LocationFormPageState extends State<LocationFormPage> {
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
+              _buildTextField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: "Name"),
-                validator: (value) =>
-                value == null || value.isEmpty ? "Bitte eingeben" : null,
+                label: "Name",
+                validator: (v) =>
+                v == null || v.isEmpty ? "Bitte eingeben" : null,
               ),
-              TextFormField(
+              _buildTextField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: "Beschreibung"),
+                label: "Beschreibung",
               ),
-              TextFormField(
+              _buildTextField(
                 controller: _imageController,
-                decoration: const InputDecoration(
-                    labelText: "Bild-URL (optional)"),
+                label: "Bild-URL (optional)",
               ),
               const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Abbrechen"),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        final newLocation = LocationData(
-                          name: _nameController.text,
-                          description: _descriptionController.text,
-                          imageUrl: _imageController.text.isNotEmpty
-                              ? _imageController.text
-                              : "https://via.placeholder.com/150",
-                          position: widget.point,
-                        );
-                        Navigator.pop(context, newLocation);
-                      }
-                    },
-                    child: const Text("Speichern"),
-                  ),
-                ],
-              )
+              _buildActionButtons(),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// Wiederverwendbares Textfeld
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(labelText: label),
+      validator: validator,
+    );
+  }
+
+  /// Buttons am Ende
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Abbrechen"),
+        ),
+        const SizedBox(width: 10),
+        ElevatedButton(
+          onPressed: _onSave,
+          child: const Text("Speichern"),
+        ),
+      ],
     );
   }
 }

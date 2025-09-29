@@ -12,10 +12,10 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   LatLng? _currentPosition;
   final List<LocationData> _locations = [];
   final MapController _mapController = MapController();
@@ -27,25 +27,32 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _determinePosition() async {
-    final latLng = await LocationService.getCurrentLocation();
-    if (latLng != null) {
-      setState(() => _currentPosition = latLng);
-      _mapController.move(latLng, 15);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Standort konnte nicht ermittelt werden")),
-      );
+    final result = await LocationService.getCurrentLocation();
+
+    switch (result) {
+      case LocationSuccess(:final position):
+        setState(() => _currentPosition = position);
+        _mapController.move(position, 15);
+      case LocationServiceDisabled():
+        _showErrorSnackBar("Standortdienste sind deaktiviert");
+      case LocationPermissionDenied():
+        _showErrorSnackBar("Standort-Berechtigung verweigert");
+      case LocationError(:final message):
+        _showErrorSnackBar("Fehler: $message");
     }
   }
 
-  void _centerOnUser() async {
-    await _determinePosition();
-  }
+
+  void _centerOnUser() async => await _determinePosition();
 
   void _addLocation(LocationData location) {
-    setState(() {
-      _locations.add(location);
-    });
+    setState(() => _locations.add(location));
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -54,92 +61,117 @@ class _HomePageState extends State<HomePage> {
         _currentPosition ?? LatLng(51.1657, 10.4515); // Mitte Deutschland
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Meetmaap"),
-        leading: PopupMenuButton<String>(
-          icon: const Icon(Icons.menu),
-          onSelected: (value) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Ausgewählt: $value")),
-            );
-          },
-          itemBuilder: (BuildContext context) => const [
-            PopupMenuItem(value: "Option 1", child: Text("Option 1")),
-            PopupMenuItem(value: "Option 2", child: Text("Option 2")),
-            PopupMenuItem(value: "Option 3", child: Text("Option 3")),
-          ],
-        ),
-        actions: [
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfilePage()),
-              );
-            },
-            child: const Padding(
-              padding: EdgeInsets.only(right: 12.0),
-              child: CircleAvatar(
-                backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: Stack(
         children: [
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: initialCenter,
-              initialZoom: 6,
-              onLongPress: (tapPosition, point) async {
-                final newLocation = await Navigator.push<LocationData>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LocationFormPage(point: point),
-                  ),
-                );
-                if (newLocation != null) _addLocation(newLocation);
-              },
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                userAgentPackageName: 'com.example.app',
-              ),
-              MarkerLayer(
-                markers: _locations
-                    .map(
-                      (loc) => Marker(
-                    point: loc.position,
-                    width: 80,
-                    height: 80,
-                    child: LocationMarker(location: loc),
-                  ),
-                )
-                    .toList(),
-              ),
-              if (_currentPosition != null)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _currentPosition!,
-                      width: 60,
-                      height: 60,
-                      child: const Icon(
-                        Icons.my_location,
-                        color: Colors.blue,
-                        size: 40,
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          ),
+          _buildMap(initialCenter),
           CenterOnUserButton(onPressed: _centerOnUser),
         ],
       ),
+    );
+  }
+
+  /// ---------- UI-Aufteilung ----------
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: const Text("Meetmaap"),
+      leading: _buildMenu(),
+      actions: [_buildProfileAvatar()],
+    );
+  }
+
+  Widget _buildMenu() {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.menu),
+      onSelected: (value) {
+        _showErrorSnackBar("Ausgewählt: $value");
+      },
+      itemBuilder: (BuildContext context) => const [
+        PopupMenuItem(value: "Option 1", child: Text("Option 1")),
+        PopupMenuItem(value: "Option 2", child: Text("Option 2")),
+        PopupMenuItem(value: "Option 3", child: Text("Option 3")),
+      ],
+    );
+  }
+
+  Widget _buildProfileAvatar() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfilePage()),
+        );
+      },
+      child: const Padding(
+        padding: EdgeInsets.only(right: 12.0),
+        child: CircleAvatar(
+          backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMap(LatLng initialCenter) {
+    return FlutterMap(
+      mapController: _mapController,
+      options: MapOptions(
+        initialCenter: initialCenter,
+        initialZoom: 6,
+        onLongPress: (tapPosition, point) async {
+          final newLocation = await Navigator.push<LocationData>(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LocationFormPage(point: point),
+            ),
+          );
+          if (newLocation != null) _addLocation(newLocation);
+        },
+      ),
+      children: [
+        _buildTileLayer(),
+        _buildLocationsLayer(),
+        if (_currentPosition != null) _buildUserMarker(),
+      ],
+    );
+  }
+
+  Widget _buildTileLayer() {
+    return TileLayer(
+      urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      userAgentPackageName: 'com.example.app',
+    );
+  }
+
+  Widget _buildLocationsLayer() {
+    return MarkerLayer(
+      markers: _locations
+          .map(
+            (loc) => Marker(
+          point: loc.position,
+          width: 80,
+          height: 80,
+          child: LocationMarker(location: loc),
+        ),
+      )
+          .toList(),
+    );
+  }
+
+  Widget _buildUserMarker() {
+    return MarkerLayer(
+      markers: [
+        Marker(
+          point: _currentPosition!,
+          width: 60,
+          height: 60,
+          child: const Icon(
+            Icons.my_location,
+            color: Colors.blue,
+            size: 40,
+          ),
+        ),
+      ],
     );
   }
 }
