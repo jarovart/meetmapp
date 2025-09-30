@@ -139,7 +139,7 @@ class HomePageState extends State<HomePage> {
   Widget _buildTileLayer() {
     return TileLayer(
       urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-      userAgentPackageName: 'com.example.app',
+      userAgentPackageName: 'de.jarovart.meetmaap',
     );
   }
 
