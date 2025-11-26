@@ -46,7 +46,7 @@ macos/Flutter/ephemeral/
 # Linux
 linux/flutter/generated_plugin_registrant.cc
 linux/flutter/generated_plugin_registrant.h
-linux/flutter/ephemeral
+linux/flutter/ephemeral/
 
 
 # Coverage
