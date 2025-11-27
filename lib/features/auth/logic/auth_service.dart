@@ -1,13 +1,13 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+/// Lightweight placeholder AuthService (no Supabase) so project can run without Supabase.
+/// Replace with real implementation when integrating your Spring Boot backend.
 
-/// Ergebnis-Typ für Auth-Aktionen
 sealed class AuthResult {
   const AuthResult();
 }
 
 class AuthSuccess extends AuthResult {
-  final AuthResponse response;
-  const AuthSuccess(this.response);
+  final String message;
+  const AuthSuccess(this.message);
 }
 
 class AuthFailure extends AuthResult {
@@ -16,69 +16,19 @@ class AuthFailure extends AuthResult {
 }
 
 class AuthService {
-  final SupabaseClient _supabase = Supabase.instance.client;
-
-  /// Anmeldung mit E-Mail & Passwort
   Future<AuthResult> signIn(String email, String password) async {
-    return _handleAuthRequest(() async {
-      return await _supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-    });
+    // Placeholder: always return failure. Replace with real API call.
+    return const AuthFailure('Auth not implemented');
   }
 
-  /// Registrierung
   Future<AuthResult> signUp(String email, String password) async {
-    return _handleAuthRequest(() async {
-      return await _supabase.auth.signUp(
-        email: email,
-        password: password,
-      );
-    });
+    return const AuthFailure('Auth not implemented');
   }
 
-  /// Abmelden
-  Future<void> signOut() async {
-    try {
-      await _supabase.auth.signOut();
-    } catch (e) {
-      // Optional: Logging/Monitoring
-      rethrow;
-    }
-  }
+  Future<void> signOut() async {}
 
-  /// Aktuelle Session abrufen
-  Session? getCurrentSession() => _supabase.auth.currentSession;
-
-  /// Aktuellen Benutzer abrufen
-  User? getCurrentUser() => _supabase.auth.currentUser;
-
-  /// Echtzeit-Listener für Auth-Änderungen
-  Stream<AuthState> onAuthStateChange() => _supabase.auth.onAuthStateChange;
-
-  /// Gemeinsames Fehler-Handling für signIn/signUp
-  Future<AuthResult> _handleAuthRequest(
-      Future<AuthResponse> Function() request,
-      ) async {
-    try {
-      final res = await request();
-      return AuthSuccess(res);
-    } on AuthException catch (e) {
-      return AuthFailure(e.message);
-    } catch (e) {
-      return AuthFailure("Unerwarteter Fehler: $e");
-    }
-  }
+  // No session/user support in placeholder
+  dynamic getCurrentSession() => null;
+  dynamic getCurrentUser() => null;
+  Stream<dynamic> onAuthStateChange() => const Stream.empty();
 }
-/*
-final result = await AuthService().signIn(email, password);
-
-switch (result) {
-case AuthSuccess(:final response):
-print("✅ Eingeloggt: ${response.user?.email}");
-case AuthFailure(:final message):
-ScaffoldMessenger.of(context).showSnackBar(
-SnackBar(content: Text("Fehler: $message")),
-);
-}*/

@@ -6,15 +6,11 @@ class CenterOnUserButton extends StatelessWidget {
   const CenterOnUserButton({super.key, required this.onPressed});
 
   // Abstand vom Bildschirmrand
-  static const double _padding = 20.0;
+  static const double padding = 20.0;
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      bottom: _padding,
-      right: _padding,
-      child: _buildFloatingButton(),
-    );
+    return _buildFloatingButton();
   }
 
   Widget _buildFloatingButton() {
@@ -27,9 +23,6 @@ class CenterOnUserButton extends StatelessWidget {
   }
 
   Widget _buildIcon() {
-    return const Icon(
-      Icons.my_location,
-      color: Colors.blue,
-    );
+    return const Icon(Icons.my_location, color: Colors.blue);
   }
 }
