@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import '../models/location_data.dart';
-import '../services/location_service.dart';
-import '../widgets/location_marker.dart';
-import '../widgets/center_on_user_button.dart';
-import 'location_form_page.dart';
-import 'profile_page.dart';
+import '../features/locations/data/location_data.dart';
+import '../features/locations/logic/location_service.dart';
+import '../common/widgets/location_marker.dart';
+import '../common/widgets/center_on_user_button.dart';
+import '../features/locations/presentation/location_form_page.dart';
+import '../features/profile/profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -42,7 +42,6 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-
   void _centerOnUser() async => await _determinePosition();
 
   void _addLocation(LocationData location) {
@@ -50,9 +49,9 @@ class HomePageState extends State<HomePage> {
   }
 
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -106,7 +105,9 @@ class HomePageState extends State<HomePage> {
       child: const Padding(
         padding: EdgeInsets.only(right: 12.0),
         child: CircleAvatar(
-          backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=3"),
+          backgroundImage: NetworkImage(
+            "https://ui-avatars.com/api/?name=Artem&background=0D8ABC&color=fff",
+          ),
         ),
       ),
     );
@@ -148,12 +149,12 @@ class HomePageState extends State<HomePage> {
       markers: _locations
           .map(
             (loc) => Marker(
-          point: loc.position,
-          width: 80,
-          height: 80,
-          child: LocationMarker(location: loc),
-        ),
-      )
+              point: loc.position,
+              width: 80,
+              height: 80,
+              child: LocationMarker(location: loc),
+            ),
+          )
           .toList(),
     );
   }
@@ -165,11 +166,7 @@ class HomePageState extends State<HomePage> {
           point: _currentPosition!,
           width: 60,
           height: 60,
-          child: const Icon(
-            Icons.my_location,
-            color: Colors.blue,
-            size: 40,
-          ),
+          child: const Icon(Icons.my_location, color: Colors.blue, size: 40),
         ),
       ],
     );

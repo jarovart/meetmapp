@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/location_data.dart';
+import '../../features/locations/data/location_data.dart';
 
 class LocationMarker extends StatelessWidget {
   final LocationData location;
@@ -17,18 +17,11 @@ class LocationMarker extends StatelessWidget {
   /// ---------- UI-Aufteilung ----------
 
   Widget _buildMarkerIcon() {
-    return const Icon(
-      Icons.location_on,
-      color: Colors.red,
-      size: 40,
-    );
+    return const Icon(Icons.location_on, color: Colors.red, size: 40);
   }
 
   void _showLocationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => _buildLocationDialog(),
-    );
+    showDialog(context: context, builder: (_) => _buildLocationDialog());
   }
 
   Widget _buildLocationDialog() {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import '../models/location_data.dart';
+import '../data/location_data.dart';
 
 class LocationFormPage extends StatefulWidget {
   final LatLng point;
@@ -57,7 +57,7 @@ class _LocationFormPageState extends State<LocationFormPage> {
                 controller: _nameController,
                 label: "Name",
                 validator: (v) =>
-                v == null || v.isEmpty ? "Bitte eingeben" : null,
+                    v == null || v.isEmpty ? "Bitte eingeben" : null,
               ),
               _buildTextField(
                 controller: _descriptionController,
@@ -99,10 +99,7 @@ class _LocationFormPageState extends State<LocationFormPage> {
           child: const Text("Abbrechen"),
         ),
         const SizedBox(width: 10),
-        ElevatedButton(
-          onPressed: _onSave,
-          child: const Text("Speichern"),
-        ),
+        ElevatedButton(onPressed: _onSave, child: const Text("Speichern")),
       ],
     );
   }

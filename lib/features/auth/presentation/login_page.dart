@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import '../logic/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -24,8 +24,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _handleAuthAction(
-      Future<AuthResult> Function(String, String) action,
-      ) async {
+    Future<AuthResult> Function(String, String) action,
+  ) async {
     setState(() {
       _isLoading = true;
       _message = null;

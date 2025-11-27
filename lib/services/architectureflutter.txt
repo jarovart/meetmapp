@@ -1,0 +1,47 @@
+lib/
+│
+├── main.dart
+│
+├── app/
+│   ├── app.dart
+│   └── router.dart      → Navigation, Guards, DeepLinks
+│
+├── features/
+│   ├── auth/
+│   │    ├── data/
+│   │    │    ├── auth_api.dart
+│   │    │    └── auth_repository.dart
+│   │    ├── logic/
+│   │    │    └── auth_controller.dart
+│   │    └── presentation/
+│   │         ├── login_page.dart
+│   │         └── register_page.dart
+│   │
+│   ├── locations/
+│   │    ├── data/
+│   │    │    ├── location_api.dart
+│   │    │    └── location_repository.dart
+│   │    ├── logic/
+│   │    │    └── location_controller.dart
+│   │    └── presentation/
+│   │         ├── location_map_page.dart
+│   │         ├── create_location_page.dart
+│   │         └── location_detail_page.dart
+│   │
+│   └── profile/
+│        ├── profile_api.dart
+│        ├── profile_repository.dart
+│        ├── profile_controller.dart
+│        └── profile_page.dart
+│
+├── common/
+│   ├── widgets/
+│   ├── theming/
+│   ├── utils/
+│   └── constants/
+│
+└── services/
+    ├── http_client.dart
+    ├── secure_storage.dart
+    ├── token_service.dart
+    └── geolocation_service.dart
