@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = false;
 
       switch (result) {
-        case AuthSuccess(:final message):
+        case AuthSuccess(/*:final message*/):
           _message = "✅ Willkommen"; //${message.user?.email ?? ''}";
         case AuthFailure(:final message):
           _message = "❌ Fehler: $message";

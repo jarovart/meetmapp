@@ -10,7 +10,7 @@ import '../features/locations/presentation/location_form_page.dart';
 import '../common/services/notification_service.dart';
 
 class MapPage extends StatefulWidget {
-  const MapPage({Key? key}) : super(key: key);
+  const MapPage({super.key});
 
   @override
   State<MapPage> createState() => MapPageState();
@@ -209,9 +209,9 @@ class MapPageState extends State<MapPage> {
             child: SliderTheme(
               data: SliderTheme.of(context).copyWith(
                 activeTrackColor: Colors.blue,
-                inactiveTrackColor: Colors.blue.withOpacity(0.3),
+                inactiveTrackColor: Colors.blue.withValues(alpha: 0.3),
                 thumbColor: Colors.blue,
-                overlayColor: Colors.blue.withOpacity(0.15),
+                overlayColor: Colors.blue.withValues(alpha: 0.15),
                 trackHeight: 2,
                 rangeThumbShape: const RoundRangeSliderThumbShape(
                   enabledThumbRadius: 8,

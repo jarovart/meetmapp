@@ -80,7 +80,7 @@ class HomePageState extends State<HomePage> {
               Expanded(
                 child: ListView.separated(
                   itemCount: items.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final label = items[index];
                     return ListTile(
