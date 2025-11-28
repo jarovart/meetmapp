@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meetmaap/pages/map_page.dart';
+import 'package:provider/provider.dart';
+import '../common/services/notification_service.dart';
 import '../features/profile/profile_page.dart';
 import '../features/locations/presentation/locations_page.dart';
 
@@ -20,7 +22,7 @@ class HomePageState extends State<HomePage> {
       appBar: _buildAppBar(),
       body: Stack(
         children: [
-          MapPage(),
+          const MapPage(),
           if (_isMenuOpen) _buildMenuScrim(),
           _buildSlidingMenu(),
         ],
@@ -97,7 +99,10 @@ class HomePageState extends State<HomePage> {
                           return;
                         }
 
-                        _showErrorSnackBar("Ausgewaehlt: $label");
+                        Provider.of<NotificationService>(
+                          context,
+                          listen: false,
+                        ).showError("Ausgewaehlt: $label");
                         _toggleMenu();
                       },
                     );
@@ -138,11 +143,5 @@ class HomePageState extends State<HomePage> {
         ),
       ),
     );
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

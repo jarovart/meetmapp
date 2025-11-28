@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 import '../features/locations/data/location_data.dart';
 import '../features/locations/logic/location_service.dart';
 import '../common/widgets/location_marker.dart';
 import '../common/widgets/center_on_user_button.dart';
 import '../features/locations/presentation/location_form_page.dart';
+import '../common/services/notification_service.dart';
 
 class MapPage extends StatefulWidget {
+  const MapPage({Key? key}) : super(key: key);
+
   @override
   State<MapPage> createState() => MapPageState();
 }
@@ -75,11 +79,24 @@ class MapPageState extends State<MapPage> {
         setState(() => _currentPosition = position);
         _mapController.move(position, 15);
       case LocationServiceDisabled():
-        _showErrorSnackBar("Standortdienste sind deaktiviert");
+        // use NotificationService via Provider
+        final notifier = Provider.of<NotificationService>(
+          context,
+          listen: false,
+        );
+        notifier.showError("Standortdienste sind deaktiviert");
       case LocationPermissionDenied():
-        _showErrorSnackBar("Standort-Berechtigung verweigert");
+        final notifier2 = Provider.of<NotificationService>(
+          context,
+          listen: false,
+        );
+        notifier2.showError("Standort-Berechtigung verweigert");
       case LocationError(:final message):
-        _showErrorSnackBar("Fehler: $message");
+        final notifier3 = Provider.of<NotificationService>(
+          context,
+          listen: false,
+        );
+        notifier3.showError("Fehler: $message");
     }
   }
 
@@ -121,7 +138,11 @@ class MapPageState extends State<MapPage> {
               style: const TextStyle(color: Colors.black),
               onSubmitted: (value) {
                 if (value.trim().isEmpty) return;
-                _showErrorSnackBar('Suche: $value');
+                final notifier = Provider.of<NotificationService>(
+                  context,
+                  listen: false,
+                );
+                notifier.showError('Suche: $value');
                 // TODO: wire real search behavior (filter markers / navigate)
               },
             ),
@@ -129,13 +150,6 @@ class MapPageState extends State<MapPage> {
         ),
       ),
     );
-  }
-
-  //TODO artem doppelt
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget _buildTileLayer() {
