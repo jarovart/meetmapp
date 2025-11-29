@@ -1,5 +1,6 @@
 /// Lightweight placeholder AuthService (no Supabase) so project can run without Supabase.
 /// Replace with real implementation when integrating your Spring Boot backend.
+library;
 
 sealed class AuthResult {
   const AuthResult();
