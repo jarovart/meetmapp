@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:meetmaap/common/utils/exception_message.dart';
 import 'package:meetmaap/pages/map_page.dart';
 import '../features/profile/profile_page.dart';
@@ -89,12 +90,7 @@ class HomePageState extends State<HomePage> {
                         // handle navigation for special entries
                         if (label == 'Locations') {
                           _toggleMenu();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LocationsPage(),
-                            ),
-                          );
+                          context.push('/location/124');
                           return;
                         }
                         ExceptionMessage.showError(
