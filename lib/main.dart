@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/features/locations/presentation/locations_page.dart';
+import 'package:meetmaap/features/locations/data/location_model.dart';
+import 'package:meetmaap/features/locations/presentation/location_page.dart';
+import 'package:meetmaap/features/locations/presentation/locationlist_page.dart';
 import 'app/home_page.dart';
 
 void main() {
@@ -19,10 +21,34 @@ class MainApplication extends StatelessWidget {
 
         /// Location-Seite mit Parameter
         GoRoute(
-          path: '/location/:id',
+          path: '/locationlist/:id',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
             return LocationsPage(locationId: id);
+          },
+        ),
+
+        /// Location-Seite mit Parameter
+        GoRoute(
+          path: '/location/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+
+            // TODO: echte Daten laden
+            final mockLocation = LocationModel(
+              id: id,
+              title: "Chill Spot $id",
+              address: "Adresse $id in Bremen",
+              description:
+                  "Eine sehr coole Location zum Chillen, Essen und Treffen.",
+              latitude: 53.0,
+              longitude: 8.8,
+              date: "Heute um 18:00",
+              imageUrl:
+                  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
+            );
+
+            return LocationDetailPage(location: mockLocation);
           },
         ),
       ],

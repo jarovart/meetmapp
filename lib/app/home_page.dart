@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:meetmaap/common/utils/exception_message.dart';
 import 'package:meetmaap/pages/map_page.dart';
 import '../features/profile/profile_page.dart';
-import '../features/locations/presentation/locations_page.dart';
+import '../features/locations/presentation/locationlist_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -90,7 +90,7 @@ class HomePageState extends State<HomePage> {
                         // handle navigation for special entries
                         if (label == 'Locations') {
                           _toggleMenu();
-                          context.push('/location/124');
+                          context.push('/locationlist/124');
                           return;
                         }
                         ExceptionMessage.showError(
