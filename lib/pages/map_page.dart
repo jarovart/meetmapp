@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import '../features/locations/data/location_base.dart';
 import '../features/locations/logic/location_service.dart';
@@ -39,11 +40,8 @@ class MapPageState extends State<MapPage> {
             initialCenter: initialCenter,
             initialZoom: 6,
             onLongPress: (tapPosition, point) async {
-              final newLocation = await Navigator.push<LocationBase>(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LocationCreatePage(point: point),
-                ),
+              final newLocation = await context.push<LocationBase>(
+                '/locationcreate/${point.latitude}/${point.longitude}',
               );
               if (newLocation != null) _addLocation(newLocation);
             },

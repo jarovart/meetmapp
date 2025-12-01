@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
 import 'package:meetmaap/features/locations/presentation/location_page.dart';
 import 'package:meetmaap/features/locations/presentation/locationlist_page.dart';
+import 'package:meetmaap/features/locations/presentation/locationcreate_page.dart';
 import 'app/home_page.dart';
 
 void main() {
@@ -19,7 +21,7 @@ class MainApplication extends StatelessWidget {
         /// Home (Startseite)
         GoRoute(path: '/', builder: (context, state) => const HomePage()),
 
-        /// Location-Seite mit Parameter
+        /// Location Listen-Seite ohne Parameter
         GoRoute(
           path: '/locationlist/:id',
           builder: (context, state) {
@@ -49,6 +51,16 @@ class MainApplication extends StatelessWidget {
             );
 
             return LocationDetailPage(location: mockLocation);
+          },
+        ),
+
+        /// Location-Seite mit Parameter
+        GoRoute(
+          path: '/locationcreate/:lat/:lng',
+          builder: (context, state) {
+            final lat = double.parse(state.pathParameters['lat']!);
+            final lng = double.parse(state.pathParameters['lng']!);
+            return LocationCreatePage(point: LatLng(lat, lng));
           },
         ),
       ],
