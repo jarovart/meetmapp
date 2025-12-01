@@ -43,11 +43,13 @@ class MainApplication extends StatelessWidget {
               address: "Adresse $id in Bremen",
               description:
                   "Eine sehr coole Location zum Chillen, Essen und Treffen.",
-              latitude: 53.0,
-              longitude: 8.8,
+              position: LatLng(53.0, 8.8),
               date: "Heute um 18:00",
+              thumbnailUrl:
+                  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
               imageUrl:
                   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
+              user: "Max Mustermann",
             );
 
             return LocationDetailPage(location: mockLocation);

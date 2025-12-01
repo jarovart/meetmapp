@@ -1,34 +1,39 @@
+import 'package:latlong2/latlong.dart';
+
 class LocationFull {
   final String id;
   final String title;
-  final String address;
   final String description;
-  final double latitude;
-  final double longitude;
   final String date;
+  final String address;
+  final LatLng position;
+  final String thumbnailUrl;
   final String imageUrl;
+  final String user;
 
   LocationFull({
     required this.id,
     required this.title,
-    required this.address,
     required this.description,
-    required this.latitude,
-    required this.longitude,
     required this.date,
+    required this.address,
+    required this.position,
+    required this.thumbnailUrl,
     required this.imageUrl,
+    required this.user,
   });
 
   factory LocationFull.fromMap(Map<String, dynamic> map) {
     return LocationFull(
       id: map['id'].toString(),
       title: map['title'].toString(),
-      address: map['address'].toString(),
       description: map['description'].toString(),
-      latitude: double.parse(map['latitude'].toString()),
-      longitude: double.parse(map['longitude'].toString()),
       date: map['date'].toString(),
+      address: map['address'].toString(),
+      position: map['position'],
+      thumbnailUrl: map['thumbnailUrl'].toString(),
       imageUrl: map['imageUrl'].toString(),
+      user: map['user'].toString(),
     );
   }
 }

@@ -49,7 +49,7 @@ class LocationDetailPage extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      location.address,
+                      location.position.toString(),
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),
@@ -89,7 +89,9 @@ class LocationDetailPage extends StatelessWidget {
                 children: [
                   const Icon(Icons.map, size: 20),
                   const SizedBox(width: 8),
-                  Text("Lat: ${location.latitude}, Lng: ${location.longitude}"),
+                  Text(
+                    "Lat: ${location.position.latitude}, Lng: ${location.position.longitude}",
+                  ),
                 ],
               ),
             ),

@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import '../data/location_base.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import '../data/location_base.dart';
+import '../data/location_full.dart';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+
 class LocationCreatePage extends StatefulWidget {
   final LatLng point;
 
@@ -14,95 +24,180 @@ class LocationCreatePage extends StatefulWidget {
 class _LocationCreatePageState extends State<LocationCreatePage> {
   final _formKey = GlobalKey<FormState>();
 
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _imageController = TextEditingController();
+  // Controllers
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController thumbnailController = TextEditingController();
+  final TextEditingController imageController = TextEditingController();
+  final TextEditingController userController = TextEditingController();
 
-  static const String _defaultImage =
-      "https://via.placeholder.com/150"; // Konstante statt Magic String
+  DateTime? selectedDate;
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    _imageController.dispose();
-    super.dispose();
+  // DATE PICKER
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? now,
+      firstDate: DateTime(now.year - 2),
+      lastDate: DateTime(now.year + 5),
+    );
+
+    if (picked != null) {
+      setState(() => selectedDate = picked);
+    }
   }
 
-  void _onSave() {
-    if (_formKey.currentState!.validate()) {
-      final newLocation = LocationBase(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title: _nameController.text.trim(),
-        description: _descriptionController.text.trim(),
-        date: DateTime.now().toIso8601String(),
-        thumbnailUrl: _imageController.text.trim().isNotEmpty
-            ? _imageController.text.trim()
-            : _defaultImage,
-        position: widget.point,
+  // SAVE LOCATION
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Bitte ein Datum auswählen")),
       );
-      Navigator.pop(context, newLocation);
+      return;
     }
+
+    // 👇 HIER erstellst du das Objekt (LocationFull)
+    final createdLocation = LocationFull(
+      id: 'tmp-${DateTime.now().millisecondsSinceEpoch}',
+      title: titleController.text.trim(),
+      description: descriptionController.text.trim(),
+      date: "_pickDate().toString()",
+      address: "${descriptionController.text.trim()}222",
+      position: LatLng(widget.point.latitude, widget.point.longitude),
+      thumbnailUrl: [imageController.text.trim()].single,
+      imageUrl: [imageController.text.trim()].single,
+      user: userController.text.trim(),
+    );
+
+    // Rückgabe an vorherige Seite
+    final LocationBase locationBase = LocationBase(
+      id: createdLocation.id,
+      title: createdLocation.title,
+      description: createdLocation.description,
+      date: createdLocation.date,
+      position: createdLocation.position,
+      thumbnailUrl: createdLocation.thumbnailUrl,
+    );
+    Navigator.pop(context, locationBase);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Neue Location")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      appBar: AppBar(title: const Text("Location erstellen")),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
+
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTextField(
-                controller: _nameController,
-                label: "Name",
+              // --- TITLE ---
+              TextFormField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: "Titel",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) => v == null || v.isEmpty
+                    ? "Titel darf nicht leer sein"
+                    : null,
+              ),
+              const SizedBox(height: 16),
+
+              // --- DESCRIPTION ---
+              TextFormField(
+                controller: descriptionController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: "Beschreibung",
+                  border: OutlineInputBorder(),
+                ),
                 validator: (v) =>
-                    v == null || v.isEmpty ? "Bitte eingeben" : null,
+                    v == null || v.isEmpty ? "Beschreibung fehlt" : null,
               ),
-              _buildTextField(
-                controller: _descriptionController,
-                label: "Beschreibung",
+              const SizedBox(height: 16),
+
+              // --- DATE ---
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      selectedDate == null
+                          ? "Kein Datum gewählt"
+                          : "Datum: ${selectedDate!.day}.${selectedDate!.month}.${selectedDate!.year}",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: _pickDate,
+                    child: const Text("Datum wählen"),
+                  ),
+                ],
               ),
-              _buildTextField(
-                controller: _imageController,
-                label: "Bild-URL (optional)",
+              const SizedBox(height: 16),
+
+              // --- THUMBNAIL URL ---
+              TextFormField(
+                controller: thumbnailController,
+                decoration: const InputDecoration(
+                  labelText: "Thumbnail URL",
+                  border: OutlineInputBorder(),
+                ),
               ),
-              const SizedBox(height: 20),
-              _buildActionButtons(),
+              const SizedBox(height: 16),
+
+              // --- IMAGE URL ---
+              TextFormField(
+                controller: imageController,
+                decoration: const InputDecoration(
+                  labelText: "Image URL",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // --- USER ---
+              TextFormField(
+                controller: userController,
+                decoration: const InputDecoration(
+                  labelText: "Benutzername",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // --- LOCATION PREVIEW ---
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  "Position:\nLatitude: ${widget.point.latitude}\nLongitude: ${widget.point.longitude}",
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // --- SAVE BUTTON ---
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _save,
+                  child: const Text("Location speichern"),
+                ),
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  /// Wiederverwendbares Textfeld
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(labelText: label),
-      validator: validator,
-    );
-  }
-
-  /// Buttons am Ende
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("Abbrechen"),
-        ),
-        const SizedBox(width: 10),
-        ElevatedButton(onPressed: _onSave, child: const Text("Speichern")),
-      ],
     );
   }
 }
