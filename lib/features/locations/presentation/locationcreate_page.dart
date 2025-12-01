@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import '../data/location_data.dart';
+import '../data/location_base.dart';
 
-class LocationFormPage extends StatefulWidget {
+class LocationCreatePage extends StatefulWidget {
   final LatLng point;
 
-  const LocationFormPage({super.key, required this.point});
+  const LocationCreatePage({super.key, required this.point});
 
   @override
-  State<LocationFormPage> createState() => _LocationFormPageState();
+  State<LocationCreatePage> createState() => _LocationCreatePageState();
 }
 
-class _LocationFormPageState extends State<LocationFormPage> {
+class _LocationCreatePageState extends State<LocationCreatePage> {
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
@@ -31,10 +31,12 @@ class _LocationFormPageState extends State<LocationFormPage> {
 
   void _onSave() {
     if (_formKey.currentState!.validate()) {
-      final newLocation = LocationData(
-        name: _nameController.text.trim(),
+      final newLocation = LocationBase(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
-        imageUrl: _imageController.text.trim().isNotEmpty
+        date: DateTime.now().toIso8601String(),
+        thumbnailUrl: _imageController.text.trim().isNotEmpty
             ? _imageController.text.trim()
             : _defaultImage,
         position: widget.point,

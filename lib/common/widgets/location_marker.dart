@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../features/locations/data/location_data.dart';
+import '../../features/locations/data/location_base.dart';
 
 class LocationMarker extends StatelessWidget {
-  final LocationData location;
+  final LocationBase location;
 
   const LocationMarker({super.key, required this.location});
 
@@ -26,11 +26,11 @@ class LocationMarker extends StatelessWidget {
 
   Widget _buildLocationDialog() {
     return AlertDialog(
-      title: Text(location.name),
+      title: Text(location.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.network(location.imageUrl, height: 100),
+          Image.network(location.thumbnailUrl, height: 100),
           const SizedBox(height: 8),
           Text(location.description),
         ],

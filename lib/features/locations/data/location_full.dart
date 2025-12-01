@@ -1,4 +1,4 @@
-class LocationModel {
+class LocationFull {
   final String id;
   final String title;
   final String address;
@@ -8,7 +8,7 @@ class LocationModel {
   final String date;
   final String imageUrl;
 
-  LocationModel({
+  LocationFull({
     required this.id,
     required this.title,
     required this.address,
@@ -19,8 +19,8 @@ class LocationModel {
     required this.imageUrl,
   });
 
-  factory LocationModel.fromMap(Map<String, dynamic> map) {
-    return LocationModel(
+  factory LocationFull.fromMap(Map<String, dynamic> map) {
+    return LocationFull(
       id: map['id'].toString(),
       title: map['title'].toString(),
       address: map['address'].toString(),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/features/locations/data/location_model.dart';
+import 'package:meetmaap/features/locations/data/location_full.dart';
 import 'package:meetmaap/features/locations/presentation/location_page.dart';
 import 'package:meetmaap/features/locations/presentation/locationlist_page.dart';
 import 'app/home_page.dart';
@@ -35,7 +35,7 @@ class MainApplication extends StatelessWidget {
             final id = state.pathParameters['id']!;
 
             // TODO: echte Daten laden
-            final mockLocation = LocationModel(
+            final mockLocation = LocationFull(
               id: id,
               title: "Chill Spot $id",
               address: "Adresse $id in Bremen",

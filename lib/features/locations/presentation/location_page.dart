@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../data/location_model.dart';
+import '../data/location_full.dart';
 
 class LocationDetailPage extends StatelessWidget {
-  final LocationModel location;
+  final LocationFull location;
 
   const LocationDetailPage({super.key, required this.location});
 

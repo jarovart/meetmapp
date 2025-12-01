@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import '../features/locations/data/location_data.dart';
+import '../features/locations/data/location_base.dart';
 import '../features/locations/logic/location_service.dart';
 import '../common/widgets/location_marker.dart';
 import '../common/widgets/center_on_user_button.dart';
-import '../features/locations/presentation/location_form_page.dart';
+import '../features/locations/presentation/locationcreate_page.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   LatLng? _currentPosition;
-  final List<LocationData> _locations = [];
+  final List<LocationBase> _locations = [];
   final MapController _mapController = MapController();
   final List<String> _dayOptions = [
     'Heute',
@@ -39,10 +39,10 @@ class MapPageState extends State<MapPage> {
             initialCenter: initialCenter,
             initialZoom: 6,
             onLongPress: (tapPosition, point) async {
-              final newLocation = await Navigator.push<LocationData>(
+              final newLocation = await Navigator.push<LocationBase>(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => LocationFormPage(point: point),
+                  builder: (context) => LocationCreatePage(point: point),
                 ),
               );
               if (newLocation != null) _addLocation(newLocation);
@@ -85,7 +85,7 @@ class MapPageState extends State<MapPage> {
 
   void _centerOnUser() async => await _determinePosition();
 
-  void _addLocation(LocationData location) {
+  void _addLocation(LocationBase location) {
     setState(() => _locations.add(location));
   }
 
