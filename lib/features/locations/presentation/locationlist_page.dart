@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
 
 class LocationsPage extends StatefulWidget {
@@ -38,7 +39,20 @@ class _LocationsPageState extends State<LocationsPage> {
           .map((e) => LocationBase.fromMap(e as Map<String, dynamic>))
           .toList();
     } else {
-      throw Exception('Failed to load locations');
+      // Beispiel-Daten – später ersetzt durch Backend
+      return List.generate(
+        20,
+        (i) => LocationBase(
+          id: i.toString(),
+          title: "Coole Location #$i",
+          description: "Adresse $i, Bremen",
+          position: LatLng(52.0 + i, 8.0 + i),
+          date: "Heute",
+          thumbnailUrl:
+              "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
+        ),
+      );
+      //throw Exception('Failed to load locations');
     }
   }
 

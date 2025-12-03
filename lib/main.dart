@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/home_page.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
 import 'package:meetmaap/features/locations/presentation/location_page.dart';
 import 'package:meetmaap/features/locations/presentation/locationlist_page.dart';
 import 'package:meetmaap/features/locations/presentation/locationcreate_page.dart';
-import 'app/home_page.dart';
 
 void main() {
   runApp(const MainApplication());

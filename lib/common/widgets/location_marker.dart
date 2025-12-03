@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../features/locations/data/location_base.dart';
+import 'package:meetmaap/features/locations/data/location_base.dart';
 
 class LocationMarker extends StatelessWidget {
   final LocationBase location;

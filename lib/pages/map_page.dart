@@ -1,14 +1,13 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import '../features/locations/data/location_base.dart';
-import '../features/locations/logic/location_service.dart';
-import '../common/widgets/location_marker.dart';
-import '../common/widgets/center_on_user_button.dart';
+import 'package:meetmaap/features/locations/data/location_base.dart';
+import 'package:meetmaap/features/locations/logic/location_service.dart';
+import 'package:meetmaap/common/widgets/location_marker.dart';
+import 'package:meetmaap/common/widgets/center_on_user_button.dart';
 
 class MapPage extends StatefulWidget {
   @override

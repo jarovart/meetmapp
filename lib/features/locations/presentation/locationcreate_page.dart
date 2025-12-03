@@ -1,16 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import '../data/location_base.dart';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import '../data/location_base.dart';
-import '../data/location_full.dart';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/features/locations/data/location_base.dart';
+import 'package:meetmaap/features/locations/data/location_full.dart';
 
 class LocationCreatePage extends StatefulWidget {
   final LatLng point;

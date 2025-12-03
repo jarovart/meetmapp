@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/location_full.dart';
+import 'package:meetmaap/features/locations/data/location_full.dart';
 
 class LocationDetailPage extends StatelessWidget {
   final LocationFull location;
