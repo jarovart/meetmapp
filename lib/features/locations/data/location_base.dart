@@ -23,7 +23,7 @@ class LocationBase {
       title: map['title'].toString(),
       description: map['description'].toString(),
       date: map['date'].toString(),
-      position: map['position'],
+      position: LatLng(map['latitude'], map['longitude']),
       thumbnailUrl: map['thumbnailUrl'].toString(),
     );
   }

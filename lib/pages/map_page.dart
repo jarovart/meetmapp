@@ -1,12 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import '../features/locations/data/location_base.dart';
 import '../features/locations/logic/location_service.dart';
 import '../common/widgets/location_marker.dart';
 import '../common/widgets/center_on_user_button.dart';
-import '../features/locations/presentation/locationcreate_page.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -26,6 +28,54 @@ class MapPageState extends State<MapPage> {
   ];
   RangeValues _selectedRange = RangeValues(0, 4);
 
+  void _loadLocationsInView() async {
+    final bounds = _mapController.camera.visibleBounds;
+
+    // Bounding Box Parameter
+    final minLat = bounds.southWest.latitude;
+    final maxLat = bounds.northEast.latitude;
+    final minLng = bounds.southWest.longitude;
+    final maxLng = bounds.northEast.longitude;
+
+    try {
+      final locations = await getLocationsInBounds(
+        minLat: minLat,
+        maxLat: maxLat,
+        minLng: minLng,
+        maxLng: maxLng,
+      );
+
+      setState(() {
+        _locations
+          ..clear()
+          ..addAll(locations);
+      });
+    } catch (e) {
+      showError("Locations konnten nicht geladen werden");
+    }
+  }
+
+  static Future<List<LocationBase>> getLocationsInBounds({
+    required double minLat,
+    required double maxLat,
+    required double minLng,
+    required double maxLng,
+  }) async {
+    final url = Uri.parse(
+      'http://localhost:8080/api/locations/within'
+      '?minLat=$minLat&maxLat=$maxLat&minLng=$minLng&maxLng=$maxLng',
+    );
+
+    final response = await http.get(url);
+
+    if (response.statusCode != 200) {
+      throw Exception("Server error: ${response.statusCode}");
+    }
+
+    final body = jsonDecode(response.body) as List;
+    return body.map((e) => LocationBase.fromMap(e)).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final initialCenter =
@@ -39,6 +89,11 @@ class MapPageState extends State<MapPage> {
           options: MapOptions(
             initialCenter: initialCenter,
             initialZoom: 6,
+            onMapEvent: (event) {
+              if (event is MapEventMoveEnd) {
+                _loadLocationsInView();
+              }
+            },
             onLongPress: (tapPosition, point) async {
               final newLocation = await context.push<LocationBase>(
                 '/locationcreate/${point.latitude}/${point.longitude}',

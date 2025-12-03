@@ -30,7 +30,7 @@ class LocationFull {
       description: map['description'].toString(),
       date: map['date'].toString(),
       address: map['address'].toString(),
-      position: map['position'],
+      position: LatLng(map['latitude'], map['longitude']),
       thumbnailUrl: map['thumbnailUrl'].toString(),
       imageUrl: map['imageUrl'].toString(),
       user: map['user'].toString(),

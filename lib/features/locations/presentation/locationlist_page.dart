@@ -1,57 +1,118 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:meetmaap/features/locations/data/location_base.dart';
 
-class LocationsPage extends StatelessWidget {
+class LocationsPage extends StatefulWidget {
   final String locationId; // falls du sie brauchst – sonst entfernen
 
   const LocationsPage({super.key, required this.locationId});
 
   @override
-  Widget build(BuildContext context) {
-    // Beispiel-Daten – später ersetzt durch Backend
-    final locations = List.generate(
-      20,
-      (i) => {
-        "id": i,
-        "title": "Coole Location #$i",
-        "subtitle": "Adresse $i, Bremen",
-        "image":
-            "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
-        "date": "Heute",
-      },
+  State<LocationsPage> createState() => _LocationsPageState();
+}
+
+class _LocationsPageState extends State<LocationsPage> {
+  late Future<List<LocationBase>> _futureLocations;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocations();
+  }
+
+  void _loadLocations() {
+    _futureLocations = _fetchLocations();
+  }
+
+  Future<List<LocationBase>> _fetchLocations() async {
+    final response = await http.get(
+      Uri.parse('http://localhost:8080/api/locations'),
+      headers: {'Content-Type': 'application/json'},
     );
 
+    if (response.statusCode == 200) {
+      final List<dynamic> body = jsonDecode(response.body);
+      return body
+          .map((e) => LocationBase.fromMap(e as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception('Failed to load locations');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Locations"), centerTitle: true),
       backgroundColor: Colors.grey.shade200,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // 👇 Responsive Berechnung
-          int crossAxisCount = 1;
-          if (constraints.maxWidth >= 1200) {
-            crossAxisCount = 3;
-          } else if (constraints.maxWidth >= 800) {
-            crossAxisCount = 2;
+      body: FutureBuilder<List<LocationBase>>(
+        future: _futureLocations,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
           }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 4 / 3, // Höhe/Breite Verhältnis
-            ),
-            itemCount: locations.length,
-            itemBuilder: (context, index) {
-              final loc = locations[index];
+          if (snapshot.hasError) {
+            return Center(child: Text('Fehler: ${snapshot.error}'));
+          }
 
-              return _LocationCard(
-                id: loc["id"].toString(),
-                title: loc["title"]!.toString(),
-                subtitle: loc["subtitle"]!.toString(),
-                imageUrl: loc["image"]!.toString(),
-                date: loc["date"]!.toString(),
+          final locations = snapshot.data ?? [];
+
+          // ⬇️ Optional: wenn keine Locations vorhanden sind
+          if (locations.isEmpty) {
+            return RefreshIndicator(
+              onRefresh: () async => _loadLocations(),
+              child: ListView(
+                children: const [
+                  SizedBox(height: 200),
+                  Center(child: Text("Keine Locations gefunden.")),
+                ],
+              ),
+            );
+          }
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              int crossAxisCount = 1;
+              if (constraints.maxWidth >= 1200) {
+                crossAxisCount = 3;
+              } else if (constraints.maxWidth >= 800) {
+                crossAxisCount = 2;
+              }
+
+              final grid = GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 4 / 3,
+                ),
+                itemCount: locations.length,
+                itemBuilder: (context, index) {
+                  final loc = locations[index];
+
+                  return _LocationCard(
+                    id: loc.id.toString(),
+                    title: loc.title,
+                    // Passe diese Felder an dein LocationBase an:
+                    subtitle: loc.description ?? '',
+                    imageUrl: loc.thumbnailUrl ?? '',
+                    date: loc.date ?? '',
+                  );
+                },
+              );
+
+              // ⬇️ Pull-to-refresh, damit du manuell neu laden kannst
+              return RefreshIndicator(
+                onRefresh: () async {
+                  setState(() {
+                    _loadLocations();
+                  });
+                },
+                child: grid,
               );
             },
           );
@@ -96,7 +157,6 @@ class _LocationCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Bild oben
             ClipRRect(
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
@@ -106,10 +166,14 @@ class _LocationCard extends StatelessWidget {
                 height: 130,
                 width: double.infinity,
                 fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  height: 130,
+                  color: Colors.grey[300],
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.image_not_supported),
+                ),
               ),
             ),
-
-            // Infos
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -117,19 +181,32 @@ class _LocationCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: TextStyle(color: Colors.grey[700])),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
                       const Icon(Icons.calendar_today, size: 16),
                       const SizedBox(width: 6),
-                      Text(date),
+                      Expanded(
+                        child: Text(
+                          date,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ],
                   ),
                 ],
