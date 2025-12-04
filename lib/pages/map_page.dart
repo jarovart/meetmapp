@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +28,12 @@ class MapPageState extends State<MapPage> {
   ];
   RangeValues _selectedRange = RangeValues(0, 4);
 
+  @override
+  void initState() {
+    super.initState();
+    _determinePosition();
+  }
+
   void _loadLocationsInView() async {
     final bounds = _mapController.camera.visibleBounds;
 
@@ -44,13 +51,15 @@ class MapPageState extends State<MapPage> {
         maxLng: maxLng,
       );
 
+      if (!mounted) return;
+
       setState(() {
         _locations
           ..clear()
           ..addAll(locations);
       });
     } catch (e) {
-      showError("Locations konnten nicht geladen werden");
+      if (mounted) showError("Locations konnten nicht geladen werden");
     }
   }
 
@@ -79,6 +88,7 @@ class MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     final initialCenter =
         _currentPosition ?? LatLng(51.1657, 10.4515); // Mitte Deutschland
+    Timer? debounce;
 
     return Stack(
       children: [
@@ -90,7 +100,10 @@ class MapPageState extends State<MapPage> {
             initialZoom: 6,
             onMapEvent: (event) {
               if (event is MapEventMoveEnd) {
-                _loadLocationsInView();
+                debounce?.cancel();
+                debounce = Timer(const Duration(milliseconds: 300), () {
+                  _loadLocationsInView();
+                });
               }
             },
             onLongPress: (tapPosition, point) async {
@@ -111,12 +124,6 @@ class MapPageState extends State<MapPage> {
         _buildDateSliderAndGps(),
       ],
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _determinePosition();
   }
 
   Future<void> _determinePosition() async {

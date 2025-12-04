@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/home_page.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
 import 'package:meetmaap/features/locations/presentation/location_page.dart';
