@@ -16,7 +16,12 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
+  List<LocationBase> _searchResults = [];
+
   LatLng? _currentPosition;
+  Timer? debounce;
   final List<LocationBase> _locations = [];
   final MapController _mapController = MapController();
   final List<String> _dayOptions = [
@@ -88,7 +93,6 @@ class MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     final initialCenter =
         _currentPosition ?? LatLng(51.1657, 10.4515); // Mitte Deutschland
-    Timer? debounce;
 
     return Stack(
       children: [
@@ -122,6 +126,12 @@ class MapPageState extends State<MapPage> {
         // Overlay: Search Bar and Slider/GPS positioned on top
         _buildSearchBar(),
         _buildDateSliderAndGps(),
+        Positioned(
+          left: MediaQuery.of(context).size.width * 0.15,
+          right: MediaQuery.of(context).size.width * 0.15,
+          top: 70,
+          child: _buildSearchResults(),
+        ),
       ],
     );
   }
@@ -170,6 +180,8 @@ class MapPageState extends State<MapPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: TextField(
+              controller: _searchController,
+              onChanged: _onSearchChanged,
               textInputAction: TextInputAction.search,
               decoration: InputDecoration(
                 hintText: 'Suchen...',
@@ -178,11 +190,6 @@ class MapPageState extends State<MapPage> {
                 contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
               ),
               style: const TextStyle(color: Colors.black),
-              onSubmitted: (value) {
-                if (value.trim().isEmpty) return;
-                showError('Suche: $value');
-                // TODO: wire real search behavior (filter markers / navigate)
-              },
             ),
           ),
         ),
@@ -325,5 +332,89 @@ class MapPageState extends State<MapPage> {
     );
 
     return Stack(children: [sliderPositioned, gpsWidget]);
+  }
+
+  Widget _buildSearchResults() {
+    if (_searchResults.isEmpty) return SizedBox.shrink();
+
+    return Material(
+      elevation: 6,
+      borderRadius: BorderRadius.circular(12),
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: _searchResults.length,
+        itemBuilder: (context, index) {
+          final loc = _searchResults[index];
+
+          return ListTile(
+            leading: Icon(Icons.location_on, color: Colors.green),
+            title: Text(loc.title),
+            subtitle: Text(loc.description),
+            onTap: () {
+              // Karte auf Location bewegen
+              _mapController.move(loc.position, 15);
+
+              setState(() => _searchResults.clear());
+              _searchController.clear();
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  void _onSearchChanged(String text) {
+    if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
+
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () async {
+      if (text.length < 3) {
+        setState(() => _searchResults.clear());
+        return;
+      }
+
+      try {
+        final results = await searchLocations(text);
+
+        // nach Entfernung sortieren (falls _currentPosition != null)
+        if (_currentPosition != null) {
+          results.sort((a, b) {
+            final distA = Distance().as(
+              LengthUnit.Kilometer,
+              _currentPosition!,
+              a.position,
+            );
+            final distB = Distance().as(
+              LengthUnit.Kilometer,
+              _currentPosition!,
+              b.position,
+            );
+            return distA.compareTo(distB);
+          });
+        }
+
+        if (!mounted) return;
+
+        setState(() {
+          _searchResults = results;
+        });
+      } catch (e) {
+        showError("Suche fehlgeschlagen");
+      }
+    });
+  }
+
+  static Future<List<LocationBase>> searchLocations(String query) async {
+    final url = Uri.parse(
+      'http://localhost:8080/api/locations/search?query=$query',
+    );
+
+    final response = await http.get(url);
+
+    if (response.statusCode != 200) {
+      throw Exception("Fehler beim Suchen");
+    }
+
+    final body = jsonDecode(response.body) as List;
+    return body.map((e) => LocationBase.fromMap(e)).toList();
   }
 }
