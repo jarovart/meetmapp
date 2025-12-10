@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/config/api_config.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
 import 'package:meetmaap/features/locations/logic/location_service.dart';
 import 'package:meetmaap/common/widgets/location_marker.dart';
@@ -76,7 +77,7 @@ class MapPageState extends State<MapPage> {
     required double maxLng,
   }) async {
     final url = Uri.parse(
-      'http://localhost:8080/api/locations/within'
+      '${ApiConfig.baseUrl}/api/locations/within'
       '?minLat=$minLat&maxLat=$maxLat&minLng=$minLng&maxLng=$maxLng',
     );
 
@@ -423,7 +424,7 @@ class MapPageState extends State<MapPage> {
 
   static Future<List<LocationBase>> searchLocations(String query) async {
     final url = Uri.parse(
-      'http://localhost:8080/api/locations/search?query=$query',
+      '${ApiConfig.baseUrl}/api/locations/search?query=$query',
     );
 
     final response = await http.get(url);

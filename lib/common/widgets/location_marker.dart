@@ -24,7 +24,7 @@ class LocationMarker extends StatelessWidget {
       duration: Duration(milliseconds: 200),
       padding: EdgeInsets.all(isSelected ? 6 : 2),
       decoration: BoxDecoration(
-        color: Colors.white,
+        //color: Colors.white,
         shape: BoxShape.circle,
         border: Border.all(
           color: isSelected ? Colors.blue : Colors.transparent,
