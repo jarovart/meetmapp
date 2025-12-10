@@ -19,6 +19,7 @@ class MapPageState extends State<MapPage> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
   List<LocationBase> _searchResults = [];
+  String? _selectedLocationId;
 
   LatLng? _currentPosition;
   Timer? debounce;
@@ -187,6 +188,15 @@ class MapPageState extends State<MapPage> {
                 hintText: 'Suchen...',
                 border: InputBorder.none,
                 prefixIcon: Icon(Icons.search, color: Colors.grey[700]),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.close, color: Colors.grey[700]),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _searchResults.clear());
+                        },
+                      )
+                    : null,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
               ),
               style: const TextStyle(color: Colors.black),
@@ -243,7 +253,10 @@ class MapPageState extends State<MapPage> {
               point: loc.position,
               width: 80,
               height: 80,
-              child: LocationMarker(location: loc),
+              child: LocationMarker(
+                location: loc,
+                isSelected: _selectedLocationId == loc.id,
+              ),
             ),
           )
           .toList(),
@@ -351,7 +364,11 @@ class MapPageState extends State<MapPage> {
             title: Text(loc.title),
             subtitle: Text(loc.description),
             onTap: () {
+              setState(() {
+                _selectedLocationId = loc.id;
+              });
               // Karte auf Location bewegen
+              _locations.add(loc); // ggf. zur Karte hinzufügen
               _mapController.move(loc.position, 15);
 
               setState(() => _searchResults.clear());
@@ -364,6 +381,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void _onSearchChanged(String text) {
+    setState(() {}); // ← sorgt dafür, dass das X erscheint/verschwindet
     if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
 
     _searchDebounce = Timer(const Duration(milliseconds: 300), () async {
