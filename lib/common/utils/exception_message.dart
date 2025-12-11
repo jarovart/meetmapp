@@ -1,17 +1,27 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ExceptionMessage {
-  static void showInfo(BuildContext context, String message) {
+  static void showInfo(
+    BuildContext context,
+    String message, {
+    StackTrace? stackTrace,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       createSnackBar(
         Icon(Icons.info_outline, color: Colors.black, size: 30),
         message,
+        stackTrace,
       ),
     );
   }
 
-  static void showWarning(BuildContext context, String message) {
+  static void showWarning(
+    BuildContext context,
+    String message, {
+    StackTrace? stackTrace,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       createSnackBar(
         Icon(
@@ -20,20 +30,36 @@ class ExceptionMessage {
           size: 30,
         ),
         message,
+        stackTrace,
       ),
     );
   }
 
-  static void showError(BuildContext context, String message) {
+  static void showError(
+    BuildContext context,
+    String message, {
+    StackTrace? stackTrace,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       createSnackBar(
         Icon(Icons.error_outline, color: Colors.redAccent, size: 30),
         message,
+        stackTrace,
       ),
     );
   }
 
-  static SnackBar createSnackBar(Icon icon, String message) {
+  static SnackBar createSnackBar(
+    Icon icon,
+    String message,
+    StackTrace? stackTrace,
+  ) {
+    if (stackTrace != null) {
+      log(message, level: 1000, name: "MapPage", stackTrace: stackTrace);
+    } else {
+      debugPrint(message);
+    }
+
     return SnackBar(
       behavior: SnackBarBehavior.floating,
       backgroundColor: Colors.transparent,

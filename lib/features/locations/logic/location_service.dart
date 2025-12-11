@@ -1,5 +1,12 @@
-import 'package:geolocator/geolocator.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart' show LatLngBounds;
 import 'package:latlong2/latlong.dart';
+import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
+import 'package:meetmaap/config/api_config.dart';
+import 'package:meetmaap/features/locations/data/location_base.dart';
+import 'package:meetmaap/features/locations/data/location_full.dart';
 
 /// Ergebnis-Typ für Location-Abfragen
 sealed class LocationResult {
@@ -51,5 +58,45 @@ class LocationService {
     } catch (e) {
       return LocationError(e.toString());
     }
+  }
+
+  static Future<LocationBase> uploadLocation(LocationFull location) async {
+    final uploadLocationUrl = Uri.parse(
+      '${ApiConfig.baseUrl}/api/locations/createLocation',
+    );
+    debugPrint("Uploading location to ${jsonEncode(location.toMap())}");
+    final response = await http.post(
+      uploadLocationUrl,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(location.toMap()), // <-- Location als JSON senden
+    );
+    if (response.statusCode != 200) {
+      throw Exception("Server error: ${response.statusCode}");
+    }
+
+    final body = jsonDecode(response.body);
+    return LocationBase.fromMap(body);
+  }
+
+  static Future<List<LocationBase>> fetchAllLocationsInView(
+    LatLngBounds bounds,
+  ) async {
+    final minLat = bounds.southWest.latitude;
+    final maxLat = bounds.northEast.latitude;
+    final minLng = bounds.southWest.longitude;
+    final maxLng = bounds.northEast.longitude;
+
+    final getLocationsForViewUrl = Uri.parse(
+      '${ApiConfig.baseUrl}/api/locations/within'
+      '?minLat=$minLat&maxLat=$maxLat&minLng=$minLng&maxLng=$maxLng',
+    );
+
+    final response = await http.get(getLocationsForViewUrl);
+    if (response.statusCode != 200) {
+      throw Exception("Server error: ${response.statusCode}");
+    }
+
+    final body = jsonDecode(response.body) as List;
+    return body.map((e) => LocationBase.fromMap(e)).toList();
   }
 }

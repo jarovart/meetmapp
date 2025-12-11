@@ -23,6 +23,20 @@ class LocationFull {
     required this.user,
   });
 
+  Map<String, dynamic> toMap() {
+    return {
+      "id": id,
+      "title": title,
+      "description": description,
+      "date": date,
+      "latitude": position.latitude,
+      "longitude": position.longitude,
+      "thumbnailUrl": thumbnailUrl,
+      "imageUrl": imageUrl,
+      "user": user,
+    };
+  }
+
   factory LocationFull.fromMap(Map<String, dynamic> map) {
     return LocationFull(
       id: map['id'].toString(),

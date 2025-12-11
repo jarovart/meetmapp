@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
+import 'package:meetmaap/features/locations/logic/location_service.dart';
 
 class LocationCreatePage extends StatefulWidget {
   final LatLng point;
@@ -40,7 +41,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
   }
 
   // SAVE LOCATION
-  void _save() {
+  void _save() async {
     if (!_formKey.currentState!.validate()) return;
 
     if (selectedDate == null) {
@@ -52,10 +53,10 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
 
     // 👇 HIER erstellst du das Objekt (LocationFull)
     final createdLocation = LocationFull(
-      id: 'tmp-${DateTime.now().millisecondsSinceEpoch}',
+      id: '', // ID wird vom Server vergeben
       title: titleController.text.trim(),
       description: descriptionController.text.trim(),
-      date: "_pickDate().toString()",
+      date: selectedDate!.toIso8601String(),
       address: "${descriptionController.text.trim()}222",
       position: LatLng(widget.point.latitude, widget.point.longitude),
       thumbnailUrl: [imageController.text.trim()].single,
@@ -64,15 +65,19 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
     );
 
     // Rückgabe an vorherige Seite
-    final LocationBase locationBase = LocationBase(
-      id: createdLocation.id,
-      title: createdLocation.title,
-      description: createdLocation.description,
-      date: createdLocation.date,
-      position: createdLocation.position,
-      thumbnailUrl: createdLocation.thumbnailUrl,
-    );
-    Navigator.pop(context, locationBase);
+    try {
+      final LocationBase locationBase = await LocationService.uploadLocation(
+        createdLocation,
+      );
+      if (!mounted) return;
+      Navigator.pop(context, locationBase);
+    } catch (e) {
+      debugPrint("Fehler beim Hochladen der Location: $e");
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Fehler beim Hochladen der Location: $e")),
+      );
+    }
   }
 
   @override
@@ -167,7 +172,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(

@@ -1,15 +1,18 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/common/utils/debouncer.dart';
 import 'package:meetmaap/config/api_config.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
 import 'package:meetmaap/features/locations/logic/location_service.dart';
 import 'package:meetmaap/common/widgets/location_marker.dart';
 import 'package:meetmaap/common/widgets/center_on_user_button.dart';
+import 'package:meetmaap/common/utils/exception_message.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -17,147 +20,129 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
-  final TextEditingController _searchController = TextEditingController();
-  Timer? _searchDebounce;
-  List<LocationBase> _searchResults = [];
-  String? _selectedLocationId;
-
-  LatLng? _currentPosition;
-  Timer? debounce;
-  final List<LocationBase> _locations = [];
   final MapController _mapController = MapController();
+  final TextEditingController _searchController = TextEditingController();
+
+  LatLng _initialCenter = LatLng(51.1657, 10.4515); // Mitte von Deutschland
+  LatLng? _currentPosition;
+  LocationBase? _selectedLocation;
+  List<LocationBase> _locations = [];
+  List<LocationBase> _searchResults = [];
+
+  RangeValues _selectedRange = RangeValues(0, 4);
   final List<String> _dayOptions = [
     'Heute',
     'Morgen',
     'Übermorgen',
     '1 Woche',
     '1 Monat',
-  ];
-  RangeValues _selectedRange = RangeValues(0, 4);
+  ]; // Beispielwerte
+  late Debouncer _debouncer;
+  Timer? _searchDebounce;
 
   @override
   void initState() {
     super.initState();
     _determinePosition();
-  }
+    debugPrint("Start: InitState MapPage");
+    _debouncer = Debouncer(delay: Duration(milliseconds: 1000));
 
-  void _loadLocationsInView() async {
-    final bounds = _mapController.camera.visibleBounds;
-
-    // Bounding Box Parameter
-    final minLat = bounds.southWest.latitude;
-    final maxLat = bounds.northEast.latitude;
-    final minLng = bounds.southWest.longitude;
-    final maxLng = bounds.northEast.longitude;
-
-    try {
-      final locations = await getLocationsInBounds(
-        minLat: minLat,
-        maxLat: maxLat,
-        minLng: minLng,
-        maxLng: maxLng,
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        _locations
-          ..clear()
-          ..addAll(locations);
-      });
-    } catch (e) {
-      if (mounted) showError("Locations konnten nicht geladen werden");
-    }
-  }
-
-  static Future<List<LocationBase>> getLocationsInBounds({
-    required double minLat,
-    required double maxLat,
-    required double minLng,
-    required double maxLng,
-  }) async {
-    final url = Uri.parse(
-      '${ApiConfig.baseUrl}/api/locations/within'
-      '?minLat=$minLat&maxLat=$maxLat&minLng=$minLng&maxLng=$maxLng',
-    );
-
-    final response = await http.get(url);
-
-    if (response.statusCode != 200) {
-      throw Exception("Server error: ${response.statusCode}");
-    }
-
-    final body = jsonDecode(response.body) as List;
-    return body.map((e) => LocationBase.fromMap(e)).toList();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchLocationsByCurrentPosition();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final initialCenter =
-        _currentPosition ?? LatLng(51.1657, 10.4515); // Mitte Deutschland
-
     return Stack(
       children: [
         // FlutterMap with only layer children
         FlutterMap(
           mapController: _mapController,
           options: MapOptions(
-            initialCenter: initialCenter,
-            initialZoom: 6,
+            initialCenter: _initialCenter,
+            initialZoom: 6.0,
             onMapEvent: (event) {
-              if (event is MapEventMoveEnd) {
-                debounce?.cancel();
-                debounce = Timer(const Duration(milliseconds: 300), () {
-                  _loadLocationsInView();
-                });
+              if (event is MapEventTap) {
+                setState(() => _selectedLocation = null);
+              } else if (event is MapEventLongPress) {
+                _createLocation(context, event.tapPosition);
+              } else if (event is MapEventMoveEnd ||
+                  event is MapEventDoubleTapZoomEnd ||
+                  event is MapEventScrollWheelZoom) {
+                _debouncer.run(() => _fetchLocationsByCurrentPosition());
               }
-            },
-            onLongPress: (tapPosition, point) async {
-              final newLocation = await context.push<LocationBase>(
-                '/locationcreate/${point.latitude}/${point.longitude}',
-              );
-              if (newLocation != null) _addLocation(newLocation);
             },
           ),
           children: [
             _buildTileLayer(),
             _buildLocationsLayer(),
-            if (_currentPosition != null) _buildUserMarker(),
+            if (_currentPosition != null) _buildMyLocationMarker(),
           ],
         ),
         // Overlay: Search Bar and Slider/GPS positioned on top
         _buildSearchBar(),
         _buildDateSliderAndGps(),
-        Positioned(
-          left: MediaQuery.of(context).size.width * 0.15,
-          right: MediaQuery.of(context).size.width * 0.15,
-          top: 70,
-          child: _buildSearchResults(),
-        ),
+        _buildSearchResults(),
       ],
     );
   }
 
-  Future<void> _determinePosition() async {
-    final result = await LocationService.getCurrentLocation();
-
-    switch (result) {
-      case LocationSuccess(:final position):
-        setState(() => _currentPosition = position);
-        _mapController.move(position, 15);
-      case LocationServiceDisabled():
-        showError("Standortdienste sind deaktiviert");
-      case LocationPermissionDenied():
-        showError("Standort-Berechtigung verweigert");
-      case LocationError(:final message):
-        showError("Fehler: $message");
-    }
+  Widget _buildTileLayer() {
+    return TileLayer(
+      urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      userAgentPackageName: 'de.jarovart.meetmaap',
+    );
   }
 
-  void _centerOnUser() async => await _determinePosition();
+  Widget _buildLocationsLayer() {
+    return MarkerLayer(
+      markers: _locations
+          .map(
+            (loc) => Marker(
+              point: loc.position,
+              width: 80,
+              height: 80,
+              child: LocationMarker(
+                location: loc,
+                isSelected: _selectedLocation == loc,
+                onTapCallback: () {
+                  if (_selectedLocation == loc) {
+                    setState(() {
+                      _selectedLocation = null;
+                    });
+                  } else {
+                    setState(() {
+                      _selectedLocation = loc;
+                    });
+                  }
 
-  void _addLocation(LocationBase location) {
-    setState(() => _locations.add(location));
+                  if (_mapController.camera.center != loc.position) {
+                    _mapController.move(
+                      loc.position,
+                      _mapController.camera.zoom,
+                    );
+                    _fetchLocationsByCurrentPosition();
+                  }
+                },
+              ),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Widget _buildMyLocationMarker() {
+    return MarkerLayer(
+      markers: [
+        Marker(
+          point: _currentPosition!,
+          width: 60,
+          height: 60,
+          child: const Icon(Icons.my_location, color: Colors.blue, size: 40),
+        ),
+      ],
+    );
   }
 
   Widget _buildSearchBar() {
@@ -208,175 +193,40 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  //TODO artem doppelt
-  void showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        content: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.redAccent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white, size: 26),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  message,
-                  style: const TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              ),
-            ],
-          ),
-        ),
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  Widget _buildTileLayer() {
-    return TileLayer(
-      urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-      userAgentPackageName: 'de.jarovart.meetmaap',
-    );
-  }
-
-  Widget _buildLocationsLayer() {
-    return MarkerLayer(
-      markers: _locations
-          .map(
-            (loc) => Marker(
-              point: loc.position,
-              width: 80,
-              height: 80,
-              child: LocationMarker(
-                location: loc,
-                isSelected: _selectedLocationId == loc.id,
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _buildUserMarker() {
-    return MarkerLayer(
-      markers: [
-        Marker(
-          point: _currentPosition!,
-          width: 60,
-          height: 60,
-          child: const Icon(Icons.my_location, color: Colors.blue, size: 40),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDateSliderAndGps() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final sidePadding = screenWidth * 0.2; // default padding to get ~60% width
-    final fabDiameter = 40.0; // mini FAB diameter
-    final bottomPadding = CenterOnUserButton.padding;
-
-    final fullWidthMode = screenWidth < 420.0;
-
-    final left = fullWidthMode ? 12.0 : sidePadding;
-    final right = fullWidthMode ? 12.0 : sidePadding;
-
-    // Transparent material and reduced height to match GPS button
-    final sliderWidget = SafeArea(
-      top: false,
-      child: SizedBox(
-        height: fabDiameter,
-        child: Material(
-          color: Colors.transparent,
-          child: Center(
-            child: SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                activeTrackColor: Colors.blue,
-                inactiveTrackColor: Colors.blue.withValues(alpha: 0.3),
-                thumbColor: Colors.blue,
-                overlayColor: Colors.blue.withValues(alpha: 0.15),
-                trackHeight: 2,
-                rangeThumbShape: const RoundRangeSliderThumbShape(
-                  enabledThumbRadius: 8,
-                ),
-              ),
-              child: RangeSlider(
-                values: _selectedRange,
-                min: 0,
-                max: (_dayOptions.length - 1).toDouble(),
-                divisions: _dayOptions.length - 1,
-                labels: RangeLabels(
-                  _dayOptions[_selectedRange.start.round()],
-                  _dayOptions[_selectedRange.end.round()],
-                ),
-                onChanged: (values) => setState(() {
-                  // snap to discrete steps
-                  final start = values.start.roundToDouble();
-                  final end = values.end.roundToDouble();
-                  _selectedRange = RangeValues(start, end);
-                }),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // GPS button positioning: default bottom-right; in fullWidthMode place it top-right of slider
-    final gpsWidget = Positioned(
-      right: fullWidthMode ? right : CenterOnUserButton.padding,
-      bottom: fullWidthMode
-          ? bottomPadding + fabDiameter + 8.0
-          : CenterOnUserButton.padding,
-      child: CenterOnUserButton(onPressed: _centerOnUser),
-    );
-
-    final sliderPositioned = Positioned(
-      left: left,
-      right: right,
-      bottom: bottomPadding,
-      child: sliderWidget,
-    );
-
-    return Stack(children: [sliderPositioned, gpsWidget]);
-  }
-
   Widget _buildSearchResults() {
     if (_searchResults.isEmpty) return SizedBox.shrink();
 
-    return Material(
-      elevation: 6,
-      borderRadius: BorderRadius.circular(12),
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: _searchResults.length,
-        itemBuilder: (context, index) {
-          final loc = _searchResults[index];
+    return Positioned(
+      left: MediaQuery.of(context).size.width * 0.15,
+      right: MediaQuery.of(context).size.width * 0.15,
+      top: 70,
+      child: Material(
+        elevation: 6,
+        borderRadius: BorderRadius.circular(12),
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: _searchResults.length,
+          itemBuilder: (context, index) {
+            final loc = _searchResults[index];
 
-          return ListTile(
-            leading: Icon(Icons.location_on, color: Colors.green),
-            title: Text(loc.title),
-            subtitle: Text(loc.description),
-            onTap: () {
-              setState(() {
-                _selectedLocationId = loc.id;
-              });
-              // Karte auf Location bewegen
-              _locations.add(loc); // ggf. zur Karte hinzufügen
-              _mapController.move(loc.position, 15);
+            return ListTile(
+              leading: Icon(Icons.location_on, color: Colors.green),
+              title: Text(loc.title),
+              subtitle: Text(loc.description),
+              onTap: () {
+                setState(() {
+                  _selectedLocation = loc;
+                });
+                // Karte auf Location bewegen
+                _locations.add(loc); // ggf. zur Karte hinzufügen
+                _mapController.move(loc.position, 15);
 
-              setState(() => _searchResults.clear());
-              _searchController.clear();
-            },
-          );
-        },
+                setState(() => _searchResults.clear());
+                _searchController.clear();
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -417,11 +267,141 @@ class MapPageState extends State<MapPage> {
           _searchResults = results;
         });
       } catch (e) {
-        showError("Suche fehlgeschlagen");
+        ExceptionMessage.showError(context, "Suche fehlgeschlagen");
       }
     });
   }
 
+  Widget _buildDateSliderAndGps() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final sidePadding = screenWidth * 0.2; // default padding to get ~60% width
+    final fabDiameter = 40.0; // mini FAB diameter
+    final bottomPadding = CenterOnUserButton.padding;
+
+    final fullWidthMode = screenWidth < 620.0;
+
+    final left = fullWidthMode ? 12.0 : sidePadding;
+    final right = fullWidthMode ? 12.0 : sidePadding;
+
+    // Transparent material and reduced height to match GPS button
+
+    final sliderWidget = SafeArea(
+      top: true,
+      child: SizedBox(
+        height: fabDiameter,
+        child: Material(
+          color: Colors.transparent,
+          child: Center(
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                showValueIndicator: ShowValueIndicator.onDrag,
+                activeTrackColor: Colors.blue,
+                inactiveTrackColor: Colors.blue.withValues(alpha: 0.3),
+                thumbColor: Colors.blue,
+                overlayColor: Colors.blue.withValues(alpha: 0.15),
+                trackHeight: 2,
+                rangeThumbShape: const RoundRangeSliderThumbShape(
+                  enabledThumbRadius: 8,
+                ),
+              ),
+              child: RangeSlider(
+                values: _selectedRange,
+                min: 0,
+                max: (_dayOptions.length - 1).toDouble(),
+                divisions: _dayOptions.length - 1,
+                labels: RangeLabels(
+                  _dayOptions[_selectedRange.start.round()],
+                  _dayOptions[_selectedRange.end.round()],
+                ),
+                onChanged: (values) {
+                  setState(() {
+                    // snap to discrete steps
+                    final start = values.start.roundToDouble();
+                    final end = values.end.roundToDouble();
+                    _selectedRange = RangeValues(start, end);
+                  });
+                  _debouncer.run(() => _fetchLocationsByCurrentPosition());
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // GPS button positioning: default bottom-right; in fullWidthMode place it top-right of slider
+    final gpsWidget = Positioned(
+      right: fullWidthMode ? right : CenterOnUserButton.padding,
+      bottom: fullWidthMode
+          ? bottomPadding + fabDiameter + 28.0
+          : CenterOnUserButton.padding,
+      child: CenterOnUserButton(onPressed: _centerOnUser),
+    );
+
+    final sliderPositioned = Positioned(
+      left: left,
+      right: right,
+      bottom: bottomPadding,
+      child: sliderWidget,
+    );
+
+    return Stack(children: [sliderPositioned, gpsWidget]);
+  }
+
+  /// Zentriert die Karte auf die aktuelle Benutzerposition.
+  void _centerOnUser() async => await _determinePosition();
+
+  /// Bestimmt die aktuelle Position des Benutzers und aktualisiert die Karte.
+  Future<void> _determinePosition() async {
+    final result = await LocationService.getCurrentLocation();
+
+    if (!mounted) return; // Ist das Widget noch im Baum?
+    switch (result) {
+      case LocationSuccess(:final position):
+        setState(() {
+          _initialCenter = position;
+          _currentPosition = position;
+        });
+        _mapController.move(position, 15);
+      case LocationServiceDisabled():
+        ExceptionMessage.showError(context, "Standortdienste sind deaktiviert");
+      case LocationPermissionDenied():
+        ExceptionMessage.showError(context, "Standort-Berechtigung verweigert");
+      case LocationError(:final message):
+        ExceptionMessage.showError(context, "Fehler: $message");
+    }
+  }
+
+  Future<void> _fetchLocationsByCurrentPosition() async {
+    try {
+      debugPrint("Start: _fetchLocationsByCurrentPosition");
+      final locations = await LocationService.fetchAllLocationsInView(
+        _mapController.camera.visibleBounds,
+      );
+      if (!mounted) return;
+      setState(() => _locations = locations);
+    } catch (e) {
+      if (!mounted) return;
+      debugPrint("Execute: _fetchLocationsByCurrentPosition");
+      //ExceptionMessage.showError(context, "Fehler beim Laden der Locations");
+    }
+  }
+
+  void _createLocation(BuildContext context, LatLng tapPosition) async {
+    final createdLocation = await context.push<LocationBase>(
+      "/locationcreate/${tapPosition.latitude}/${tapPosition.longitude}",
+    );
+
+    if (createdLocation != null) {
+      setState(() {
+        _locations.add(createdLocation);
+        _selectedLocation = createdLocation;
+      });
+      _mapController.move(createdLocation.position, 15.0);
+    }
+  }
+
+  /// Sucht nach Locations basierend auf der Suchanfrage.
   static Future<List<LocationBase>> searchLocations(String query) async {
     final url = Uri.parse(
       '${ApiConfig.baseUrl}/api/locations/search?query=$query',

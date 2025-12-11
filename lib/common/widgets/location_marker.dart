@@ -4,22 +4,27 @@ import 'package:meetmaap/features/locations/data/location_base.dart';
 class LocationMarker extends StatelessWidget {
   final LocationBase location;
   final bool isSelected;
+  final VoidCallback? onTapCallback;
 
   const LocationMarker({
     super.key,
     this.isSelected = false,
     required this.location,
+    this.onTapCallback,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _showLocationDialog(context),
-      child: asd(context),
+      onTap: () {
+        if (onTapCallback != null) onTapCallback!();
+        if (!isSelected) _showLocationDialog(context);
+      },
+      child: build1(context),
     );
   }
 
-  Widget asd(BuildContext context) {
+  Widget build1(BuildContext context) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 200),
       padding: EdgeInsets.all(isSelected ? 6 : 2),
@@ -33,7 +38,7 @@ class LocationMarker extends StatelessWidget {
         boxShadow: [
           if (isSelected)
             BoxShadow(
-              color: Colors.blue.withOpacity(0.4),
+              color: Colors.blue.withValues(alpha: 0.4),
               blurRadius: 20,
               spreadRadius: 5,
             ),
