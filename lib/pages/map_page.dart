@@ -81,9 +81,9 @@ class MapPageState extends State<MapPage> {
           ],
         ),
         // Overlay: Search Bar and Slider/GPS positioned on top
-        _buildSearchBar(),
         _buildDateSliderAndGps(),
         _buildSearchResults(),
+        _buildSearchBar(),
       ],
     );
   }
@@ -97,38 +97,44 @@ class MapPageState extends State<MapPage> {
 
   Widget _buildLocationsLayer() {
     return MarkerLayer(
-      markers: _locations
-          .map(
-            (loc) => Marker(
-              point: loc.position,
-              width: 80,
-              height: 80,
-              child: LocationMarker(
-                location: loc,
-                isSelected: _selectedLocation?.id == loc.id,
-                onTapCallback: () {
-                  if (_selectedLocation?.id == loc.id) {
-                    setState(() {
-                      _selectedLocation = null;
-                    });
-                  } else {
-                    setState(() {
-                      _selectedLocation = loc;
-                    });
-                  }
+      markers:
+          _locations
+              .map(
+                (loc) => Marker(
+                  point: loc.position,
+                  width: 80,
+                  height: 80,
+                  child: LocationMarker(
+                    location: loc,
+                    isSelected: _selectedLocation?.id == loc.id,
+                    onTapCallback: () {
+                      if (_selectedLocation?.id == loc.id) {
+                        setState(() {
+                          _selectedLocation = null;
+                        });
+                      } else {
+                        setState(() {
+                          _selectedLocation = loc;
+                        });
+                      }
 
-                  if (_mapController.camera.center != loc.position) {
-                    _mapController.move(
-                      loc.position,
-                      _mapController.camera.zoom,
-                    );
-                    _fetchLocationsByCurrentPosition();
-                  }
-                },
-              ),
-            ),
-          )
-          .toList(),
+                      if (_mapController.camera.center != loc.position) {
+                        _mapController.move(
+                          loc.position,
+                          _mapController.camera.zoom,
+                        );
+                        _fetchLocationsByCurrentPosition();
+                      }
+                    },
+                  ),
+                ),
+              )
+              .toList()
+            ..sort((a, b) {
+              if (a.point == _selectedLocation?.position) return 1;
+              if (b.point == _selectedLocation?.position) return -1;
+              return 0;
+            }),
     );
   }
 
@@ -196,36 +202,58 @@ class MapPageState extends State<MapPage> {
   Widget _buildSearchResults() {
     if (_searchResults.isEmpty) return SizedBox.shrink();
 
-    return Positioned(
-      left: MediaQuery.of(context).size.width * 0.15,
-      right: MediaQuery.of(context).size.width * 0.15,
-      top: 70,
-      child: Material(
-        elevation: 6,
-        borderRadius: BorderRadius.circular(12),
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: _searchResults.length,
-          itemBuilder: (context, index) {
-            final loc = _searchResults[index];
+    final sidePadding = MediaQuery.of(context).size.width * 0.15;
 
-            return ListTile(
-              leading: Icon(Icons.location_on, color: Colors.green),
-              title: Text(loc.title),
-              subtitle: Text(loc.description),
-              onTap: () {
-                _mapController.move(loc.position, _mapController.camera.zoom);
-                setState(() {
-                  _selectedLocation = loc;
-                  _locations.add(loc);
-                  _searchResults.clear();
-                });
-                _searchController.clear();
-                _fetchLocationsByCurrentPosition();
-              },
-            );
-          },
-        ),
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          // 🔹 Graues Overlay (Tap schließt Suche)
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              setState(() {
+                _searchResults.clear();
+              });
+              _searchController.clear();
+            },
+            child: Container(color: Colors.black.withValues(alpha: 0.25)),
+          ),
+          Positioned(
+            left: sidePadding,
+            right: sidePadding,
+            top: 70,
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(12),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  final loc = _searchResults[index];
+
+                  return ListTile(
+                    leading: Icon(Icons.location_on, color: Colors.green),
+                    title: Text(loc.title),
+                    subtitle: Text(loc.description),
+                    onTap: () {
+                      _mapController.move(
+                        loc.position,
+                        _mapController.camera.zoom,
+                      );
+                      setState(() {
+                        _selectedLocation = loc;
+                        _locations.add(loc);
+                        _searchResults.clear();
+                      });
+                      _searchController.clear();
+                      _fetchLocationsByCurrentPosition();
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -379,9 +407,10 @@ class MapPageState extends State<MapPage> {
       );
       if (!mounted) return;
       setState(() => _locations = locations);
+      debugPrint("Execute: _fetchLocationsByCurrentPosition");
     } catch (e) {
       if (!mounted) return;
-      debugPrint("Execute: _fetchLocationsByCurrentPosition");
+      debugPrint("Exception: _fetchLocationsByCurrentPosition");
       //ExceptionMessage.showError(context, "Fehler beim Laden der Locations");
     }
   }

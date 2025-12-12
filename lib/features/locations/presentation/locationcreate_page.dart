@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/common/utils/exception_message.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
 import 'package:meetmaap/features/locations/logic/location_service.dart';
@@ -169,15 +171,29 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
               const SizedBox(height: 16),
 
               // --- LOCATION PREVIEW ---
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  "Position:\nLatitude: ${widget.point.latitude}\nLongitude: ${widget.point.longitude}",
-                  style: const TextStyle(fontSize: 16),
+              GestureDetector(
+                onTap: () {
+                  Clipboard.setData(
+                    ClipboardData(
+                      text:
+                          "${widget.point.latitude}, ${widget.point.longitude}",
+                    ),
+                  );
+                  ExceptionMessage.showInfo(
+                    context,
+                    "Position has been copied!",
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    "Position:\nLatitude: ${widget.point.latitude}\nLongitude: ${widget.point.longitude}",
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

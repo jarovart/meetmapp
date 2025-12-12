@@ -20,30 +20,6 @@ class LocationMarker extends StatelessWidget {
         if (onTapCallback != null) onTapCallback!();
         if (!isSelected) _showLocationDialog(context);
       },
-      child: build1(context),
-    );
-  }
-
-  Widget build1(BuildContext context) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
-      padding: EdgeInsets.all(isSelected ? 6 : 2),
-      decoration: BoxDecoration(
-        //color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isSelected ? Colors.blue : Colors.transparent,
-          width: isSelected ? 4 : 0,
-        ),
-        boxShadow: [
-          if (isSelected)
-            BoxShadow(
-              color: Colors.blue.withValues(alpha: 0.4),
-              blurRadius: 20,
-              spreadRadius: 5,
-            ),
-        ],
-      ),
       child: _buildMarkerIcon(),
     );
   }
