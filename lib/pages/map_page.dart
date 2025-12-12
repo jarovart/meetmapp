@@ -105,9 +105,9 @@ class MapPageState extends State<MapPage> {
               height: 80,
               child: LocationMarker(
                 location: loc,
-                isSelected: _selectedLocation == loc,
+                isSelected: _selectedLocation?.id == loc.id,
                 onTapCallback: () {
-                  if (_selectedLocation == loc) {
+                  if (_selectedLocation?.id == loc.id) {
                     setState(() {
                       _selectedLocation = null;
                     });
@@ -214,15 +214,14 @@ class MapPageState extends State<MapPage> {
               title: Text(loc.title),
               subtitle: Text(loc.description),
               onTap: () {
+                _mapController.move(loc.position, _mapController.camera.zoom);
                 setState(() {
                   _selectedLocation = loc;
+                  _locations.add(loc);
+                  _searchResults.clear();
                 });
-                // Karte auf Location bewegen
-                _locations.add(loc); // ggf. zur Karte hinzufügen
-                _mapController.move(loc.position, 15);
-
-                setState(() => _searchResults.clear());
                 _searchController.clear();
+                _fetchLocationsByCurrentPosition();
               },
             );
           },
@@ -362,7 +361,7 @@ class MapPageState extends State<MapPage> {
           _initialCenter = position;
           _currentPosition = position;
         });
-        _mapController.move(position, 15);
+        _mapController.move(position, 13.00); //todo auf 15 ändern
       case LocationServiceDisabled():
         ExceptionMessage.showError(context, "Standortdienste sind deaktiviert");
       case LocationPermissionDenied():
@@ -397,7 +396,7 @@ class MapPageState extends State<MapPage> {
         _locations.add(createdLocation);
         _selectedLocation = createdLocation;
       });
-      _mapController.move(createdLocation.position, 15.0);
+      _mapController.move(createdLocation.position, _mapController.camera.zoom);
     }
   }
 
