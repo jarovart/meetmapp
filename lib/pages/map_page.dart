@@ -103,6 +103,8 @@ class MapPageState extends State<MapPage> {
       options: MarkerClusterLayerOptions(
         maxClusterRadius: 45,
         size: const Size(40, 40),
+        zoomToBoundsOnClick: false,
+        spiderfyCluster: false,
         markers:
             _locations
                 .map(
@@ -156,6 +158,30 @@ class MapPageState extends State<MapPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+          );
+        },
+        onClusterTap: (cluster) {
+          showModalBottomSheet(
+            context: context,
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            builder: (_) {
+              return ListView(
+                children: cluster.markers.map((marker) {
+                  final loc = (marker.child as LocationMarker).location;
+                  return ListTile(
+                    title: Text(loc.title),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() => _selectedLocation = loc);
+                      _mapController.move(
+                        loc.position,
+                        _mapController.camera.zoom + 2,
+                      );
+                    },
+                  );
+                }).toList(),
+              );
+            },
           );
         },
       ),
