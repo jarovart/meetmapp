@@ -27,6 +27,7 @@ class MapPageState extends State<MapPage> {
 
   LatLng _initialCenter = LatLng(51.1657, 10.4515); // Mitte von Deutschland
   LatLng? _currentPosition;
+  LatLng? _mapCenterBeforeSheet;
   LocationBase? _selectedLocation;
   List<LocationBase> _locations = [];
   List<LocationBase> _searchResults = [];
@@ -160,32 +161,150 @@ class MapPageState extends State<MapPage> {
             ),
           );
         },
-        onClusterTap: (cluster) {
-          showModalBottomSheet(
-            context: context,
-            constraints: const BoxConstraints(maxWidth: double.infinity),
-            builder: (_) {
-              return ListView(
-                children: cluster.markers.map((marker) {
-                  final loc = (marker.child as LocationMarker).location;
-                  return ListTile(
-                    title: Text(loc.title),
-                    onTap: () {
-                      Navigator.pop(context);
-                      setState(() => _selectedLocation = loc);
-                      _mapController.move(
-                        loc.position,
-                        _mapController.camera.zoom + 2,
-                      );
-                    },
-                  );
-                }).toList(),
-              );
-            },
-          );
+        onClusterTap: (cluster) async {
+          // Fokuspunkt (Cluster hat mehrere Marker)
+          final focus = cluster.markers.first.point;
+
+          // Offset passend zu deiner maxHeight: 400 -> nimm ca. 200
+          _shiftTargetUp(focus, -200);
+          try {
+            await showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              useSafeArea: true,
+              constraints: const BoxConstraints(maxWidth: double.infinity),
+              builder: (context) {
+                return DraggableScrollableSheet(
+                  snap: true,
+                  snapSizes: const [0.5, 1.0],
+                  expand: false,
+                  initialChildSize: 0.5, // 40% Höhe beim Öffnen
+                  minChildSize: 0.25, // minimal (nach unten ziehen)
+                  maxChildSize: 1.0, // 🔥 volle Höhe beim Hochziehen
+                  builder: (context, scrollController) {
+                    return Material(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
+                      clipBehavior: Clip.hardEdge,
+                      child: ListView(
+                        controller: scrollController, // 🔥 extrem wichtig
+                        children: [
+                          // optionaler Drag-Handle
+                          const SizedBox(height: 8),
+                          Center(
+                            child: Container(
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: Colors.grey,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ...cluster.markers.map((marker) {
+                            final loc =
+                                (marker.child as LocationMarker).location;
+                            return ListTile(
+                              title: Text(loc.title),
+                              onTap: () async {
+                                Navigator.pop(context);
+                                setState(() => _selectedLocation = loc);
+                                _mapController.move(
+                                  loc.position,
+                                  _mapController.camera.zoom + 2,
+                                );
+                              },
+                            );
+                          }),
+
+                          // Beispiel: zusätzlicher Content
+                          const SizedBox(height: 24),
+                          const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text(
+                              'Weitere Informationen',
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                          const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text(
+                              'Weitere Informationen1',
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          } finally {
+            if (mounted) _restoreCenterAfterSheet();
+          }
         },
       ),
     );
+  }
+
+  void _moveLocationUp(LatLng target, double offsetPx) {
+    final camera = _mapController.camera;
+
+    // aktuelle Center-Position merken
+    _mapCenterBeforeSheet ??= camera.center;
+
+    // Geo → Screen
+    final projected = camera.project(target);
+
+    // nach oben verschieben (y wird kleiner)
+    final shiftedPoint = projected - Point(0, offsetPx);
+
+    // Screen → Geo
+    final shiftedLatLng = camera.unproject(shiftedPoint);
+
+    _mapController.move(shiftedLatLng, camera.zoom);
+  }
+
+  void _shiftTargetUp(LatLng target, double offsetPx) {
+    final camera = _mapController.camera;
+
+    _mapCenterBeforeSheet ??= camera.center;
+
+    final projected = camera.project(target);
+    final shifted = projected - Point(0, offsetPx); // y kleiner => nach oben
+    final newCenter = camera.unproject(shifted);
+
+    _mapController.move(newCenter, camera.zoom);
+  }
+
+  void _restoreCenterAfterSheet() {
+    if (_mapCenterBeforeSheet == null) return;
+    _mapController.move(_mapCenterBeforeSheet!, _mapController.camera.zoom);
+    _mapCenterBeforeSheet = null;
   }
 
   Widget _buildMyLocationMarker() {
