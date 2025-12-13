@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
@@ -76,8 +77,8 @@ class MapPageState extends State<MapPage> {
           ),
           children: [
             _buildTileLayer(),
-            _buildLocationsLayer(),
             if (_currentPosition != null) _buildMyLocationMarker(),
+            _buildLocationsLayer(),
           ],
         ),
         // Overlay: Search Bar and Slider/GPS positioned on top
@@ -96,45 +97,66 @@ class MapPageState extends State<MapPage> {
   }
 
   Widget _buildLocationsLayer() {
-    return MarkerLayer(
-      markers:
-          _locations
-              .map(
-                (loc) => Marker(
-                  point: loc.position,
-                  width: 80,
-                  height: 80,
-                  child: LocationMarker(
-                    location: loc,
-                    isSelected: _selectedLocation?.id == loc.id,
-                    onTapCallback: () {
-                      if (_selectedLocation?.id == loc.id) {
-                        setState(() {
-                          _selectedLocation = null;
-                        });
-                      } else {
-                        setState(() {
-                          _selectedLocation = loc;
-                        });
-                      }
+    return MarkerClusterLayerWidget(
+      options: MarkerClusterLayerOptions(
+        maxClusterRadius: 45,
+        size: const Size(40, 40),
+        markers:
+            _locations
+                .map(
+                  (loc) => Marker(
+                    point: loc.position,
+                    width: 80,
+                    height: 80,
+                    child: LocationMarker(
+                      location: loc,
+                      isSelected: _selectedLocation?.id == loc.id,
+                      onTapCallback: () {
+                        if (_selectedLocation?.id == loc.id) {
+                          setState(() {
+                            _selectedLocation = null;
+                          });
+                        } else {
+                          setState(() {
+                            _selectedLocation = loc;
+                          });
+                        }
 
-                      if (_mapController.camera.center != loc.position) {
-                        _mapController.move(
-                          loc.position,
-                          _mapController.camera.zoom,
-                        );
-                        _fetchLocationsByCurrentPosition();
-                      }
-                    },
+                        if (_mapController.camera.center != loc.position) {
+                          _mapController.move(
+                            loc.position,
+                            _mapController.camera.zoom,
+                          );
+                          _fetchLocationsByCurrentPosition();
+                        }
+                      },
+                    ),
                   ),
-                ),
-              )
-              .toList()
-            ..sort((a, b) {
-              if (a.point == _selectedLocation?.position) return 1;
-              if (b.point == _selectedLocation?.position) return -1;
-              return 0;
-            }),
+                )
+                .toList()
+              ..sort((a, b) {
+                if (a.point == _selectedLocation?.position) return 1;
+                if (b.point == _selectedLocation?.position) return -1;
+                return 0;
+              }),
+        // 🔹 Cluster-Design
+        builder: (context, markers) {
+          return Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: 0.8),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              markers.length.toString(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
