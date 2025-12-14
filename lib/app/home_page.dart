@@ -52,6 +52,8 @@ class HomePageState extends State<HomePage> {
       "Locations",
       "Freunde",
       "Favoriten",
+      "Test-ShowModal",
+      "Test-SliderGPS",
       "Einstellungen",
     ];
 
@@ -90,6 +92,14 @@ class HomePageState extends State<HomePage> {
                         if (label == 'Locations') {
                           _toggleMenu();
                           context.push('/locationlist/124');
+                          return;
+                        } else if (label == "Test-ShowModal") {
+                          _toggleMenu();
+                          context.push('/test-showmodal');
+                          return;
+                        } else if (label == "Test-SliderGPS") {
+                          _toggleMenu();
+                          context.push('/test-slidergps');
                           return;
                         }
                         ExceptionMessage.showError(

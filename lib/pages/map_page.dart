@@ -71,8 +71,9 @@ class MapPageState extends State<MapPage> {
               } else if (event is MapEventLongPress) {
                 _createLocation(context, event.tapPosition);
               } else if (event is MapEventMoveEnd ||
-                  event is MapEventDoubleTapZoomEnd ||
-                  event is MapEventScrollWheelZoom) {
+                  event is MapEventDoubleTapZoomEnd) {
+                _fetchLocationsByCurrentPosition();
+              } else if (event is MapEventScrollWheelZoom) {
                 _debouncer.run(() => _fetchLocationsByCurrentPosition());
               }
             },
@@ -172,7 +173,10 @@ class MapPageState extends State<MapPage> {
               context: context,
               isScrollControlled: true,
               useSafeArea: true,
-              constraints: const BoxConstraints(maxWidth: double.infinity),
+              constraints: BoxConstraints(
+                maxWidth: double.infinity,
+                maxHeight: MediaQuery.of(context).size.height,
+              ),
               builder: (context) {
                 return DraggableScrollableSheet(
                   snap: true,

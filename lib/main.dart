@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/home_page.dart';
+import 'package:meetmaap/common/constants/testshowmodal.dart';
+import 'package:meetmaap/common/constants/testslidergps.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
 import 'package:meetmaap/features/locations/presentation/location_page.dart';
 import 'package:meetmaap/features/locations/presentation/locationlist_page.dart';
@@ -63,6 +65,22 @@ class MainApplication extends StatelessWidget {
             final lat = double.parse(state.pathParameters['lat']!);
             final lng = double.parse(state.pathParameters['lng']!);
             return LocationCreatePage(point: LatLng(lat, lng));
+          },
+        ),
+
+        /// Test ShowModal-Seite
+        GoRoute(
+          path: '/test-showmodal',
+          builder: (context, state) {
+            return TestShowModal();
+          },
+        ),
+
+        /// Test Slider/GPS-Seite
+        GoRoute(
+          path: '/test-slidergps',
+          builder: (context, state) {
+            return TestSliderGps();
           },
         ),
       ],

@@ -28,6 +28,7 @@ class _LocationsPageState extends State<LocationsPage> {
   }
 
   Future<List<LocationBase>> _fetchLocations() async {
+    debugPrint("Start: load locations from backend");
     final response = await http.get(
       Uri.parse('http://localhost:8080/api/locations'),
       headers: {'Content-Type': 'application/json'},
@@ -35,6 +36,7 @@ class _LocationsPageState extends State<LocationsPage> {
 
     if (response.statusCode == 200) {
       final List<dynamic> body = jsonDecode(response.body);
+      debugPrint("Executed: load locations from backend");
       return body
           .map((e) => LocationBase.fromMap(e as Map<String, dynamic>))
           .toList();
