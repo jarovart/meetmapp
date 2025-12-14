@@ -36,82 +36,86 @@ class LocationMarker extends StatelessWidget {
   void _showLocationDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      //isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       useSafeArea: true,
-      enableDrag: true,
+      constraints: BoxConstraints(
+        maxWidth: double.infinity,
+        maxHeight: MediaQuery.of(context).size.height,
+      ),
       builder: (context) {
         return DraggableScrollableSheet(
           snap: true,
-          snapSizes: const [0.5, 0.7, 1.0],
-          initialChildSize: 0.5,
-          minChildSize: 0.25,
-          maxChildSize: 1.0,
+          snapSizes: const [0.5, 1.0],
+          expand: false,
+          initialChildSize: 0.5, // 40% Höhe beim Öffnen
+          minChildSize: 0.25, // minimal (nach unten ziehen)
+          maxChildSize: 1.0, // 🔥 volle Höhe beim Hochziehen
           builder: (context, scrollController) {
             return Material(
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
               ),
               clipBehavior: Clip.hardEdge,
-              child: SafeArea(
-                top: true, // ✅ schützt Statusbar
-                bottom: true, // ✅ schützt Gesten-Navigation
-                child: CustomScrollView(
-                  controller: scrollController,
-                  //primary: false,
-                  //physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    // 🔹 Header (zieht das Sheet)
-                    SliverToBoxAdapter(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 8),
-                          Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            location.title,
-                            style: const TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Text(
-                            'Ort',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+              child: ListView(
+                controller: scrollController, // 🔥 extrem wichtig
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // optionaler Drag-Handle
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
+                  ),
 
-                    // 🔹 Horizontal scrollbare Bilder (wie Google Maps)
-                    SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 220,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: [_imageCard(), _imageCard(), _imageCard()],
-                        ),
-                      ),
+                  Text(
+                    location.title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
 
-                    // 🔹 Vertikal scrollbare Inhalte
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        return ListTile(title: Text('Menüpunkt $index'));
-                      }, childCount: 20),
+                  Text(
+                    location.description,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _imageCard(),
+                        _imageCard(),
+                        _imageCard(),
+                        _imageCard(),
+                        _imageCard(),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+
+                  // Beispiel: zusätzlicher Content
+                  const SizedBox(height: 24),
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      'Weitere Informationen',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      'Weitere Informationen1',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ],
               ),
             );
           },
@@ -123,6 +127,7 @@ class LocationMarker extends StatelessWidget {
   Widget _imageCard() {
     return Container(
       width: 300,
+      height: 300,
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
