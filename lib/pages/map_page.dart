@@ -147,19 +147,20 @@ class MapPageState extends State<MapPage> {
               }),
         // 🔹 Cluster-Design
         builder: (context, markers) {
-          return Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.8),
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              markers.length.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          // 🔥 Gewinner ermitteln
+          final winningLocation = pickBestLocationFromCluster(markers);
+
+          // 🔥 exakt EIN Marker anzeigen
+          return LocationMarker(
+            location: winningLocation,
+            isSelected: _selectedLocation?.id == winningLocation.id,
+            onTapCallback: () {
+              setState(() => _selectedLocation = winningLocation);
+              _mapController.move(
+                winningLocation.position,
+                _mapController.camera.zoom + 1,
+              );
+            },
           );
         },
         onClusterTap: (cluster) async {
@@ -653,4 +654,10 @@ class MapPageState extends State<MapPage> {
   DateTime get _startDate => _dateFromIndex(_selectedRange.start.round());
 
   DateTime get _endDate => _dateFromIndex(_selectedRange.end.round());
+
+  LocationBase pickBestLocationFromCluster(List<Marker> markers) {
+    return markers
+        .map((m) => (m.child as LocationMarker).location)
+        .reduce((a, b) => a.getLocationScore() >= b.getLocationScore() ? a : b);
+  }
 }

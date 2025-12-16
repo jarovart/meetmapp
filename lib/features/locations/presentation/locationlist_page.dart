@@ -45,13 +45,19 @@ class _LocationsPageState extends State<LocationsPage> {
       return List.generate(
         20,
         (i) => LocationBase(
-          id: i.toString(),
+          id: i,
           title: "Coole Location #$i",
           description: "Adresse $i, Bremen",
+          creationDateTime: DateTime.now(),
+          startDateTime: DateTime.now().add(const Duration(days: 1)),
+          endDateTime: DateTime.now().add(const Duration(days: 2)),
           position: LatLng(52.0 + i, 8.0 + i),
-          date: "Heute",
           thumbnailUrl:
               "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
+          createdUserId: i,
+          createdUsername: "test123",
+          joinedUserCount: 123,
+          likedUserCount: 11,
         ),
       );
       //throw Exception('Failed to load locations');
@@ -116,7 +122,7 @@ class _LocationsPageState extends State<LocationsPage> {
                     // Passe diese Felder an dein LocationBase an:
                     subtitle: loc.description ?? '',
                     imageUrl: loc.thumbnailUrl ?? '',
-                    date: loc.date ?? '',
+                    date: loc.creationDateTime.toIso8601String() ?? '',
                   );
                 },
               );
