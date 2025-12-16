@@ -99,4 +99,30 @@ class LocationService {
     final body = jsonDecode(response.body) as List;
     return body.map((e) => LocationBase.fromMap(e)).toList();
   }
+
+  static Future<List<LocationBase>> fetchLocationsWithinWithTime(
+    LatLngBounds bounds,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/api/locations/withinWithTime')
+        .replace(
+          queryParameters: {
+            'minLat': bounds.southWest.latitude.toString(),
+            'maxLat': bounds.northEast.latitude.toString(),
+            'minLng': bounds.southWest.longitude.toString(),
+            'maxLng': bounds.northEast.longitude.toString(),
+            'rangeStart': startDate.toIso8601String(),
+            'rangeEnd': endDate.toIso8601String(),
+          },
+        );
+
+    final response = await http.get(uri);
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load locations');
+    }
+    final body = jsonDecode(response.body) as List;
+    return body.map((e) => LocationBase.fromMap(e)).toList();
+  }
 }

@@ -51,7 +51,7 @@ class MapPageState extends State<MapPage> {
     _debouncer = Debouncer(delay: Duration(milliseconds: 1000));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchLocationsByCurrentPosition();
+      _fetchLocationsWithinWithTime();
     });
   }
 
@@ -72,9 +72,9 @@ class MapPageState extends State<MapPage> {
                 _createLocation(context, event.tapPosition);
               } else if (event is MapEventMoveEnd ||
                   event is MapEventDoubleTapZoomEnd) {
-                _fetchLocationsByCurrentPosition();
+                _fetchLocationsWithinWithTime();
               } else if (event is MapEventScrollWheelZoom) {
-                _debouncer.run(() => _fetchLocationsByCurrentPosition());
+                _debouncer.run(() => _fetchLocationsWithinWithTime());
               }
             },
           ),
@@ -133,7 +133,7 @@ class MapPageState extends State<MapPage> {
                             loc.position,
                             _mapController.camera.zoom,
                           );
-                          _fetchLocationsByCurrentPosition();
+                          _fetchLocationsWithinWithTime();
                         }
                       },
                     ),
@@ -419,7 +419,7 @@ class MapPageState extends State<MapPage> {
                         _searchResults.clear();
                       });
                       _searchController.clear();
-                      _fetchLocationsByCurrentPosition();
+                      _fetchLocationsWithinWithTime();
                     },
                   );
                 },
@@ -520,7 +520,8 @@ class MapPageState extends State<MapPage> {
                     final end = values.end.roundToDouble();
                     _selectedRange = RangeValues(start, end);
                   });
-                  _debouncer.run(() => _fetchLocationsByCurrentPosition());
+
+                  _debouncer.run(() => _fetchLocationsWithinWithTime());
                 },
               ),
             ),
@@ -588,6 +589,24 @@ class MapPageState extends State<MapPage> {
     }
   }
 
+  Future<void> _fetchLocationsWithinWithTime() async {
+    try {
+      debugPrint("Start: _fetchLocationsWithinWithTime");
+      final locations = await LocationService.fetchLocationsWithinWithTime(
+        _mapController.camera.visibleBounds,
+        _startDate,
+        _endDate,
+      );
+      if (!mounted) return;
+      setState(() => _locations = locations);
+      debugPrint("Execute: _fetchLocationsWithinWithTime");
+    } catch (e) {
+      if (!mounted) return;
+      debugPrint("Exception: _fetchLocationsWithinWithTime");
+      //ExceptionMessage.showError(context, "Fehler beim Laden der Locations");
+    }
+  }
+
   void _createLocation(BuildContext context, LatLng tapPosition) async {
     final createdLocation = await context.push<LocationBase>(
       "/locationcreate/${tapPosition.latitude}/${tapPosition.longitude}",
@@ -617,4 +636,21 @@ class MapPageState extends State<MapPage> {
     final body = jsonDecode(response.body) as List;
     return body.map((e) => LocationBase.fromMap(e)).toList();
   }
+
+  DateTime _dateFromIndex(int index) {
+    final now = DateTime.now();
+
+    return switch (index) {
+      0 => DateTime(now.year, now.month, now.day), // heute 00:00
+      1 => now.add(const Duration(days: 1)),
+      2 => now.add(const Duration(days: 2)),
+      3 => now.add(const Duration(days: 7)),
+      4 => DateTime(now.year, now.month + 1, now.day),
+      _ => now,
+    };
+  }
+
+  DateTime get _startDate => _dateFromIndex(_selectedRange.start.round());
+
+  DateTime get _endDate => _dateFromIndex(_selectedRange.end.round());
 }
