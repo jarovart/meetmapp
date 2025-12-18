@@ -40,18 +40,23 @@ class MainApplication extends StatelessWidget {
 
             // TODO: echte Daten laden
             final mockLocation = LocationFull(
-              id: id,
+              id: id as int,
               title: "Chill Spot $id",
-              address: "Adresse $id in Bremen",
+              //address: "Adresse $id in Bremen",
               description:
                   "Eine sehr coole Location zum Chillen, Essen und Treffen.",
+              creationDateTime: DateTime.now(),
+              startDateTime: DateTime.now(),
+              endDateTime: DateTime.now(),
               position: LatLng(53.0, 8.8),
-              date: "Heute um 18:00",
               thumbnailUrl:
                   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
               imageUrl:
                   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
-              user: "Max Mustermann",
+              createdUserId: 1,
+              createdUsername: "1",
+              joinedUserCount: 1,
+              likedUserCount: 1,
             );
 
             return LocationDetailPage(location: mockLocation);
