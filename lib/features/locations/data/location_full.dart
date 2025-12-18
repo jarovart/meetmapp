@@ -1,26 +1,35 @@
 import 'package:latlong2/latlong.dart';
 
 class LocationFull {
-  final String id;
+  final int id;
   final String title;
   final String description;
-  final String date;
-  final String address;
+  final DateTime creationDateTime;
+  final DateTime startDateTime;
+  final DateTime endDateTime;
   final LatLng position;
   final String thumbnailUrl;
   final String imageUrl;
-  final String user;
+  //final List<String> imageUrls;
+  final int createdUserId;
+  final String createdUsername;
+  final int joinedUserCount;
+  final int likedUserCount;
 
   LocationFull({
     required this.id,
     required this.title,
     required this.description,
-    required this.date,
-    required this.address,
+    required this.creationDateTime,
+    required this.startDateTime,
+    required this.endDateTime,
     required this.position,
     required this.thumbnailUrl,
     required this.imageUrl,
-    required this.user,
+    required this.createdUserId,
+    required this.createdUsername,
+    required this.joinedUserCount,
+    required this.likedUserCount,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,26 +37,39 @@ class LocationFull {
       "id": id,
       "title": title,
       "description": description,
-      "date": date,
+      "creationDateTime": creationDateTime,
+      "startDateTime": startDateTime,
+      "endDateTime": endDateTime,
       "latitude": position.latitude,
       "longitude": position.longitude,
       "thumbnailUrl": thumbnailUrl,
       "imageUrl": imageUrl,
-      "user": user,
+      "createdUserId": createdUserId,
+      "createdUsername": createdUsername,
+      "joinedUserCount": joinedUserCount,
+      "likedUserCount": likedUserCount,
     };
   }
 
   factory LocationFull.fromMap(Map<String, dynamic> map) {
     return LocationFull(
-      id: map['id'].toString(),
-      title: map['title'].toString(),
-      description: map['description'].toString(),
-      date: map['date'].toString(),
-      address: map['address'].toString(),
-      position: LatLng(map['latitude'], map['longitude']),
-      thumbnailUrl: map['thumbnailUrl'].toString(),
-      imageUrl: map['imageUrl'].toString(),
-      user: map['user'].toString(),
+      id: map['id'] as int,
+      title: map['title'] as String,
+      description: map['description'] ?? '',
+      creationDateTime: DateTime.parse(map['creationDateTime']),
+      startDateTime: DateTime.parse(map['startDateTime']),
+      endDateTime: DateTime.parse(map['endDateTime']),
+      position: LatLng(
+        (map['latitude'] as num).toDouble(),
+        (map['longitude'] as num).toDouble(),
+      ),
+      thumbnailUrl: map['thumbnailUrl'] ?? '',
+      imageUrl: map['imageUrl'] ?? '',
+      //imageUrls: List<String>.from(map['imageUrls'] ?? []),
+      createdUserId: map['createdUserId'] as int,
+      createdUsername: map['createdUsername'] as String,
+      joinedUserCount: map['joinedUserCount'] ?? 0,
+      likedUserCount: map['likedUserCount'] ?? 0,
     );
   }
 }

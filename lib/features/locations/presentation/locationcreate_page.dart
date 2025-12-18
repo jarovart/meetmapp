@@ -55,15 +55,19 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
 
     // 👇 HIER erstellst du das Objekt (LocationFull)
     final createdLocation = LocationFull(
-      id: '', // ID wird vom Server vergeben
+      id: 0, // ID wird vom Server vergeben
       title: titleController.text.trim(),
       description: descriptionController.text.trim(),
-      date: selectedDate!.toIso8601String(),
-      address: "${descriptionController.text.trim()}222",
+      creationDateTime: selectedDate!,
+      startDateTime: selectedDate!,
+      endDateTime: selectedDate!,
       position: LatLng(widget.point.latitude, widget.point.longitude),
       thumbnailUrl: [imageController.text.trim()].single,
       imageUrl: [imageController.text.trim()].single,
-      user: userController.text.trim(),
+      createdUserId: userController.text.trim() as int,
+      createdUsername: userController.text.trim(),
+      joinedUserCount: userController.text.trim() as int,
+      likedUserCount: userController.text.trim() as int,
     );
 
     // Rückgabe an vorherige Seite

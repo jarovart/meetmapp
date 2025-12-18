@@ -8,6 +8,7 @@ import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_ti
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/view/locationdetailssheet.dart';
 import 'package:meetmaap/common/utils/debouncer.dart';
 import 'package:meetmaap/config/api_config.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
@@ -117,25 +118,7 @@ class MapPageState extends State<MapPage> {
                     child: LocationMarker(
                       location: loc,
                       isSelected: _selectedLocation?.id == loc.id,
-                      onTapCallback: () {
-                        if (_selectedLocation?.id == loc.id) {
-                          setState(() {
-                            _selectedLocation = null;
-                          });
-                        } else {
-                          setState(() {
-                            _selectedLocation = loc;
-                          });
-                        }
-
-                        if (_mapController.camera.center != loc.position) {
-                          _mapController.move(
-                            loc.position,
-                            _mapController.camera.zoom,
-                          );
-                          _fetchLocationsWithinWithTime();
-                        }
-                      },
+                      onTap: () => _onLocationTapped(loc),
                     ),
                   ),
                 )
@@ -154,123 +137,8 @@ class MapPageState extends State<MapPage> {
           return LocationMarker(
             location: winningLocation,
             isSelected: _selectedLocation?.id == winningLocation.id,
-            onTapCallback: () {
-              setState(() => _selectedLocation = winningLocation);
-              _mapController.move(
-                winningLocation.position,
-                _mapController.camera.zoom + 1,
-              );
-            },
+            onTap: () => _onLocationTapped(winningLocation),
           );
-        },
-        onClusterTap: (cluster) async {
-          // Fokuspunkt (Cluster hat mehrere Marker)
-          final focus = cluster.markers.first.point;
-
-          // Offset passend zu deiner maxHeight: 400 -> nimm ca. 200
-          _shiftTargetUp(focus, -200);
-          try {
-            await showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              useSafeArea: true,
-              constraints: BoxConstraints(
-                maxWidth: double.infinity,
-                maxHeight: MediaQuery.of(context).size.height,
-              ),
-              builder: (context) {
-                return DraggableScrollableSheet(
-                  snap: true,
-                  snapSizes: const [0.5, 1.0],
-                  expand: false,
-                  initialChildSize: 0.5, // 40% Höhe beim Öffnen
-                  minChildSize: 0.25, // minimal (nach unten ziehen)
-                  maxChildSize: 1.0, // 🔥 volle Höhe beim Hochziehen
-                  builder: (context, scrollController) {
-                    return Material(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                      clipBehavior: Clip.hardEdge,
-                      child: ListView(
-                        controller: scrollController, // 🔥 extrem wichtig
-                        children: [
-                          // optionaler Drag-Handle
-                          const SizedBox(height: 8),
-                          Center(
-                            child: Container(
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: Colors.grey,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ...cluster.markers.map((marker) {
-                            final loc =
-                                (marker.child as LocationMarker).location;
-                            return ListTile(
-                              title: Text(loc.title),
-                              onTap: () async {
-                                Navigator.pop(context);
-                                setState(() => _selectedLocation = loc);
-                                _mapController.move(
-                                  loc.position,
-                                  _mapController.camera.zoom + 2,
-                                );
-                              },
-                            );
-                          }),
-
-                          // Beispiel: zusätzlicher Content
-                          const SizedBox(height: 24),
-                          const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Text(
-                              'Weitere Informationen',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const SizedBox(height: 24),
-                          const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Text(
-                              'Weitere Informationen1',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          } finally {
-            if (mounted) _restoreCenterAfterSheet();
-          }
         },
       ),
     );
@@ -659,5 +527,30 @@ class MapPageState extends State<MapPage> {
     return markers
         .map((m) => (m.child as LocationMarker).location)
         .reduce((a, b) => a.getLocationScore() >= b.getLocationScore() ? a : b);
+  }
+
+  void _onLocationTapped(LocationBase location) {
+    setState(() {
+      _selectedLocation = _selectedLocation?.id == location.id
+          ? null
+          : location;
+    });
+
+    _mapController.move(location.position, _mapController.camera.zoom);
+
+    _openLocationDetails(location.id);
+  }
+
+  void _openLocationDetails(int locationId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      constraints: BoxConstraints(
+        maxWidth: double.infinity,
+        maxHeight: MediaQuery.of(context).size.height,
+      ),
+      builder: (_) => LocationDetailsSheet(locationId: locationId),
+    );
   }
 }

@@ -64,7 +64,10 @@ class LocationDetailPage extends StatelessWidget {
                 children: [
                   const Icon(Icons.calendar_today, size: 20),
                   const SizedBox(width: 6),
-                  Text(location.date, style: const TextStyle(fontSize: 16)),
+                  Text(
+                    location.creationDateTime.toIso8601String(),
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ],
               ),
             ),

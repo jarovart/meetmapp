@@ -32,6 +32,8 @@ class LocationError extends LocationResult {
 }
 
 class LocationService {
+  static final Map<int, LocationFull> _fullLocationCache = {};
+
   static Future<LocationResult> getCurrentLocation() async {
     try {
       // Service aktiv?
@@ -124,5 +126,40 @@ class LocationService {
     }
     final body = jsonDecode(response.body) as List;
     return body.map((e) => LocationBase.fromMap(e)).toList();
+  }
+
+  static Future<LocationFull> fetchFullLocation(int id) async {
+    // 🔥 1. Cache-Hit
+    if (_fullLocationCache.containsKey(id)) {
+      debugPrint('🟢 Location $id aus Cache');
+      return _fullLocationCache[id]!;
+    }
+
+    // 🔥 2. API-Call
+    debugPrint('🔵 Location $id vom Server laden');
+    final url = Uri.parse(
+      '${ApiConfig.baseUrl}/api/locations/findById',
+    ).replace(queryParameters: {'id': id.toString()});
+    final response = await http.get(url);
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load location');
+    }
+    final location = LocationFull.fromMap(jsonDecode(response.body));
+
+    // 🔥 3. Cache speichern
+    _fullLocationCache[id] = location;
+
+    return location;
+  }
+
+  /// Optional: Cache invalidieren (z.B. nach Like / Join)
+  static void invalidateLocation(int id) {
+    _fullLocationCache.remove(id);
+  }
+
+  /// Optional: kompletten Cache leeren (Logout)
+  static void clearCache() {
+    _fullLocationCache.clear();
   }
 }
