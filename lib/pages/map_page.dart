@@ -8,7 +8,7 @@ import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_ti
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/view/locationdetailssheet.dart';
+import 'package:meetmaap/app/view/locationdetails_bottomsheet_mobile.dart';
 import 'package:meetmaap/common/utils/debouncer.dart';
 import 'package:meetmaap/config/api_config.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
@@ -542,6 +542,6 @@ class MapPageState extends State<MapPage> {
   }
 
   void _openLocationDetails(int locationId) {
-    LocationDetailsSheet.show(context, locationId: locationId);
+    LocationDetailsBottomSheet.show(context, locationId: locationId);
   }
 }

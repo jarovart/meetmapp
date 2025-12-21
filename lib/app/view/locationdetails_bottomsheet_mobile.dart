@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
 import 'package:meetmaap/features/locations/logic/location_service.dart';
 
-class LocationDetailsSheet extends StatelessWidget {
+class LocationDetailsBottomSheet extends StatelessWidget {
   final int locationId;
 
-  const LocationDetailsSheet({super.key, required this.locationId});
+  const LocationDetailsBottomSheet({super.key, required this.locationId});
 
   // 🔹 Imperativ: öffnet das Sheet
   static Future<void> show(BuildContext context, {required int locationId}) {
@@ -14,12 +14,12 @@ class LocationDetailsSheet extends StatelessWidget {
       isScrollControlled: true,
       useSafeArea: true,
       enableDrag: true,
-      showDragHandle: true,
+      //showDragHandle: true,
       constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width / 2,
-        maxHeight: MediaQuery.of(context).size.height,
+        maxWidth: double.infinity,
+        maxHeight: MediaQuery.of(context).size.height - 110,
       ),
-      builder: (_) => LocationDetailsSheet(locationId: locationId),
+      builder: (_) => LocationDetailsBottomSheet(locationId: locationId),
     );
   }
 
@@ -46,9 +46,9 @@ class LocationDetailsSheet extends StatelessWidget {
 
         return DraggableScrollableSheet(
           snap: true,
-          snapSizes: const [0.5, 1.0],
+          snapSizes: const [0.55, 1.0],
           expand: false,
-          initialChildSize: 0.5, // 40% Höhe beim Öffnen
+          initialChildSize: 0.55, // 40% Höhe beim Öffnen
           minChildSize: 0.25, // minimal (nach unten ziehen)
           maxChildSize: 1.0, // 🔥 volle Höhe beim Hochziehen
           builder: (_, scrollController) {
@@ -66,7 +66,9 @@ class LocationDetailsSheet extends StatelessWidget {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 12),
-                Row(
+                Wrap(
+                  spacing: 22, // horizontaler Abstand
+                  runSpacing: 8,
                   children: [
                     Text(
                       location.startDateTime.toString(),
@@ -81,7 +83,9 @@ class LocationDetailsSheet extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
+                Wrap(
+                  spacing: 22, // horizontaler Abstand
+                  runSpacing: 8,
                   children: [
                     Text(
                       location.position.latitude.toString(),
@@ -96,7 +100,9 @@ class LocationDetailsSheet extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
+                Wrap(
+                  spacing: 22, // horizontaler Abstand
+                  runSpacing: 8,
                   children: [
                     Text("Erstellt von ", style: const TextStyle(fontSize: 16)),
                     Text(
@@ -106,7 +112,9 @@ class LocationDetailsSheet extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
+                Wrap(
+                  spacing: 22, // horizontaler Abstand
+                  runSpacing: 8,
                   children: [
                     Text("Likes: ", style: const TextStyle(fontSize: 16)),
                     Text(
@@ -116,7 +124,9 @@ class LocationDetailsSheet extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
+                Wrap(
+                  spacing: 22, // horizontaler Abstand
+                  runSpacing: 8,
                   children: [
                     Text("Joined by ", style: const TextStyle(fontSize: 16)),
                     Text(
