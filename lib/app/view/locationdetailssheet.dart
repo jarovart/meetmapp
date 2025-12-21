@@ -7,6 +7,22 @@ class LocationDetailsSheet extends StatelessWidget {
 
   const LocationDetailsSheet({super.key, required this.locationId});
 
+  // 🔹 Imperativ: öffnet das Sheet
+  static Future<void> show(BuildContext context, {required int locationId}) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      enableDrag: true,
+      showDragHandle: true,
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width / 2,
+        maxHeight: MediaQuery.of(context).size.height,
+      ),
+      builder: (_) => LocationDetailsSheet(locationId: locationId),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<LocationFull>(
@@ -40,18 +56,6 @@ class LocationDetailsSheet extends StatelessWidget {
               controller: scrollController,
               padding: const EdgeInsets.all(16),
               children: [
-                // optionaler Drag-Handle
-                const SizedBox(height: 8),
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
                 Text(
                   location.title,
                   style: Theme.of(context).textTheme.headlineMedium,

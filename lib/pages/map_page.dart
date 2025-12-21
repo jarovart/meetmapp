@@ -542,15 +542,6 @@ class MapPageState extends State<MapPage> {
   }
 
   void _openLocationDetails(int locationId) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      constraints: BoxConstraints(
-        maxWidth: double.infinity,
-        maxHeight: MediaQuery.of(context).size.height,
-      ),
-      builder: (_) => LocationDetailsSheet(locationId: locationId),
-    );
+    LocationDetailsSheet.show(context, locationId: locationId);
   }
 }
