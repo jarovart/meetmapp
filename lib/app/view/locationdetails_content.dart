@@ -6,8 +6,14 @@ import 'package:meetmaap/features/locations/logic/location_service.dart';
 
 class LocationDetailsContent extends StatelessWidget {
   final LocationFull location;
+  final ScrollController? scrollController;
+  final bool dragHandle;
 
-  const LocationDetailsContent({required this.location});
+  const LocationDetailsContent({
+    required this.location,
+    this.scrollController,
+    this.dragHandle = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,19 +26,21 @@ class LocationDetailsContent extends StatelessWidget {
 
     return ListView(
       padding: const EdgeInsets.all(16),
+      controller: scrollController,
       children: [
-        // Drag-Handle
-        const SizedBox(height: 8),
-        Center(
-          child: Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey,
-              borderRadius: BorderRadius.circular(2),
+        if (dragHandle) const SizedBox(height: 8),
+        if (dragHandle)
+          // Drag-Handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
-        ),
 
         const SizedBox(height: 12),
         Text(location.title, style: Theme.of(context).textTheme.headlineMedium),
