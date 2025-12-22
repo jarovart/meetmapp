@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -9,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/view/locationdetails_bottomsheet_mobile.dart';
+import 'package:meetmaap/app/view/locationdetails_leftsheet_web.dart';
 import 'package:meetmaap/common/utils/debouncer.dart';
 import 'package:meetmaap/config/api_config.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
@@ -538,10 +541,78 @@ class MapPageState extends State<MapPage> {
 
     _mapController.move(location.position, _mapController.camera.zoom);
 
-    _openLocationDetails(location.id);
+    _openLocationDetails(location);
   }
 
-  void _openLocationDetails(int locationId) {
-    LocationDetailsBottomSheet.show(context, locationId: locationId);
+  bool _useBottomSheetForMobile(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    // Web → niemals BottomSheet
+    if (kIsWeb) return false;
+
+    // Mobile Portrait → BottomSheet
+    return (Platform.isAndroid || Platform.isIOS) && size.width < size.height;
+  }
+
+  void _openLocationDetails(LocationBase location) {
+    if (_useBottomSheetForMobile(context)) {
+      LocationDetailsBottomSheet.show(context, locationBase: location);
+    } else {
+      _openLeftSheet(location); // ✅ NEU
+    }
+  }
+
+  void _openLeftSheet(LocationBase location) {
+    // Marker etwas aus dem Weg schieben
+    _shiftTargetUp(location.position, 120);
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Location details',
+      barrierColor: Colors.black.withValues(alpha: 0.25),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (_, __, ___) {
+        return SafeArea(
+          left: false,
+          right: true,
+          bottom: false,
+          top: true,
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: Material(
+              elevation: 16,
+              borderRadius: const BorderRadius.horizontal(
+                right: Radius.circular(16),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: SizedBox(
+                width: 420,
+                height: MediaQuery.of(context).size.height,
+                child: SafeArea(
+                  left: true,
+                  child: LocationDetailsView(locationBase: location),
+                ), //LocationDetailsBottomSheet(locationBase: location),
+              ),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (_, animation, __, child) {
+        final slideAnimation =
+            Tween<Offset>(
+              begin: const Offset(-1, 0), // 👈 von links
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+            );
+
+        return SlideTransition(position: slideAnimation, child: child);
+      },
+    ).then((_) {
+      // Beim Schließen: Map & State zurücksetzen
+      _restoreCenterAfterSheet();
+      setState(() => _selectedLocation = null);
+    });
   }
 }

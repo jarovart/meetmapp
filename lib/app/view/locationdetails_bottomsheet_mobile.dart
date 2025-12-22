@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:meetmaap/features/locations/data/location_base.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
 import 'package:meetmaap/features/locations/logic/location_service.dart';
 
 class LocationDetailsBottomSheet extends StatelessWidget {
-  final int locationId;
+  final LocationBase locationBase;
 
-  const LocationDetailsBottomSheet({super.key, required this.locationId});
+  const LocationDetailsBottomSheet({super.key, required this.locationBase});
 
   // 🔹 Imperativ: öffnet das Sheet
-  static Future<void> show(BuildContext context, {required int locationId}) {
+  static Future<void> show(
+    BuildContext context, {
+    required LocationBase locationBase,
+  }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -19,14 +23,14 @@ class LocationDetailsBottomSheet extends StatelessWidget {
         maxWidth: double.infinity,
         maxHeight: MediaQuery.of(context).size.height - 110,
       ),
-      builder: (_) => LocationDetailsBottomSheet(locationId: locationId),
+      builder: (_) => LocationDetailsBottomSheet(locationBase: locationBase),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<LocationFull>(
-      future: LocationService.fetchFullLocation(locationId),
+      future: LocationService.fetchFullLocation(locationBase.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
@@ -56,6 +60,18 @@ class LocationDetailsBottomSheet extends StatelessWidget {
               controller: scrollController,
               padding: const EdgeInsets.all(16),
               children: [
+                // optionaler Drag-Handle
+                const SizedBox(height: 8),
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
                 Text(
                   location.title,
                   style: Theme.of(context).textTheme.headlineMedium,
