@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/view/imageviewer.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
 import 'package:meetmaap/features/locations/logic/location_service.dart';
@@ -10,6 +11,13 @@ class LocationDetailsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<String> imageUrls = [
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+    ];
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -84,19 +92,41 @@ class LocationDetailsContent extends StatelessWidget {
 
         // Bilder
         const SizedBox(height: 24),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _imageCard(),
-              _imageCard(),
-              _imageCard(),
-              _imageCard(),
-              /*
-              ...location.imageUrls
-                  .map((url) => _imageCard(url))
-              */
-            ],
+        SizedBox(
+          height: 160,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: imageUrls.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final url = imageUrls[index];
+
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      opaque: false,
+                      pageBuilder: (_, __, ___) => ImageGalleryViewer(
+                        imageUrls: imageUrls,
+                        initialIndex: index,
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: url,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      url,
+                      width: 160,
+                      height: 160,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ],
