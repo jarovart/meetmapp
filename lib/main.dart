@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/home_page.dart';
+import 'package:meetmaap/app/repositories/AuthRepository.dart';
+import 'package:meetmaap/app/view/loginpage.dart';
 import 'package:meetmaap/common/constants/testshowmodal.dart';
 import 'package:meetmaap/common/constants/testslidergps.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
 import 'package:meetmaap/features/locations/presentation/location_page.dart';
 import 'package:meetmaap/features/locations/presentation/locationlist_page.dart';
 import 'package:meetmaap/features/locations/presentation/locationcreate_page.dart';
+import 'package:meetmaap/features/profile/profile_page.dart';
 
 void main() {
   runApp(const MainApplication());
@@ -66,6 +69,17 @@ class MainApplication extends StatelessWidget {
         /// Location-Seite mit Parameter
         GoRoute(
           path: '/locationcreate/:lat/:lng',
+          /*redirect: (context, state) async {
+            final loggedIn = await AuthRepository.isLoggedIn();
+
+            if (!loggedIn) {
+              // 👇 Ziel merken
+              final from = state.uri.toString();
+              return '/loginpage?from=$from';
+            }
+
+            return null; // ✅ Zugriff erlaubt
+          },*/
           builder: (context, state) {
             final lat = double.parse(state.pathParameters['lat']!);
             final lng = double.parse(state.pathParameters['lng']!);
@@ -86,6 +100,18 @@ class MainApplication extends StatelessWidget {
           path: '/test-slidergps',
           builder: (context, state) {
             return TestSliderGps();
+          },
+        ),
+        GoRoute(
+          path: '/profilepage',
+          builder: (context, state) {
+            return ProfilePage();
+          },
+        ),
+        GoRoute(
+          path: '/loginpage',
+          builder: (context, state) {
+            return LoginPage();
           },
         ),
       ],

@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart' show LatLngBounds;
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
+import 'package:meetmaap/app/repositories/authrepository.dart';
 import 'package:meetmaap/config/api_config.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
@@ -63,16 +64,25 @@ class LocationService {
   }
 
   static Future<LocationBase> uploadLocation(LocationFull location) async {
+    final token = await AuthRepository.getToken();
+
+    if (token == null) {
+      throw Exception('Not authenticated');
+    }
     final uploadLocationUrl = Uri.parse(
       '${ApiConfig.baseUrl}/api/locations/createLocation',
     );
     debugPrint("Uploading location to ${jsonEncode(location.toMap())}");
     final response = await http.post(
       uploadLocationUrl,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+
+        'Authorization': 'Bearer $token', // 🔥 DAS FEHLT
+      },
       body: jsonEncode(location.toMap()), // <-- Location als JSON senden
     );
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201) {
       throw Exception("Server error: ${response.statusCode}");
     }
 

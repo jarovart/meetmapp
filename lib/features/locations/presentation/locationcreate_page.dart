@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/repositories/AuthRepository.dart';
 import 'package:meetmaap/common/utils/exception_message.dart';
 import 'package:meetmaap/features/locations/data/location_base.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
@@ -17,6 +19,7 @@ class LocationCreatePage extends StatefulWidget {
 
 class _LocationCreatePageState extends State<LocationCreatePage> {
   final _formKey = GlobalKey<FormState>();
+  bool _checkingAuth = true;
 
   // Controllers
   final TextEditingController titleController = TextEditingController();
@@ -25,28 +28,70 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
   final TextEditingController imageController = TextEditingController();
   final TextEditingController userController = TextEditingController();
 
-  DateTime? selectedDate;
+  DateTime? selectedDateTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    final loggedIn = await AuthRepository.isLoggedIn();
+
+    if (!mounted) return;
+
+    if (!loggedIn) {
+      final ok = await context.push<bool>('/loginpage');
+
+      if (ok != true) {
+        // User hat Login abgebrochen → Seite schließen
+        if (mounted) context.pop();
+        return;
+      }
+    }
+
+    // User ist jetzt sicher eingeloggt
+    setState(() => _checkingAuth = false);
+  }
 
   // DATE PICKER
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final picked = await showDatePicker(
+    final date = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? now,
+      initialDate: selectedDateTime ?? now,
       firstDate: DateTime(now.year - 2),
       lastDate: DateTime(now.year + 5),
     );
 
-    if (picked != null) {
-      setState(() => selectedDate = picked);
-    }
+    if (date == null || !mounted) return;
+
+    // 2️⃣ Uhrzeit wählen
+    final time = await showTimePicker(
+      context: context,
+      initialTime: selectedDateTime != null
+          ? TimeOfDay.fromDateTime(selectedDateTime!)
+          : TimeOfDay.fromDateTime(now),
+    );
+
+    if (time == null) return;
+    setState(
+      () => selectedDateTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      ),
+    );
   }
 
   // SAVE LOCATION
   void _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (selectedDate == null) {
+    if (selectedDateTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Bitte ein Datum auswählen")),
       );
@@ -58,16 +103,16 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
       id: 0, // ID wird vom Server vergeben
       title: titleController.text.trim(),
       description: descriptionController.text.trim(),
-      creationDateTime: selectedDate!,
-      startDateTime: selectedDate!,
-      endDateTime: selectedDate!,
+      creationDateTime: selectedDateTime!,
+      startDateTime: selectedDateTime!,
+      endDateTime: selectedDateTime!,
       position: LatLng(widget.point.latitude, widget.point.longitude),
       thumbnailUrl: [imageController.text.trim()].single,
       imageUrl: [imageController.text.trim()].single,
-      createdUserId: userController.text.trim() as int,
-      createdUsername: userController.text.trim(),
-      joinedUserCount: userController.text.trim() as int,
-      likedUserCount: userController.text.trim() as int,
+      createdUserId: 0,
+      createdUsername: '',
+      joinedUserCount: 0,
+      likedUserCount: 0,
     );
 
     // Rückgabe an vorherige Seite
@@ -88,6 +133,13 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_checkingAuth) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("Location erstellen")),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text("Location erstellen")),
 
@@ -130,9 +182,9 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                 children: [
                   Expanded(
                     child: Text(
-                      selectedDate == null
+                      selectedDateTime == null
                           ? "Kein Datum gewählt"
-                          : "Datum: ${selectedDate!.day}.${selectedDate!.month}.${selectedDate!.year}",
+                          : "Datum: ${selectedDateTime!.day}.${selectedDateTime!.month}.${selectedDateTime!.year} ${selectedDateTime!.hour}:${selectedDateTime!.minute}",
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),

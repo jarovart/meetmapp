@@ -131,10 +131,10 @@ class HomePageState extends State<HomePage> {
   Widget _buildProfileAvatar() {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
+        /*Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProfilePage()),
-        );
+          MaterialPageRoute(builder: (context) => const ProfilePage()),*/
+        context.push('/profilepage');
       },
       child: const Padding(
         padding: EdgeInsets.only(right: 12.0),
