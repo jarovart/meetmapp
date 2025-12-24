@@ -48,7 +48,7 @@ class HomePageState extends State<HomePage> {
 
   Widget _buildSlidingMenu() {
     final items = [
-      "Karte",
+      "Login",
       "Locations",
       "Freunde",
       "Favoriten",
@@ -89,7 +89,11 @@ class HomePageState extends State<HomePage> {
                       leading: const Icon(Icons.arrow_right),
                       onTap: () {
                         // handle navigation for special entries
-                        if (label == 'Locations') {
+                        if (label == 'Login') {
+                          _toggleMenu();
+                          context.push('/authoverviewpage', extra: false);
+                          return;
+                        } else if (label == 'Locations') {
                           _toggleMenu();
                           context.push('/locationlist/124');
                           return;

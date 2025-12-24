@@ -3,7 +3,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/home_page.dart';
 import 'package:meetmaap/app/repositories/AuthRepository.dart';
-import 'package:meetmaap/app/view/loginpage.dart';
+import 'package:meetmaap/app/view/authentication/authoverviewpage.dart';
+import 'package:meetmaap/app/view/authentication/loginpage.dart';
 import 'package:meetmaap/common/constants/testshowmodal.dart';
 import 'package:meetmaap/common/constants/testslidergps.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
@@ -109,9 +110,10 @@ class MainApplication extends StatelessWidget {
           },
         ),
         GoRoute(
-          path: '/loginpage',
+          path: '/authoverviewpage',
           builder: (context, state) {
-            return LoginPage();
+            final returnOnSuccess = state.extra as bool? ?? true;
+            return AuthPage(returnOnSuccess: returnOnSuccess);
           },
         ),
       ],

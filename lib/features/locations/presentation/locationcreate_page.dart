@@ -42,7 +42,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
     if (!mounted) return;
 
     if (!loggedIn) {
-      final ok = await context.push<bool>('/loginpage');
+      final ok = await context.push<bool>('/authoverviewpage');
 
       if (ok != true) {
         // User hat Login abgebrochen → Seite schließen
@@ -121,7 +121,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
         createdLocation,
       );
       if (!mounted) return;
-      Navigator.pop(context, locationBase);
+      context.pop(locationBase);
     } catch (e) {
       debugPrint("Fehler beim Hochladen der Location: $e");
       if (!mounted) return;
