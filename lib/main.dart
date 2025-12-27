@@ -3,8 +3,12 @@ import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/home_page.dart';
 import 'package:meetmaap/app/repositories/AuthRepository.dart';
-import 'package:meetmaap/app/view/authentication/authoverviewpage.dart';
+import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';
+import 'package:meetmaap/app/view/authentication/registercheckemailpage.dart';
+import 'package:meetmaap/app/view/authentication/registerpage.dart';
+import 'package:meetmaap/app/view/authentication/resetpasswordpage.dart';
+import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
 import 'package:meetmaap/common/constants/testshowmodal.dart';
 import 'package:meetmaap/common/constants/testslidergps.dart';
 import 'package:meetmaap/features/locations/data/location_full.dart';
@@ -23,6 +27,8 @@ class MainApplication extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GoRouter router = GoRouter(
+      initialLocation:
+          Uri.base.path + (Uri.base.hasQuery ? '?${Uri.base.query}' : ''),
       routes: [
         /// Home (Startseite)
         GoRoute(path: '/', builder: (context, state) => const HomePage()),
@@ -70,17 +76,6 @@ class MainApplication extends StatelessWidget {
         /// Location-Seite mit Parameter
         GoRoute(
           path: '/locationcreate/:lat/:lng',
-          /*redirect: (context, state) async {
-            final loggedIn = await AuthRepository.isLoggedIn();
-
-            if (!loggedIn) {
-              // 👇 Ziel merken
-              final from = state.uri.toString();
-              return '/loginpage?from=$from';
-            }
-
-            return null; // ✅ Zugriff erlaubt
-          },*/
           builder: (context, state) {
             final lat = double.parse(state.pathParameters['lat']!);
             final lng = double.parse(state.pathParameters['lng']!);
@@ -110,10 +105,53 @@ class MainApplication extends StatelessWidget {
           },
         ),
         GoRoute(
-          path: '/authoverviewpage',
+          path: '/loginpage',
           builder: (context, state) {
             final returnOnSuccess = state.extra as bool? ?? true;
-            return AuthPage(returnOnSuccess: returnOnSuccess);
+            return LoginPage(returnOnSuccess: returnOnSuccess);
+          },
+        ),
+        GoRoute(
+          path: '/registerpage',
+          builder: (context, state) {
+            return RegisterPage();
+          },
+        ),
+        GoRoute(
+          path: '/registercheckemail',
+          builder: (context, state) {
+            final email = state.extra as String;
+            return RegisterCheckEmailPage(email: email);
+          },
+        ),
+        GoRoute(
+          path: '/verify',
+          builder: (context, state) {
+            final token = state.uri.queryParameters['token'];
+
+            if (token == null || token.isEmpty) {
+              return const Scaffold(
+                body: Center(child: Text('Ungültiger Verifizierungslink')),
+              );
+            }
+
+            return VerifyPage(token: token);
+          },
+        ),
+        GoRoute(
+          path: '/forgot-password',
+          builder: (context, state) => const ForgotPasswordPage(),
+        ),
+        GoRoute(
+          path: '/reset-password',
+          builder: (context, state) {
+            final token = state.uri.queryParameters['token'];
+            if (token == null || token.isEmpty) {
+              return const Scaffold(
+                body: Center(child: Text('Ungültiger Link')),
+              );
+            }
+            return ResetPasswordPage(token: token);
           },
         ),
       ],

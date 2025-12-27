@@ -91,7 +91,7 @@ class HomePageState extends State<HomePage> {
                         // handle navigation for special entries
                         if (label == 'Login') {
                           _toggleMenu();
-                          context.push('/authoverviewpage', extra: false);
+                          context.push('/loginpage', extra: false);
                           return;
                         } else if (label == 'Locations') {
                           _toggleMenu();

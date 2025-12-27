@@ -97,14 +97,17 @@ class _LoginPageState extends State<LoginPage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: _loggedIn! ? logoutWidgets() : loginWidgets(),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Login')),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: _loggedIn! ? logoutWidgets() : loginWidgets(),
+            ),
           ),
         ),
       ),
@@ -161,13 +164,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
 
       TextButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => const ForgotPasswordSheet(),
-          );
-        },
+        onPressed: () => context.push('/forgot-password'),
         child: const Text('Passwort vergessen?'),
       ),
 
@@ -190,6 +187,19 @@ class _LoginPageState extends State<LoginPage> {
                 )
               : const Text('Einloggen'),
         ),
+      ),
+      const SizedBox(height: 16),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Noch keinen Account?"),
+          TextButton(
+            onPressed: () {
+              context.push('/registerpage');
+            },
+            child: const Text('Registrieren'),
+          ),
+        ],
       ),
     ];
   }

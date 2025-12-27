@@ -29,7 +29,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (!mounted) return;
 
     if (!loggedIn) {
-      final ok = await context.push<bool>('/authoverviewpage');
+      final ok = await context.push<bool>('/loginpage');
 
       if (ok != true) {
         // User hat Login abgebrochen → Seite schließen
