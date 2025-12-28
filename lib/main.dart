@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/home_page.dart';
-import 'package:meetmaap/app/repositories/AuthRepository.dart';
+import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';
 import 'package:meetmaap/app/view/authentication/registercheckemailpage.dart';
 import 'package:meetmaap/app/view/authentication/registerpage.dart';
 import 'package:meetmaap/app/view/authentication/resetpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
-import 'package:meetmaap/common/constants/testshowmodal.dart';
-import 'package:meetmaap/common/constants/testslidergps.dart';
-import 'package:meetmaap/features/locations/data/location_full.dart';
-import 'package:meetmaap/features/locations/presentation/location_page.dart';
-import 'package:meetmaap/features/locations/presentation/locationlist_page.dart';
-import 'package:meetmaap/features/locations/presentation/locationcreate_page.dart';
-import 'package:meetmaap/features/profile/profile_page.dart';
+import 'package:meetmaap/testexample/testshowmodal.dart';
+import 'package:meetmaap/testexample/testslidergps.dart';
+import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/view/locations/locationdetail_page.dart';
+import 'package:meetmaap/app/view/locations/locationlist_page.dart';
+import 'package:meetmaap/app/view/locations/locationcreate_page.dart';
+import 'package:meetmaap/app/view/users/profile_page.dart';
 
 void main() {
   runApp(const MainApplication());
@@ -42,19 +41,18 @@ class MainApplication extends StatelessWidget {
           },
         ),
 
-        /// Location-Seite mit Parameter
+        /// Location-Seite mit Parameter EXAMPLE
         GoRoute(
           path: '/location/:id',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
 
-            // TODO: echte Daten laden
             final mockLocation = LocationFull(
-              id: id as int,
+              id: int.tryParse(id) ?? 0,
               title: "Chill Spot $id",
               //address: "Adresse $id in Bremen",
               description:
-                  "Eine sehr coole Location zum Chillen, Essen und Treffen.",
+                  "Eine sehr coole Location zum Chillen, Essen und Treffen1.",
               creationDateTime: DateTime.now(),
               startDateTime: DateTime.now(),
               endDateTime: DateTime.now(),
@@ -63,10 +61,10 @@ class MainApplication extends StatelessWidget {
                   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
               imageUrl:
                   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
-              createdUserId: 1,
-              createdUsername: "1",
-              joinedUserCount: 1,
-              likedUserCount: 1,
+              createdUserId: 12,
+              createdUsername: "jarovart",
+              joinedUserCount: 14,
+              likedUserCount: 13,
             );
 
             return LocationDetailPage(location: mockLocation);

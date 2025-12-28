@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:meetmaap/app/view/ArrowButton.dart';
+import 'package:meetmaap/app/view/util/arrowbutton_widget.dart';
 
 class ImageGalleryViewer extends StatefulWidget {
   final List<String> imageUrls;
@@ -112,6 +112,25 @@ class _ImageGalleryViewerState extends State<ImageGalleryViewer> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  // ignore: unused_element
+  static Widget _imageCard({String? url}) {
+    const fallBackUrl =
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee";
+
+    return Container(
+      width: 300,
+      height: 300,
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        image: DecorationImage(
+          image: NetworkImage(url ?? fallBackUrl),
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

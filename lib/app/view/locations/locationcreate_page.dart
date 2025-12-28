@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/repositories/AuthRepository.dart';
-import 'package:meetmaap/common/utils/exception_message.dart';
-import 'package:meetmaap/features/locations/data/location_base.dart';
-import 'package:meetmaap/features/locations/data/location_full.dart';
-import 'package:meetmaap/features/locations/logic/location_service.dart';
+import 'package:meetmaap/app/repositories/authentication_repository.dart';
+import 'package:meetmaap/app/repositories/location_repository.dart';
+import 'package:meetmaap/app/model/exceptions/exception_message.dart';
+import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/model/location_full.dart';
 
 class LocationCreatePage extends StatefulWidget {
   final LatLng point;

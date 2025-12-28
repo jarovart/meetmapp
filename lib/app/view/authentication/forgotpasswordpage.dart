@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:meetmaap/app/model/exceptions/cooldownexception.dart';
-import 'package:meetmaap/app/repositories/authrepository.dart';
+import 'package:meetmaap/app/repositories/authentication_repository.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -17,7 +17,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   String? _error;
   bool _sent = false;
   int _cooldown = 0;
-  Timer? _timer;
 
   @override
   void dispose() {
@@ -127,7 +126,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   void startCooldown(int seconds) {
     setState(() => _cooldown = seconds);
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+    Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
         return;

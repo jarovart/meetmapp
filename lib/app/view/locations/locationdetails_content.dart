@@ -2,10 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/view/imageviewer.dart';
-import 'package:meetmaap/features/locations/data/location_base.dart';
-import 'package:meetmaap/features/locations/data/location_full.dart';
-import 'package:meetmaap/features/locations/logic/location_service.dart';
+import 'package:meetmaap/app/view/util/imageviewer_widget.dart';
+import 'package:meetmaap/app/model/location_full.dart';
 
 class LocationDetailsContent extends StatelessWidget {
   final LocationFull location;
@@ -124,7 +122,7 @@ class LocationDetailsContent extends StatelessWidget {
                   Navigator.of(context).push(
                     PageRouteBuilder(
                       opaque: false,
-                      pageBuilder: (_, __, ___) => ImageGalleryViewer(
+                      pageBuilder: (_, _, _) => ImageGalleryViewer(
                         imageUrls: imageUrls,
                         initialIndex: index,
                       ),
@@ -148,7 +146,7 @@ class LocationDetailsContent extends StatelessWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: imageUrls.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final url = imageUrls[index];
 
@@ -157,7 +155,7 @@ class LocationDetailsContent extends StatelessWidget {
                     Navigator.of(context).push(
                       PageRouteBuilder(
                         opaque: false,
-                        pageBuilder: (_, __, ___) => ImageGalleryViewer(
+                        pageBuilder: (_, _, _) => ImageGalleryViewer(
                           imageUrls: imageUrls,
                           initialIndex: index,
                         ),
@@ -181,24 +179,6 @@ class LocationDetailsContent extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _imageCard({String? url}) {
-    const fallBackUrl =
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee";
-
-    return Container(
-      width: 300,
-      height: 300,
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        image: DecorationImage(
-          image: NetworkImage(url ?? fallBackUrl),
-          fit: BoxFit.cover,
-        ),
-      ),
     );
   }
 

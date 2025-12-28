@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/model/exceptions/cooldownexception.dart';
-import 'package:meetmaap/app/repositories/AuthRepository.dart';
+import 'package:meetmaap/app/repositories/authentication_repository.dart';
 
 class RegisterCheckEmailPage extends StatefulWidget {
   final String email;
@@ -17,7 +16,6 @@ class _RegisterCheckEmailPageState extends State<RegisterCheckEmailPage> {
   bool _loading = false;
   String? _error;
   int _cooldown = 0;
-  Timer? _timer;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +80,7 @@ class _RegisterCheckEmailPageState extends State<RegisterCheckEmailPage> {
   void startCooldown(int seconds) {
     setState(() => _cooldown = seconds);
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+    Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
         return;

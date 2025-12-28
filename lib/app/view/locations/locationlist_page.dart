@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/features/locations/data/location_base.dart';
+import 'package:meetmaap/app/model/location_base.dart';
 
 class LocationsPage extends StatefulWidget {
   final String locationId; // falls du sie brauchst – sonst entfernen
@@ -117,12 +117,12 @@ class _LocationsPageState extends State<LocationsPage> {
                   final loc = locations[index];
 
                   return _LocationCard(
-                    id: loc.id.toString(),
+                    id: loc.id,
                     title: loc.title,
                     // Passe diese Felder an dein LocationBase an:
-                    subtitle: loc.description ?? '',
-                    imageUrl: loc.thumbnailUrl ?? '',
-                    date: loc.creationDateTime.toIso8601String() ?? '',
+                    subtitle: loc.description,
+                    imageUrl: loc.thumbnailUrl,
+                    date: loc.creationDateTime.toIso8601String(),
                   );
                 },
               );
@@ -145,7 +145,7 @@ class _LocationsPageState extends State<LocationsPage> {
 }
 
 class _LocationCard extends StatelessWidget {
-  final String id;
+  final int id;
   final String title;
   final String subtitle;
   final String imageUrl;
@@ -173,7 +173,7 @@ class _LocationCard extends StatelessWidget {
               blurRadius: 10,
               spreadRadius: 2,
               offset: const Offset(2, 3),
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
             ),
           ],
         ),
@@ -188,7 +188,7 @@ class _LocationCard extends StatelessWidget {
                 height: 130,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   height: 130,
                   color: Colors.grey[300],
                   alignment: Alignment.center,

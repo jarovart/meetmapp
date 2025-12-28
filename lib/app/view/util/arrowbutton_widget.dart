@@ -19,7 +19,7 @@ class ArrowButton extends StatelessWidget {
           icon,
           color: onPressed != null
               ? Colors.white
-              : Colors.white.withOpacity(0.3),
+              : Colors.white.withValues(alpha: 0.3),
         ),
         onPressed: onPressed,
       ),

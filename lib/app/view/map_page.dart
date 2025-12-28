@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
@@ -10,15 +10,15 @@ import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_ti
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/view/locationdetails_bottomsheet_mobile.dart';
-import 'package:meetmaap/app/view/locationdetails_leftsheet_web.dart';
-import 'package:meetmaap/common/utils/debouncer.dart';
-import 'package:meetmaap/config/api_config.dart';
-import 'package:meetmaap/features/locations/data/location_base.dart';
-import 'package:meetmaap/features/locations/logic/location_service.dart';
-import 'package:meetmaap/common/widgets/location_marker.dart';
-import 'package:meetmaap/common/widgets/center_on_user_button.dart';
-import 'package:meetmaap/common/utils/exception_message.dart';
+import 'package:meetmaap/app/repositories/location_repository.dart';
+import 'package:meetmaap/app/view/locations/locationdetails_bottomsheet_mobile.dart';
+import 'package:meetmaap/app/view/locations/locationdetails_leftsheet_web.dart';
+import 'package:meetmaap/app/controller/debouncer.dart';
+import 'package:meetmaap/app/config/api_config.dart';
+import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
+import 'package:meetmaap/app/view/util/geolocationbutton_widget.dart';
+import 'package:meetmaap/app/model/exceptions/exception_message.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -147,37 +147,36 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  void _moveLocationUp(LatLng target, double offsetPx) {
+  void _shiftTargetForView(
+    MapController? controller,
+    LatLng target, {
+    bool isMobileSheetOpen = true,
+  }) {
     final camera = _mapController.camera;
-
-    // aktuelle Center-Position merken
     _mapCenterBeforeSheet ??= camera.center;
+    final LatLng newCenter;
+    if (isMobileSheetOpen) {
+      final up = camera.project(camera.visibleBounds.northEast);
+      final bottom = camera.project(camera.visibleBounds.southWest);
+      final mapWidthPx = up.y - bottom.y;
 
-    // Geo → Screen
-    final projected = camera.project(target);
+      final projected = camera.project(target);
+      final shifted = Point<double>(projected.x, projected.y - mapWidthPx / 4);
+      newCenter = camera.unproject(shifted);
+    } else {
+      final left = camera.project(camera.visibleBounds.southWest);
+      final right = camera.project(camera.visibleBounds.northEast);
+      final mapWidthPx = right.x - left.x;
 
-    // nach oben verschieben (y wird kleiner)
-    final shiftedPoint = projected - Point(0, offsetPx);
-
-    // Screen → Geo
-    final shiftedLatLng = camera.unproject(shiftedPoint);
-
-    _mapController.move(shiftedLatLng, camera.zoom);
-  }
-
-  void _shiftTargetUp(LatLng target, double offsetPx) {
-    final camera = _mapController.camera;
-
-    _mapCenterBeforeSheet ??= camera.center;
-
-    final projected = camera.project(target);
-    final shifted = projected - Point(0, offsetPx); // y kleiner => nach oben
-    final newCenter = camera.unproject(shifted);
+      final projected = camera.project(target);
+      final shifted = Point<double>(projected.x - mapWidthPx / 4, projected.y);
+      newCenter = camera.unproject(shifted);
+    }
 
     _mapController.move(newCenter, camera.zoom);
   }
 
-  void _restoreCenterAfterSheet() {
+  void _restoreCenterAfterSheet(MapController? controller) {
     if (_mapCenterBeforeSheet == null) return;
     _mapController.move(_mapCenterBeforeSheet!, _mapController.camera.zoom);
     _mapCenterBeforeSheet = null;
@@ -445,22 +444,6 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  Future<void> _fetchLocationsByCurrentPosition() async {
-    try {
-      debugPrint("Start: _fetchLocationsByCurrentPosition");
-      final locations = await LocationService.fetchAllLocationsInView(
-        _mapController.camera.visibleBounds,
-      );
-      if (!mounted) return;
-      setState(() => _locations = locations);
-      debugPrint("Execute: _fetchLocationsByCurrentPosition");
-    } catch (e) {
-      if (!mounted) return;
-      debugPrint("Exception: _fetchLocationsByCurrentPosition");
-      //ExceptionMessage.showError(context, "Fehler beim Laden der Locations");
-    }
-  }
-
   Future<void> _fetchLocationsWithinWithTime() async {
     try {
       debugPrint("Start: _fetchLocationsWithinWithTime");
@@ -556,7 +539,17 @@ class MapPageState extends State<MapPage> {
 
   void _openLocationDetails(LocationBase location) {
     if (_useBottomSheetForMobile(context)) {
-      LocationDetailsBottomSheet.show(context, locationBase: location);
+      _shiftTargetForView(
+        _mapController,
+        location.position,
+        isMobileSheetOpen: true,
+      );
+      LocationDetailsBottomSheet.show(context, locationBase: location).then((
+        _,
+      ) {
+        _restoreCenterAfterSheet(_mapController);
+        setState(() => _selectedLocation = null);
+      });
     } else {
       _openLeftSheet(location); // ✅ NEU
     }
@@ -564,7 +557,7 @@ class MapPageState extends State<MapPage> {
 
   void _openLeftSheet(LocationBase location) {
     // Marker etwas aus dem Weg schieben
-    _shiftTargetUp(location.position, 120);
+    _shiftTargetForView(_mapController, location.position);
 
     showGeneralDialog(
       context: context,
@@ -572,7 +565,7 @@ class MapPageState extends State<MapPage> {
       barrierLabel: 'Location details',
       barrierColor: Colors.black.withValues(alpha: 0.25),
       transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (_, __, ___) {
+      pageBuilder: (_, _, _) {
         return SafeArea(
           left: false,
           right: true,
@@ -598,7 +591,7 @@ class MapPageState extends State<MapPage> {
           ),
         );
       },
-      transitionBuilder: (_, animation, __, child) {
+      transitionBuilder: (_, animation, _, child) {
         final slideAnimation =
             Tween<Offset>(
               begin: const Offset(-1, 0), // 👈 von links
@@ -611,7 +604,7 @@ class MapPageState extends State<MapPage> {
       },
     ).then((_) {
       // Beim Schließen: Map & State zurücksetzen
-      _restoreCenterAfterSheet();
+      _restoreCenterAfterSheet(_mapController);
       setState(() => _selectedLocation = null);
     });
   }

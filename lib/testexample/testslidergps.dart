@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/common/utils/exception_message.dart';
-import 'package:meetmaap/common/widgets/center_on_user_button.dart';
+import 'package:meetmaap/app/model/exceptions/exception_message.dart';
+import 'package:meetmaap/app/view/util/geolocationbutton_widget.dart';
 
 class TestSliderGps extends StatefulWidget {
   const TestSliderGps({super.key});

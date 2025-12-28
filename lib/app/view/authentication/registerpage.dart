@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/model/exceptions/cooldownexception.dart';
-import 'package:meetmaap/app/repositories/authrepository.dart';
+import 'package:meetmaap/app/repositories/authentication_repository.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -23,7 +23,6 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _error;
   String? registeredUsername;
   int _cooldown = 0;
-  Timer? _timer;
 
   Future<void> _submit() async {
     setState(() {
@@ -176,7 +175,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void startCooldown(int seconds) {
     setState(() => _cooldown = seconds);
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+    Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
         return;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/features/locations/data/location_base.dart';
-import 'package:meetmaap/features/locations/data/location_full.dart';
-import 'package:meetmaap/features/locations/logic/location_service.dart';
-import 'package:meetmaap/app/view/locationdetails_content.dart';
+import 'package:meetmaap/app/repositories/location_repository.dart';
+import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/view/locations/locationdetails_content.dart';
 
 class LocationDetailsView extends StatefulWidget {
   final LocationBase locationBase;

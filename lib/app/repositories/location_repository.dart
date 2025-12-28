@@ -4,10 +4,10 @@ import 'package:flutter_map/flutter_map.dart' show LatLngBounds;
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
-import 'package:meetmaap/app/repositories/authrepository.dart';
-import 'package:meetmaap/config/api_config.dart';
-import 'package:meetmaap/features/locations/data/location_base.dart';
-import 'package:meetmaap/features/locations/data/location_full.dart';
+import 'package:meetmaap/app/repositories/authentication_repository.dart';
+import 'package:meetmaap/app/config/api_config.dart';
+import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/model/location_full.dart';
 
 /// Ergebnis-Typ für Location-Abfragen
 sealed class LocationResult {

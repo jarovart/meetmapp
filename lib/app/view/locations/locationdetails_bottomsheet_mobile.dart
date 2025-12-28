@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/features/locations/data/location_base.dart';
-import 'package:meetmaap/features/locations/data/location_full.dart';
-import 'package:meetmaap/features/locations/logic/location_service.dart';
-import 'package:meetmaap/app/view/locationdetails_content.dart';
+import 'package:meetmaap/app/repositories/location_repository.dart';
+import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/view/locations/locationdetails_content.dart';
 
 class LocationDetailsBottomSheet extends StatelessWidget {
   final LocationBase locationBase;
@@ -65,24 +65,6 @@ class LocationDetailsBottomSheet extends StatelessWidget {
           },
         );
       },
-    );
-  }
-
-  Widget _imageCard({String? url}) {
-    const fallBackUrl =
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee";
-
-    return Container(
-      width: 300,
-      height: 300,
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        image: DecorationImage(
-          image: NetworkImage(url ?? fallBackUrl),
-          fit: BoxFit.cover,
-        ),
-      ),
     );
   }
 }

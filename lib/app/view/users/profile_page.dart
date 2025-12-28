@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/repositories/AuthRepository.dart';
+import 'package:meetmaap/app/repositories/authentication_repository.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
