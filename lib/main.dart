@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetmaap/app/controller/map_controller.dart';
 import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';
@@ -11,13 +13,23 @@ import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
 import 'package:meetmaap/testexample/testshowmodal.dart';
 import 'package:meetmaap/testexample/testslidergps.dart';
 import 'package:meetmaap/app/model/location_full.dart';
-import 'package:meetmaap/app/view/locations/locationdetail_page.dart';
-import 'package:meetmaap/app/view/locations/locationlist_page.dart';
-import 'package:meetmaap/app/view/locations/locationcreate_page.dart';
-import 'package:meetmaap/app/view/users/profile_page.dart';
+import 'package:meetmaap/app/view/location/locationdetail_page.dart';
+import 'package:meetmaap/app/view/location/locationlist_page.dart';
+import 'package:meetmaap/app/view/location/locationcreate_page.dart';
+import 'package:meetmaap/app/view/user/profile_page.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MainApplication());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => MapViewController(mapController: MapController()),
+        ),
+      ],
+      child: const MainApplication(),
+    ),
+  );
 }
 
 class MainApplication extends StatelessWidget {

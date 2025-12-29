@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/repositories/authentication_repository.dart';
+import 'package:meetmaap/app/repository/authentication_repository.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String token;

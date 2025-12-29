@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/repositories/authentication_repository.dart';
+import 'package:meetmaap/app/repository/authentication_repository.dart';
 
 class LoginPage extends StatefulWidget {
   final bool returnOnSuccess;

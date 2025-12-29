@@ -1,97 +1,60 @@
-import 'dart:convert';
-import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
-import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/repositories/location_repository.dart';
-import 'package:meetmaap/app/view/locations/locationdetails_bottomsheet_mobile.dart';
-import 'package:meetmaap/app/view/locations/locationdetails_leftsheet_web.dart';
-import 'package:meetmaap/app/controller/debouncer.dart';
-import 'package:meetmaap/app/config/api_config.dart';
+import 'package:meetmaap/app/controller/map_controller.dart';
 import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/view/location/locationdetails_bottomsheet_mobile.dart';
+import 'package:meetmaap/app/view/location/locationdetails_generaldialog_nomobile.dart';
 import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
 import 'package:meetmaap/app/view/util/geolocationbutton_widget.dart';
-import 'package:meetmaap/app/model/exceptions/exception_message.dart';
+import 'package:provider/provider.dart';
 
-class MapPage extends StatefulWidget {
-  @override
-  State<MapPage> createState() => MapPageState();
-}
-
-class MapPageState extends State<MapPage> {
-  final MapController _mapController = MapController();
-  final TextEditingController _searchController = TextEditingController();
-
-  LatLng _initialCenter = LatLng(51.1657, 10.4515); // Mitte von Deutschland
-  LatLng? _currentPosition;
-  LatLng? _mapCenterBeforeSheet;
-  LocationBase? _selectedLocation;
-  List<LocationBase> _locations = [];
-  List<LocationBase> _searchResults = [];
-
-  RangeValues _selectedRange = RangeValues(0, 4);
-  final List<String> _dayOptions = [
-    'Heute',
-    'Morgen',
-    'Übermorgen',
-    '1 Woche',
-    '1 Monat',
-  ]; // Beispielwerte
-  late Debouncer _debouncer;
-  Timer? _searchDebounce;
-
-  @override
-  void initState() {
-    super.initState();
-    _determinePosition();
-    debugPrint("Start: InitState MapPage");
-    _debouncer = Debouncer(delay: Duration(milliseconds: 1000));
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchLocationsWithinWithTime();
-    });
-  }
+class MapPage extends StatelessWidget {
+  const MapPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final mapViewController = context.watch<MapViewController>();
+    mapViewController.loadData();
+
     return Stack(
       children: [
         // FlutterMap with only layer children
         FlutterMap(
-          mapController: _mapController,
+          mapController: mapViewController.mapController,
           options: MapOptions(
-            initialCenter: _initialCenter,
+            initialCenter: mapViewController.initialCenter,
             initialZoom: 6.0,
             onMapEvent: (event) {
               if (event is MapEventTap) {
-                setState(() => _selectedLocation = null);
+                mapViewController.selectLocation(null);
               } else if (event is MapEventLongPress) {
-                _createLocation(context, event.tapPosition);
+                mapViewController.createLocation(context, event.tapPosition);
               } else if (event is MapEventMoveEnd ||
                   event is MapEventDoubleTapZoomEnd) {
-                _fetchLocationsWithinWithTime();
+                mapViewController.fetchLocations();
               } else if (event is MapEventScrollWheelZoom) {
-                _debouncer.run(() => _fetchLocationsWithinWithTime());
+                mapViewController.debouncer.run(
+                  () => mapViewController.fetchLocations(),
+                );
               }
             },
           ),
           children: [
             _buildTileLayer(),
-            if (_currentPosition != null) _buildMyLocationMarker(),
-            _buildLocationsLayer(),
+            if (mapViewController.currentPosition != null)
+              _buildMyLocationMarker(mapViewController.currentPosition!),
+            _buildLocationsLayer(context, mapViewController),
           ],
         ),
         // Overlay: Search Bar and Slider/GPS positioned on top
-        _buildDateSliderAndGps(),
-        _buildSearchResults(),
-        _buildSearchBar(),
+        _buildDateSliderAndGps(context, mapViewController),
+        _buildSearchResults(context, mapViewController),
+        _buildSearchBar(context, mapViewController),
       ],
     );
   }
@@ -104,7 +67,10 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  Widget _buildLocationsLayer() {
+  Widget _buildLocationsLayer(
+    BuildContext context,
+    MapViewController mapViewController,
+  ) {
     return MarkerClusterLayerWidget(
       options: MarkerClusterLayerOptions(
         maxClusterRadius: 45,
@@ -112,7 +78,7 @@ class MapPageState extends State<MapPage> {
         zoomToBoundsOnClick: false,
         spiderfyCluster: false,
         markers:
-            _locations
+            mapViewController.locations
                 .map(
                   (loc) => Marker(
                     point: loc.position,
@@ -120,73 +86,46 @@ class MapPageState extends State<MapPage> {
                     height: 80,
                     child: LocationMarker(
                       location: loc,
-                      isSelected: _selectedLocation?.id == loc.id,
-                      onTap: () => _onLocationTapped(loc),
+                      isSelected:
+                          mapViewController.selectedLocation?.id == loc.id,
+                      onTap: () =>
+                          _onLocationTapped(context, mapViewController, loc),
                     ),
                   ),
                 )
                 .toList()
               ..sort((a, b) {
-                if (a.point == _selectedLocation?.position) return 1;
-                if (b.point == _selectedLocation?.position) return -1;
+                if (a.point == mapViewController.selectedLocation?.position)
+                  return 1;
+                if (b.point == mapViewController.selectedLocation?.position)
+                  return -1;
                 return 0;
               }),
         // 🔹 Cluster-Design
         builder: (context, markers) {
           // 🔥 Gewinner ermitteln
-          final winningLocation = pickBestLocationFromCluster(markers);
+          final winningLocation = mapViewController.pickBestLocationFromCluster(
+            markers,
+          );
 
           // 🔥 exakt EIN Marker anzeigen
           return LocationMarker(
             location: winningLocation,
-            isSelected: _selectedLocation?.id == winningLocation.id,
-            onTap: () => _onLocationTapped(winningLocation),
+            isSelected:
+                mapViewController.selectedLocation?.id == winningLocation.id,
+            onTap: () =>
+                _onLocationTapped(context, mapViewController, winningLocation),
           );
         },
       ),
     );
   }
 
-  void _shiftTargetForView(
-    MapController? controller,
-    LatLng target, {
-    bool isMobileSheetOpen = true,
-  }) {
-    final camera = _mapController.camera;
-    _mapCenterBeforeSheet ??= camera.center;
-    final LatLng newCenter;
-    if (isMobileSheetOpen) {
-      final up = camera.project(camera.visibleBounds.northEast);
-      final bottom = camera.project(camera.visibleBounds.southWest);
-      final mapWidthPx = up.y - bottom.y;
-
-      final projected = camera.project(target);
-      final shifted = Point<double>(projected.x, projected.y - mapWidthPx / 4);
-      newCenter = camera.unproject(shifted);
-    } else {
-      final left = camera.project(camera.visibleBounds.southWest);
-      final right = camera.project(camera.visibleBounds.northEast);
-      final mapWidthPx = right.x - left.x;
-
-      final projected = camera.project(target);
-      final shifted = Point<double>(projected.x - mapWidthPx / 4, projected.y);
-      newCenter = camera.unproject(shifted);
-    }
-
-    _mapController.move(newCenter, camera.zoom);
-  }
-
-  void _restoreCenterAfterSheet(MapController? controller) {
-    if (_mapCenterBeforeSheet == null) return;
-    _mapController.move(_mapCenterBeforeSheet!, _mapController.camera.zoom);
-    _mapCenterBeforeSheet = null;
-  }
-
-  Widget _buildMyLocationMarker() {
+  Widget _buildMyLocationMarker(LatLng currentPosition) {
     return MarkerLayer(
       markers: [
         Marker(
-          point: _currentPosition!,
+          point: currentPosition,
           width: 60,
           height: 60,
           child: const Icon(Icons.my_location, color: Colors.blue, size: 40),
@@ -195,13 +134,14 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(
+    BuildContext context,
+    MapViewController mapViewController,
+  ) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final sidePadding = screenWidth * 0.15; // 70% width centered
+    final sidePadding = screenWidth * 0.15;
     final topOffset = 15.0;
-    /*MediaQuery.of(context).padding.top +
-        kToolbarHeight +
-        CenterOnUserButton.padding;*/
+    TextEditingController searchController = mapViewController.searchController;
 
     return Positioned(
       left: sidePadding,
@@ -217,19 +157,19 @@ class MapPageState extends State<MapPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
+              controller: searchController,
+              onChanged: mapViewController.onSearchChanged,
               textInputAction: TextInputAction.search,
               decoration: InputDecoration(
                 hintText: 'Suchen...',
                 border: InputBorder.none,
                 prefixIcon: Icon(Icons.search, color: Colors.grey[700]),
-                suffixIcon: _searchController.text.isNotEmpty
+                suffixIcon: searchController.text.isNotEmpty
                     ? IconButton(
                         icon: Icon(Icons.close, color: Colors.grey[700]),
                         onPressed: () {
-                          _searchController.clear();
-                          setState(() => _searchResults.clear());
+                          searchController.clear();
+                          mapViewController.clearSearchResults();
                         },
                       )
                     : null,
@@ -243,9 +183,12 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  Widget _buildSearchResults() {
-    if (_searchResults.isEmpty) return SizedBox.shrink();
-
+  Widget _buildSearchResults(
+    BuildContext context,
+    MapViewController mapViewController,
+  ) {
+    debugPrint("View searchResults: ${mapViewController.searchResults.length}");
+    if (mapViewController.searchResults.isEmpty) return SizedBox.shrink();
     final sidePadding = MediaQuery.of(context).size.width * 0.15;
 
     return Positioned.fill(
@@ -255,10 +198,8 @@ class MapPageState extends State<MapPage> {
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
-              setState(() {
-                _searchResults.clear();
-              });
-              _searchController.clear();
+              mapViewController.clearSearchResults();
+              mapViewController.searchController.clear();
             },
             child: Container(color: Colors.black.withValues(alpha: 0.25)),
           ),
@@ -271,26 +212,21 @@ class MapPageState extends State<MapPage> {
               borderRadius: BorderRadius.circular(12),
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: _searchResults.length,
+                itemCount: mapViewController.searchResults.length,
                 itemBuilder: (context, index) {
-                  final loc = _searchResults[index];
+                  final loc = mapViewController.searchResults[index];
 
                   return ListTile(
                     leading: Icon(Icons.location_on, color: Colors.green),
                     title: Text(loc.title),
                     subtitle: Text(loc.description),
                     onTap: () {
-                      _mapController.move(
-                        loc.position,
-                        _mapController.camera.zoom,
-                      );
-                      setState(() {
-                        _selectedLocation = loc;
-                        _locations.add(loc);
-                        _searchResults.clear();
-                      });
-                      _searchController.clear();
-                      _fetchLocationsWithinWithTime();
+                      mapViewController.viewMoveTo(loc.position);
+                      mapViewController.selectLocation(loc);
+                      mapViewController.locations.add(loc);
+                      mapViewController.clearSearchResults();
+                      mapViewController.searchController.clear();
+                      mapViewController.fetchLocations();
                     },
                   );
                 },
@@ -302,48 +238,10 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  void _onSearchChanged(String text) {
-    setState(() {}); // ← sorgt dafür, dass das X erscheint/verschwindet
-    if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
-
-    _searchDebounce = Timer(const Duration(milliseconds: 300), () async {
-      if (text.length < 3) {
-        setState(() => _searchResults.clear());
-        return;
-      }
-
-      try {
-        final results = await searchLocations(text);
-
-        // nach Entfernung sortieren (falls _currentPosition != null)
-        if (_currentPosition != null) {
-          results.sort((a, b) {
-            final distA = Distance().as(
-              LengthUnit.Kilometer,
-              _currentPosition!,
-              a.position,
-            );
-            final distB = Distance().as(
-              LengthUnit.Kilometer,
-              _currentPosition!,
-              b.position,
-            );
-            return distA.compareTo(distB);
-          });
-        }
-
-        if (!mounted) return;
-
-        setState(() {
-          _searchResults = results;
-        });
-      } catch (e) {
-        ExceptionMessage.showError(context, "Suche fehlgeschlagen");
-      }
-    });
-  }
-
-  Widget _buildDateSliderAndGps() {
+  Widget _buildDateSliderAndGps(
+    BuildContext context,
+    MapViewController mapViewController,
+  ) {
     final screenWidth = MediaQuery.of(context).size.width;
     final sidePadding = screenWidth * 0.2; // default padding to get ~60% width
     final fabDiameter = 40.0; // mini FAB diameter
@@ -376,23 +274,27 @@ class MapPageState extends State<MapPage> {
                 ),
               ),
               child: RangeSlider(
-                values: _selectedRange,
+                values: mapViewController.selectedRange,
                 min: 0,
-                max: (_dayOptions.length - 1).toDouble(),
-                divisions: _dayOptions.length - 1,
+                max: (mapViewController.dayOptions.length - 1).toDouble(),
+                divisions: mapViewController.dayOptions.length - 1,
                 labels: RangeLabels(
-                  _dayOptions[_selectedRange.start.round()],
-                  _dayOptions[_selectedRange.end.round()],
+                  mapViewController.setDayOptionsText(
+                    mapViewController.selectedRange.start,
+                  ),
+                  mapViewController.setDayOptionsText(
+                    mapViewController.selectedRange.end,
+                  ),
                 ),
                 onChanged: (values) {
-                  setState(() {
-                    // snap to discrete steps
-                    final start = values.start.roundToDouble();
-                    final end = values.end.roundToDouble();
-                    _selectedRange = RangeValues(start, end);
-                  });
+                  // snap to discrete steps
+                  final start = values.start.roundToDouble();
+                  final end = values.end.roundToDouble();
+                  mapViewController.setDateRange(RangeValues(start, end));
 
-                  _debouncer.run(() => _fetchLocationsWithinWithTime());
+                  mapViewController.debouncer.run(
+                    () => mapViewController.fetchLocations(),
+                  );
                 },
               ),
             ),
@@ -407,7 +309,7 @@ class MapPageState extends State<MapPage> {
       bottom: fullWidthMode
           ? bottomPadding + fabDiameter + 28.0
           : CenterOnUserButton.padding,
-      child: CenterOnUserButton(onPressed: _centerOnUser),
+      child: CenterOnUserButton(onPressed: mapViewController.centerOnUser),
     );
 
     final sliderPositioned = Positioned(
@@ -420,111 +322,39 @@ class MapPageState extends State<MapPage> {
     return Stack(children: [sliderPositioned, gpsWidget]);
   }
 
-  /// Zentriert die Karte auf die aktuelle Benutzerposition.
-  void _centerOnUser() async => await _determinePosition();
-
-  /// Bestimmt die aktuelle Position des Benutzers und aktualisiert die Karte.
-  Future<void> _determinePosition() async {
-    final result = await LocationService.getCurrentLocation();
-
-    if (!mounted) return; // Ist das Widget noch im Baum?
-    switch (result) {
-      case LocationSuccess(:final position):
-        setState(() {
-          _initialCenter = position;
-          _currentPosition = position;
-        });
-        _mapController.move(position, 13.00); //todo auf 15 ändern
-      case LocationServiceDisabled():
-        ExceptionMessage.showError(context, "Standortdienste sind deaktiviert");
-      case LocationPermissionDenied():
-        ExceptionMessage.showError(context, "Standort-Berechtigung verweigert");
-      case LocationError(:final message):
-        ExceptionMessage.showError(context, "Fehler: $message");
-    }
-  }
-
-  Future<void> _fetchLocationsWithinWithTime() async {
-    try {
-      debugPrint("Start: _fetchLocationsWithinWithTime");
-      final locations = await LocationService.fetchLocationsWithinWithTime(
-        _mapController.camera.visibleBounds,
-        _startDate,
-        _endDate,
-      );
-      if (!mounted) return;
-      setState(() => _locations = locations);
-      debugPrint("Execute: _fetchLocationsWithinWithTime");
-    } catch (e) {
-      if (!mounted) return;
-      debugPrint("Exception: _fetchLocationsWithinWithTime");
-      //ExceptionMessage.showError(context, "Fehler beim Laden der Locations");
-    }
-  }
-
-  void _createLocation(BuildContext context, LatLng tapPosition) async {
-    final createdLocation = await context.push<LocationBase>(
-      "/locationcreate/${tapPosition.latitude}/${tapPosition.longitude}",
+  void _onLocationTapped(
+    BuildContext context,
+    MapViewController mapViewController,
+    LocationBase location,
+  ) {
+    mapViewController.selectLocation(
+      mapViewController.selectedLocation?.id == location.id ? null : location,
+    );
+    mapViewController.mapController.move(
+      location.position,
+      mapViewController.mapController.camera.zoom,
     );
 
-    if (createdLocation != null) {
-      setState(() {
-        _locations.add(createdLocation);
-        _selectedLocation = createdLocation;
+    if (_useBottomSheetForMobile(context)) {
+      mapViewController.shiftTargetForView(location.position);
+      LocationDetailsBottomSheet.show(context, locationBase: location).then((
+        _,
+      ) {
+        mapViewController.restoreCenterAfterSheet();
+        mapViewController.selectLocation(null);
       });
-      _mapController.move(createdLocation.position, _mapController.camera.zoom);
+    } else {
+      mapViewController.shiftTargetForView(
+        location.position,
+        isMobileSheetOpen: false,
+      );
+      LocationDetailsGeneralDialog.show(context, locationBase: location).then((
+        _,
+      ) {
+        mapViewController.restoreCenterAfterSheet();
+        mapViewController.selectLocation(null);
+      });
     }
-  }
-
-  /// Sucht nach Locations basierend auf der Suchanfrage.
-  static Future<List<LocationBase>> searchLocations(String query) async {
-    final url = Uri.parse(
-      '${ApiConfig.baseUrl}/api/locations/search?query=$query',
-    );
-
-    final response = await http.get(url);
-
-    if (response.statusCode != 200) {
-      throw Exception("Fehler beim Suchen");
-    }
-
-    final body = jsonDecode(response.body) as List;
-    return body.map((e) => LocationBase.fromMap(e)).toList();
-  }
-
-  DateTime _dateFromIndex(int index) {
-    final now = DateTime.now();
-
-    return switch (index) {
-      0 => DateTime(now.year, now.month, now.day), // heute 00:00
-      1 => now.add(const Duration(days: 1)),
-      2 => now.add(const Duration(days: 2)),
-      3 => now.add(const Duration(days: 7)),
-      4 => DateTime(now.year, now.month + 1, now.day),
-      _ => now,
-    };
-  }
-
-  DateTime get _startDate => _dateFromIndex(_selectedRange.start.round());
-
-  DateTime get _endDate => _dateFromIndex(_selectedRange.end.round());
-
-  LocationBase pickBestLocationFromCluster(List<Marker> markers) {
-    return markers
-        .map((m) => (m.child as LocationMarker).location)
-        .reduce((a, b) => a.getLocationScore() >= b.getLocationScore() ? a : b);
-  }
-
-  void _onLocationTapped(LocationBase location) {
-    setState(() {
-      _selectedLocation = _selectedLocation?.id == location.id
-          ? null
-          : location;
-    });
-
-    _mapController.move(location.position, _mapController.camera.zoom);
-
-    _openLocationDetails(location);
   }
 
   bool _useBottomSheetForMobile(BuildContext context) {
@@ -535,77 +365,5 @@ class MapPageState extends State<MapPage> {
 
     // Mobile Portrait → BottomSheet
     return (Platform.isAndroid || Platform.isIOS) && size.width < size.height;
-  }
-
-  void _openLocationDetails(LocationBase location) {
-    if (_useBottomSheetForMobile(context)) {
-      _shiftTargetForView(
-        _mapController,
-        location.position,
-        isMobileSheetOpen: true,
-      );
-      LocationDetailsBottomSheet.show(context, locationBase: location).then((
-        _,
-      ) {
-        _restoreCenterAfterSheet(_mapController);
-        setState(() => _selectedLocation = null);
-      });
-    } else {
-      _openLeftSheet(location); // ✅ NEU
-    }
-  }
-
-  void _openLeftSheet(LocationBase location) {
-    // Marker etwas aus dem Weg schieben
-    _shiftTargetForView(_mapController, location.position);
-
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Location details',
-      barrierColor: Colors.black.withValues(alpha: 0.25),
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (_, _, _) {
-        return SafeArea(
-          left: false,
-          right: true,
-          bottom: false,
-          top: true,
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Material(
-              elevation: 16,
-              borderRadius: const BorderRadius.horizontal(
-                right: Radius.circular(16),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: SizedBox(
-                width: 420,
-                height: MediaQuery.of(context).size.height,
-                child: SafeArea(
-                  left: true,
-                  child: LocationDetailsView(locationBase: location),
-                ), //LocationDetailsBottomSheet(locationBase: location),
-              ),
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (_, animation, _, child) {
-        final slideAnimation =
-            Tween<Offset>(
-              begin: const Offset(-1, 0), // 👈 von links
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-            );
-
-        return SlideTransition(position: slideAnimation, child: child);
-      },
-    ).then((_) {
-      // Beim Schließen: Map & State zurücksetzen
-      _restoreCenterAfterSheet(_mapController);
-      setState(() => _selectedLocation = null);
-    });
   }
 }

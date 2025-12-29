@@ -4,7 +4,7 @@ import 'package:flutter_map/flutter_map.dart' show LatLngBounds;
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
-import 'package:meetmaap/app/repositories/authentication_repository.dart';
+import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/config/api_config.dart';
 import 'package:meetmaap/app/model/location_base.dart';
 import 'package:meetmaap/app/model/location_full.dart';
@@ -171,5 +171,21 @@ class LocationService {
   /// Optional: kompletten Cache leeren (Logout)
   static void clearCache() {
     _fullLocationCache.clear();
+  }
+
+  /// Sucht nach Locations basierend auf der Suchanfrage.
+  static Future<List<LocationBase>> searchLocations(String query) async {
+    final url = Uri.parse(
+      '${ApiConfig.baseUrl}/api/locations/search?query=$query',
+    );
+
+    final response = await http.get(url);
+
+    if (response.statusCode != 200) {
+      throw Exception("Fehler beim Suchen");
+    }
+
+    final body = jsonDecode(response.body) as List;
+    return body.map((e) => LocationBase.fromMap(e)).toList();
   }
 }
