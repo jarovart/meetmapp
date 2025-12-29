@@ -187,7 +187,6 @@ class MapPage extends StatelessWidget {
     BuildContext context,
     MapViewController mapViewController,
   ) {
-    debugPrint("View searchResults: ${mapViewController.searchResults.length}");
     if (mapViewController.searchResults.isEmpty) return SizedBox.shrink();
     final sidePadding = MediaQuery.of(context).size.width * 0.15;
 

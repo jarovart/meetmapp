@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/debouncer.dart';
+import 'package:meetmaap/app/model/exceptions/geolocationpermission_exception.dart';
 import 'package:meetmaap/app/model/location_base.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
@@ -32,7 +33,7 @@ class MapViewController extends ChangeNotifier {
     'Übermorgen',
     '1 Woche',
     '1 Monat',
-  ]; // Beispielwerte
+  ];
 
   final TextEditingController _searchController = TextEditingController();
   List<LocationBase> _searchResults = [];
@@ -97,75 +98,14 @@ class MapViewController extends ChangeNotifier {
     _determinePosition();
     debugPrint("Start: InitState MapPage");
     _debouncer = Debouncer(delay: Duration(milliseconds: 1000));
-    //await Future.delayed(const Duration(seconds: 1));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchLocations();
     });
-    notifyListeners();
-  }
-
-  Future<void> _determinePosition() async {
-    final result = await LocationService.getCurrentLocation();
-
-    //if (!mounted) return; // Ist das Widget noch im Baum?
-    switch (result) {
-      case LocationSuccess(:final position):
-        _initialCenter = position;
-        _currentPosition = position;
-        mapController.move(position, 13.00); //todo auf 15 ändern
-      case LocationServiceDisabled():
-        debugPrint("Standortdienste sind deaktiviert");
-      //ExceptionMessage.showError(context, "Standortdienste sind deaktiviert");
-      case LocationPermissionDenied():
-        debugPrint("Standort-Berechtigung verweigert");
-      //ExceptionMessage.showError(context, "Standort-Berechtigung verweigert");
-      case LocationError(:final message):
-        debugPrint("Fehler: $message");
-      //ExceptionMessage.showError(context, "Fehler: $message");
-    }
-    notifyListeners();
-  }
-
-  Future<void> fetchLocations() async {
-    try {
-      debugPrint("Start: _fetchLocationsWithinWithTime");
-      final bounds = mapController.camera.visibleBounds;
-      _locations = await LocationService.fetchLocationsWithinWithTime(
-        bounds,
-        _startDate,
-        _endDate,
-      );
-      debugPrint("Execute: _fetchLocationsWithinWithTime");
-    } catch (e) {
-      debugPrint("Exception: _fetchLocationsWithinWithTime");
-      //ExceptionMessage.showError(context, "Fehler beim Laden der Locations");
-    } finally {
-      notifyListeners();
-    }
-  }
-
-  DateTime _dateFromIndex(int index) {
-    final now = DateTime.now();
-
-    return switch (index) {
-      0 => DateTime(now.year, now.month, now.day), // heute 00:00
-      1 => now.add(const Duration(days: 1)),
-      2 => now.add(const Duration(days: 2)),
-      3 => now.add(const Duration(days: 7)),
-      4 => DateTime(now.year, now.month + 1, now.day),
-      _ => now,
-    };
   }
 
   // ─────────────────────────────────────────────
   // MAP BEHAVIOR
   // ─────────────────────────────────────────────
-
-  LocationBase pickBestLocationFromCluster(List<Marker> markers) {
-    return markers
-        .map((m) => (m.child as LocationMarker).location)
-        .reduce((a, b) => a.getLocationScore() >= b.getLocationScore() ? a : b);
-  }
 
   void rememberCenter() {
     _mapCenterBeforeSheet ??= mapController.camera.center;
@@ -212,9 +152,27 @@ class MapViewController extends ChangeNotifier {
     _mapCenterBeforeSheet = null;
   }
 
+  LocationBase pickBestLocationFromCluster(List<Marker> markers) {
+    return markers
+        .map((m) => (m.child as LocationMarker).location)
+        .reduce((a, b) => a.getLocationScore() >= b.getLocationScore() ? a : b);
+  }
+
+  DateTime _dateFromIndex(int index) {
+    final now = DateTime.now();
+
+    return switch (index) {
+      0 => DateTime(now.year, now.month, now.day), // heute 00:00
+      1 => now.add(const Duration(days: 1)),
+      2 => now.add(const Duration(days: 2)),
+      3 => now.add(const Duration(days: 7)),
+      4 => DateTime(now.year, now.month + 1, now.day),
+      _ => now,
+    };
+  }
+
   void onSearchChanged(String text) {
     notifyListeners();
-    //setState(() {}); // ← sorgt dafür, dass das X erscheint/verschwindet
     if (_searchDebounce?.isActive ?? false) {
       _searchDebounce!.cancel();
       notifyListeners();
@@ -222,7 +180,7 @@ class MapViewController extends ChangeNotifier {
 
     _searchDebounce = Timer(const Duration(milliseconds: 300), () async {
       if (text.length < 3) {
-        updateSearchResults([]);
+        clearSearchResults();
         return;
       }
 
@@ -245,7 +203,6 @@ class MapViewController extends ChangeNotifier {
             return distA.compareTo(distB);
           });
         }
-        debugPrint("Suche $text und text ${results.length}");
         updateSearchResults(results);
       } catch (e) {
         //ExceptionMessage.showError(context, "Suche fehlgeschlagen");
@@ -253,6 +210,54 @@ class MapViewController extends ChangeNotifier {
       }
     });
   }
+
+  // ─────────────────────────────────────────────
+  // API CALL BEHAVIOR
+  // ─────────────────────────────────────────────
+
+  Future<void> _determinePosition() async {
+    final result = await LocationService.getCurrentLocation();
+
+    //if (!mounted) return; // Ist das Widget noch im Baum?
+    switch (result) {
+      case LocationSuccess(:final position):
+        _initialCenter = position;
+        _currentPosition = position;
+        mapController.move(position, 13.00); //todo auf 15 ändern
+      case LocationServiceDisabled():
+        debugPrint("Standortdienste sind deaktiviert");
+      //ExceptionMessage.showError(context, "Standortdienste sind deaktiviert");
+      case LocationPermissionDenied():
+        debugPrint("Standort-Berechtigung verweigert");
+      //ExceptionMessage.showError(context, "Standort-Berechtigung verweigert");
+      case LocationError(:final message):
+        debugPrint("Fehler: $message");
+      //ExceptionMessage.showError(context, "Fehler: $message");
+    }
+    notifyListeners();
+  }
+
+  Future<void> fetchLocations() async {
+    try {
+      debugPrint("Start: _fetchLocationsWithinWithTime");
+      final bounds = mapController.camera.visibleBounds;
+      _locations = await LocationService.fetchLocationsWithinWithTime(
+        bounds,
+        _startDate,
+        _endDate,
+      );
+      debugPrint("Execute: _fetchLocationsWithinWithTime");
+    } catch (e) {
+      debugPrint("Exception: _fetchLocationsWithinWithTime");
+      //ExceptionMessage.showError(context, "Fehler beim Laden der Locations");
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // REDIRECT CALL BEHAVIOR
+  // ─────────────────────────────────────────────
 
   void createLocation(BuildContext context, LatLng tapPosition) async {
     final createdLocation = await context.push<LocationBase>(
