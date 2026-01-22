@@ -260,8 +260,18 @@ class MapViewController extends ChangeNotifier {
   // ─────────────────────────────────────────────
 
   void createLocation(BuildContext context, LatLng tapPosition) async {
+    final geoAddress = await LocationService.reverseGeocodeOSM(
+      tapPosition.latitude,
+      tapPosition.longitude,
+    );
+
     final createdLocation = await context.push<LocationBase>(
-      "/locationcreate/${tapPosition.latitude}/${tapPosition.longitude}",
+      "/locationcreate",
+      extra: {
+        'lat': tapPosition.latitude,
+        'lng': tapPosition.longitude,
+        'geoAddress': geoAddress,
+      },
     );
 
     if (createdLocation != null) {

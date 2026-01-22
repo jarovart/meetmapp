@@ -20,7 +20,7 @@ class LocationDetailPage extends StatelessWidget {
                 bottom: Radius.circular(20),
               ),
               child: Image.network(
-                location.imageUrl,
+                location.imageUrls.first,
                 height: 250,
                 width: double.infinity,
                 fit: BoxFit.cover,

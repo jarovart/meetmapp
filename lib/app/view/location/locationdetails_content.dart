@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/view/util/imageviewer_widget.dart';
 import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/view/util/imageviewer_widget.dart';
 
 class LocationDetailsContent extends StatelessWidget {
   final LocationFull location;
@@ -18,13 +18,15 @@ class LocationDetailsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String> imageUrls = [
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-    ];
-
+    List<String> imageUrls = (location.imageUrls?.isNotEmpty ?? false)
+        ? location.imageUrls!
+        : [
+            "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+            "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+            "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+            "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+          ];
+    debugPrint(imageUrls.toString());
     return ListView(
       padding: const EdgeInsets.all(16),
       controller: scrollController,

@@ -143,7 +143,7 @@ class HomePageState extends State<HomePage> {
         padding: EdgeInsets.only(right: 12.0),
         child: CircleAvatar(
           backgroundImage: NetworkImage(
-            "https://ui-avatars.com/api/?name=Artem&background=0D8ABC&color=fff",
+            "https://ui-avatars.com/api/?name=Ajrtem&background=0D8ABC&color=fff",
           ),
         ),
       ),

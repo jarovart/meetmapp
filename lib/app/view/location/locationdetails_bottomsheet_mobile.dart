@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/model/location_full.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/model/location_base.dart';
-import 'package:meetmaap/app/model/location_full.dart';
 import 'package:meetmaap/app/view/location/locationdetails_content.dart';
 
 class LocationDetailsBottomSheet extends StatelessWidget {

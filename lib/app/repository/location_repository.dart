@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/config/api_config.dart';
 import 'package:meetmaap/app/model/exceptions/geolocationpermission_exception.dart';
 import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/model/createlocation_request.dart';
 import 'package:meetmaap/app/model/location_full.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 
@@ -41,7 +42,9 @@ class LocationRepository {
     }
   }
 
-  static Future<LocationBase> uploadLocation(LocationFull location) async {
+  static Future<LocationBase> uploadLocation(
+    CreateLocationRequest location,
+  ) async {
     final token = await AuthRepository.getToken();
 
     if (token == null) {
@@ -165,5 +168,41 @@ class LocationRepository {
   /// Optional: kompletten Cache leeren (Logout)
   static void clearCache() {
     _fullLocationCache.clear();
+  }
+
+  static Future<String?> reverseGeocodeOSM(double lat, double lon) async {
+    final uri = Uri.parse(
+      'https://nominatim.openstreetmap.org/reverse'
+      '?format=jsonv2'
+      '&lat=$lat'
+      '&lon=$lon'
+      '&addressdetails=1',
+    );
+
+    final response = await http.get(
+      uri,
+      headers: {'User-Agent': 'meetmaap-app/1.0 (contact@meetmaap.app)'},
+    );
+
+    if (response.statusCode != 200) return null;
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (data['address'] == null) {
+      return data['display_name'] as String?;
+    }
+
+    return formatAddress(data['address'] as Map<String, dynamic>);
+  }
+
+  static String formatAddress(Map address) {
+    final parts = [
+      address['country'],
+      address['postcode'],
+      address['city'] ?? address['town'] ?? address['village'],
+      address['road'],
+      address['house_number'],
+    ];
+
+    return parts.where((e) => e != null).join(', ');
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
+import 'package:meetmaap/app/model/location_full.dart';
 import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';
@@ -12,7 +13,6 @@ import 'package:meetmaap/app/view/authentication/resetpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
 import 'package:meetmaap/testexample/testshowmodal.dart';
 import 'package:meetmaap/testexample/testslidergps.dart';
-import 'package:meetmaap/app/model/location_full.dart';
 import 'package:meetmaap/app/view/location/locationdetail_page.dart';
 import 'package:meetmaap/app/view/location/locationlist_page.dart';
 import 'package:meetmaap/app/view/location/locationcreate_page.dart';
@@ -71,8 +71,9 @@ class MainApplication extends StatelessWidget {
               position: LatLng(53.0, 8.8),
               thumbnailUrl:
                   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
-              imageUrl:
-                  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
+              imageUrls: [
+                "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
+              ],
               createdUserId: 12,
               createdUsername: "jarovart",
               joinedUserCount: 14,
@@ -85,11 +86,13 @@ class MainApplication extends StatelessWidget {
 
         /// Location-Seite mit Parameter
         GoRoute(
-          path: '/locationcreate/:lat/:lng',
+          path: '/locationcreate',
           builder: (context, state) {
-            final lat = double.parse(state.pathParameters['lat']!);
-            final lng = double.parse(state.pathParameters['lng']!);
-            return LocationCreatePage(point: LatLng(lat, lng));
+            final data = state.extra! as Map<String, dynamic>;
+            return LocationCreatePage(
+              point: LatLng(data['lat'], data['lng']),
+              geoAddress: data['geoAddress'],
+            );
           },
         ),
 
