@@ -43,11 +43,14 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
   DateTime? selectedStartDateTime;
   DateTime? selectedEndDateTime;
   String? _userName;
+  String? _initialAddress;
 
   @override
   void initState() {
     super.initState();
     _checkAuth();
+    _initialAddress = widget.geoAddress ?? '';
+    addressController.text = _initialAddress!;
   }
 
   Future<void> _checkAuth() async {
@@ -119,7 +122,17 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
     setState(() => _uploading = true);
     // Rückgabe an vorherige Seite
     try {
-      final List<String> imageUrls = await ImageService.uploadImages(_images);
+      String thumbnailUrl = '';
+      List<String> imageUrls = [];
+
+      if (_images.isNotEmpty) {
+        thumbnailUrl = (await ImageService.uploadImages(
+          _images.take(1).toList(),
+        )).first;
+        if (_images.length > 1) {
+          imageUrls = await ImageService.uploadImages(_images.skip(1).toList());
+        }
+      }
 
       // 👇 HIER erstellst du das Objekt (LocationFull)
       final createdLocation = CreateLocationRequest(
@@ -130,6 +143,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
         startDateTime: selectedStartDateTime!,
         endDateTime: selectedEndDateTime!,
         position: LatLng(widget.point.latitude, widget.point.longitude),
+        thumbnailUrl: thumbnailUrl,
         imageUrls: imageUrls,
         createdUsername: _userName!,
       );
@@ -159,190 +173,226 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
       );
     }
 
-    if (_uploading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Uploading…')),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(title: Text("Location erstellen als $_userName")),
 
-    return Scaffold(
-      appBar: AppBar(title: Text("Location erstellen als $_userName")),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- TITLE ---
-              TextFormField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: "Titel eingeben",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => v == null || v.isEmpty
-                    ? "Titel darf nicht leer sein"
-                    : null,
-              ),
-              const SizedBox(height: 16),
-
-              // --- DESCRIPTION ---
-              TextFormField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: "Beschreibung eingeben",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) =>
-                    v == null || v.isEmpty ? "Beschreibung fehlt" : null,
-              ),
-              const SizedBox(height: 16),
-
-              // --- ADDRESS ---
-              TextFormField(
-                controller: addressController,
-                decoration: InputDecoration(
-                  labelText: addressLabel(widget.geoAddress),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // --- StartDATE ---
-              Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      selectedStartDateTime == null
-                          ? "Kein Startdatum gewählt"
-                          : "Datum: ${selectedStartDateTime!.day}.${selectedStartDateTime!.month}.${selectedStartDateTime!.year} ${selectedStartDateTime!.hour}:${selectedStartDateTime!.minute}",
-                      style: const TextStyle(fontSize: 16),
+                  // --- TITLE ---
+                  TextFormField(
+                    controller: titleController,
+                    decoration: const InputDecoration(
+                      labelText: "Titel eingeben",
+                      border: OutlineInputBorder(),
                     ),
+                    validator: (v) => v == null || v.isEmpty
+                        ? "Titel darf nicht leer sein"
+                        : null,
                   ),
-                  ElevatedButton(
-                    onPressed: () => _pickDateTime(
-                      initial: selectedStartDateTime,
-                      onSelected: (dt) {
-                        setState(() => selectedStartDateTime = dt);
-                      },
-                    ),
-                    child: const Text("Startdatum wählen"),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-              // --- StartDATE ---
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      selectedEndDateTime == null
-                          ? "Kein Enddatum gewählt"
-                          : "Datum: ${selectedEndDateTime!.day}.${selectedEndDateTime!.month}.${selectedEndDateTime!.year} ${selectedEndDateTime!.hour}:${selectedEndDateTime!.minute}",
-                      style: const TextStyle(fontSize: 16),
+                  // --- DESCRIPTION ---
+                  TextFormField(
+                    controller: descriptionController,
+                    decoration: const InputDecoration(
+                      labelText: "Beschreibung eingeben",
+                      border: OutlineInputBorder(),
                     ),
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "Beschreibung fehlt" : null,
                   ),
-                  ElevatedButton(
-                    onPressed: () => _pickDateTime(
-                      initial: selectedEndDateTime,
-                      onSelected: (dt) {
-                        setState(() => selectedEndDateTime = dt);
-                      },
-                    ),
-                    child: const Text("Enddatum wählen"),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-              // --- IMAGE URL ---
-              const SizedBox(height: 16),
-              Text("Bilder", style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-
-              ReorderableListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _images.length,
-                onReorder: _reorderImages,
-                itemBuilder: (context, index) {
-                  final img = _images[index];
-                  return Card(
-                    key: ValueKey(_images[index]),
-                    child: ListTile(
-                      onTap: () => "",
-                      leading: Image.memory(
-                        _images[index],
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
-                      title: Text("Bild ${index + 1}"),
-                      subtitle: index == 0 ? Text("Thumbnail") : null,
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
+                  // --- ADDRESS ---
+                  TextFormField(
+                    controller: addressController,
+                    decoration: InputDecoration(
+                      labelText: "Adresse eingeben",
+                      border: OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        tooltip: "Adresse zurücksetzen",
+                        icon: const Icon(Icons.undo),
                         onPressed: () {
-                          setState(() => _images.removeAt(index));
+                          addressController.text = _initialAddress!;
                         },
                       ),
                     ),
-                  );
-                },
-              ),
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "Adresse fehlt" : null,
+                  ),
+                  const SizedBox(height: 16),
 
-              const SizedBox(height: 8),
+                  // --- StartDATE ---
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          selectedStartDateTime == null
+                              ? "Kein Startdatum gewählt"
+                              : "Datum: ${selectedStartDateTime!.day}.${selectedStartDateTime!.month}.${selectedStartDateTime!.year} ${selectedStartDateTime!.hour}:${selectedStartDateTime!.minute}",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _pickDateTime(
+                          initial: selectedStartDateTime,
+                          onSelected: (dt) {
+                            setState(() => selectedStartDateTime = dt);
+                          },
+                        ),
+                        child: const Text("Startdatum wählen"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
 
-              OutlinedButton.icon(
-                onPressed: _addImage,
-                icon: const Icon(Icons.add_a_photo),
-                label: const Text("Bild hinzufügen"),
-              ),
+                  // --- StartDATE ---
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          selectedEndDateTime == null
+                              ? "Kein Enddatum gewählt"
+                              : "Datum: ${selectedEndDateTime!.day}.${selectedEndDateTime!.month}.${selectedEndDateTime!.year} ${selectedEndDateTime!.hour}:${selectedEndDateTime!.minute}",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _pickDateTime(
+                          initial: selectedEndDateTime,
+                          onSelected: (dt) {
+                            setState(() => selectedEndDateTime = dt);
+                          },
+                        ),
+                        child: const Text("Enddatum wählen"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
-              // --- LOCATION PREVIEW ---
-              GestureDetector(
-                onTap: () {
-                  Clipboard.setData(
-                    ClipboardData(
-                      text:
-                          "${widget.point.latitude}, ${widget.point.longitude}",
+                  // --- IMAGE URL ---
+                  const SizedBox(height: 16),
+                  Text(
+                    "Bilder",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+
+                  ReorderableListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _images.length,
+                    onReorder: _reorderImages,
+                    itemBuilder: (context, index) {
+                      final img = _images[index];
+                      return Card(
+                        key: ValueKey(_images[index]),
+                        child: ListTile(
+                          onTap: () => "",
+                          leading: Image.memory(
+                            _images[index],
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
+                          title: Text("Bild ${index + 1}"),
+                          subtitle: index == 0 ? Text("Thumbnail") : null,
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              setState(() => _images.removeAt(index));
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  OutlinedButton.icon(
+                    onPressed: _addImage,
+                    icon: const Icon(Icons.add_a_photo),
+                    label: const Text("Bild hinzufügen"),
+                  ),
+
+                  const SizedBox(height: 16),
+                  // --- LOCATION PREVIEW ---
+                  GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(
+                        ClipboardData(
+                          text:
+                              "${widget.point.latitude}, ${widget.point.longitude}",
+                        ),
+                      );
+                      ExceptionMessage.showInfo(
+                        context,
+                        "Position has been copied!",
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        "Position:\nLatitude: ${widget.point.latitude}\nLongitude: ${widget.point.longitude}",
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     ),
-                  );
-                  ExceptionMessage.showInfo(
-                    context,
-                    "Position has been copied!",
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
-                    "Position:\nLatitude: ${widget.point.latitude}\nLongitude: ${widget.point.longitude}",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-              // --- SAVE BUTTON ---
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _save,
-                  child: const Text("Location speichern"),
-                ),
+                  // --- SAVE BUTTON ---
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _save,
+                      child: const Text("Location speichern"),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        // 🔥 Overlay Loading Layer
+        if (_uploading)
+          Positioned.fill(
+            child: AbsorbPointer(
+              absorbing: true,
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.35),
+                child: const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Loading...",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -362,14 +412,17 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
 
     if (picked == null) return;
 
+    setState(() => _uploading = true);
     try {
       //final original = File(picked.path);
       //final compressed = await compressImage(original);
       final bytes = await picked.readAsBytes();
-      final compressed = _compressImage(bytes);
+      final compressed = await compute(_compressImage, bytes);
 
       if (!mounted) return;
       setState(() => _images.add(compressed));
+    } catch (e) {
+      debugPrint("Add image failed: $e");
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
@@ -401,7 +454,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
     return compressed!;
   }
 
-  Uint8List _compressImage(Uint8List bytes) {
+  static Uint8List _compressImage(Uint8List bytes) {
     final image = img.decodeImage(bytes);
     if (image == null) return bytes;
 

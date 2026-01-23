@@ -18,14 +18,18 @@ class LocationDetailsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String> imageUrls = (location.imageUrls?.isNotEmpty ?? false)
-        ? location.imageUrls!
-        : [
-            "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-            "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-            "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-            "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-          ];
+    List<String> imageUrls = [];
+    if (location.imageUrls?.isNotEmpty ?? false) {
+      imageUrls = [location.thumbnailUrl] + location.imageUrls!;
+    } else {
+      imageUrls = [
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+      ];
+    }
+
     debugPrint(imageUrls.toString());
     return ListView(
       padding: const EdgeInsets.all(16),

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
@@ -37,25 +36,6 @@ class ImageRepository {
     // Backend liefert List<ImageResponse> => du extrahierst urls:
     final decoded = jsonDecode(body) as List;
     return decoded.map((e) => e['url'] as String).toList();
-  }
-
-  static Future<void> uploadImage(File image) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/upload');
-
-    final request = http.MultipartRequest('POST', uri)
-      ..files.add(
-        await http.MultipartFile.fromPath(
-          'file',
-          image.path,
-          contentType: MediaType('image', 'jpeg'),
-        ),
-      );
-
-    final response = await request.send();
-
-    if (response.statusCode != 200) {
-      throw Exception('Upload failed');
-    }
   }
 
   static Future<void> uploadImageByBytes(

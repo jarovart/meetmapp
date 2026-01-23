@@ -10,6 +10,7 @@ class CreateLocationRequest {
   final DateTime startDateTime;
   final DateTime endDateTime;
   final LatLng position;
+  final String thumbnailUrl;
   final List<String> imageUrls;
   final String createdUsername;
 
@@ -21,6 +22,7 @@ class CreateLocationRequest {
     required this.startDateTime,
     required this.endDateTime,
     required this.position,
+    required this.thumbnailUrl,
     required this.imageUrls,
     required this.createdUsername,
   });
@@ -35,6 +37,7 @@ class CreateLocationRequest {
       "endDateTime": endDateTime.toIso8601String(),
       "latitude": position.latitude,
       "longitude": position.longitude,
+      "thumbnailUrl": thumbnailUrl,
       "imageUrls": imageUrls,
       "createdUsername": createdUsername,
     };
@@ -52,6 +55,7 @@ class CreateLocationRequest {
         (map['latitude'] as num).toDouble(),
         (map['longitude'] as num).toDouble(),
       ),
+      thumbnailUrl: map['thumbnailUrl'] ?? '',
       imageUrls: List<String>.from(map['imageUrls'] ?? []),
       createdUsername: map['createdUsername'] as String,
     );

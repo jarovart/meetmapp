@@ -53,8 +53,12 @@ class LocationFull {
   }
 
   factory LocationFull.fromMap(Map<String, dynamic> map) {
+    final rawImage = map['thumbnailUrl'] ?? '';
     final rawImages = (map['imageUrls'] as List?) ?? [];
 
+    final thumbnailUrl = rawImage is String
+        ? LocationFull.toAbsolute(rawImage)
+        : '';
     final imageUrls = rawImages
         .whereType<String>()
         .map(LocationFull.toAbsolute)
@@ -71,7 +75,7 @@ class LocationFull {
         (map['latitude'] as num).toDouble(),
         (map['longitude'] as num).toDouble(),
       ),
-      thumbnailUrl: map['thumbnailUrl'] ?? '',
+      thumbnailUrl: thumbnailUrl,
       //imageUrl: map['imageUrl'] ?? '',
       //imageUrls: List<String>.from(map['imageUrls'] ?? []),
       imageUrls: imageUrls,
