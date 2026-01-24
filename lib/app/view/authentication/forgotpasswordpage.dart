@@ -57,66 +57,70 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Passwort vergessen')),
       body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: _sent
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.mark_email_read, size: 64),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Wenn die E-Mail existiert, haben wir dir einen Link geschickt.',
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      /*ElevatedButton(
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: _sent
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.mark_email_read, size: 64),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Wenn die E-Mail existiert, haben wir dir einen Link geschickt.',
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        /*ElevatedButton(
                         onPressed: () => context.pop(),
                         child: const Text('Zurück zum Login'),
                       ),*/
-                    ],
-                  )
-                : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller: _emailCtrl,
-                        decoration: const InputDecoration(labelText: 'E-Mail'),
-                        keyboardType: TextInputType.emailAddress,
-                        autofillHints: const [AutofillHints.email],
-                        textInputAction: TextInputAction.done,
-                        onSubmitted: (_) => _submit(),
-                      ),
-                      const SizedBox(height: 12),
-                      if (_error != null)
-                        Text(
-                          _error!,
-                          style: const TextStyle(color: Colors.red),
+                      ],
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: _emailCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'E-Mail',
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                          autofillHints: const [AutofillHints.email],
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _submit(),
                         ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: (_loading || _cooldown > 0)
-                              ? null
-                              : _submit,
-                          child: _loading
-                              ? const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : _cooldown > 0
-                              ? Text('Bitte warten ($_cooldown s)')
-                              : const Text('Link senden'),
+                        const SizedBox(height: 12),
+                        if (_error != null)
+                          Text(
+                            _error!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: (_loading || _cooldown > 0)
+                                ? null
+                                : _submit,
+                            child: _loading
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : _cooldown > 0
+                                ? Text('Bitte warten ($_cooldown s)')
+                                : const Text('Link senden'),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+            ),
           ),
         ),
       ),

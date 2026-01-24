@@ -21,31 +21,33 @@ class _RegisterCheckEmailPageState extends State<RegisterCheckEmailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.mark_email_read, size: 64),
-              Text(
-                'Registrierung erfolgreich!',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 16),
-              if (_error != null)
-                Text(_error!, style: const TextStyle(color: Colors.red)),
-              ElevatedButton(
-                onPressed: (_loading || _cooldown > 0)
-                    ? null
-                    : () => _resendVerificationEmail(),
-                child: _loading
-                    ? const CircularProgressIndicator()
-                    : _cooldown > 0
-                    ? Text('Bitte warten ($_cooldown s)')
-                    : Text('E-Mail erneut senden'),
-              ),
-            ],
+      body: Center (
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.mark_email_read, size: 64),
+                Text(
+                  'Registrierung erfolgreich!',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 16),
+                if (_error != null)
+                  Text(_error!, style: const TextStyle(color: Colors.red)),
+                ElevatedButton(
+                  onPressed: (_loading || _cooldown > 0)
+                      ? null
+                      : () => _resendVerificationEmail(),
+                  child: _loading
+                      ? const CircularProgressIndicator()
+                      : _cooldown > 0
+                      ? Text('Bitte warten ($_cooldown s)')
+                      : Text('E-Mail erneut senden'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

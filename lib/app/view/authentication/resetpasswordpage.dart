@@ -55,77 +55,79 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Neues Passwort setzen')),
       body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: _done
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.check_circle,
-                        size: 64,
-                        color: Colors.green,
-                      ),
-                      const SizedBox(height: 12),
-                      const Text('Passwort geändert ✅'),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.go('/');
-                          context.push('/loginpage');
-                        },
-                        child: const Text('Jetzt einloggen'),
-                      ),
-                    ],
-                  )
-                : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller: _p1,
-                        decoration: const InputDecoration(
-                          labelText: 'Neues Passwort',
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: _done
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          size: 64,
+                          color: Colors.green,
                         ),
-                        obscureText: true,
-                        autofillHints: const [AutofillHints.newPassword],
-                        textInputAction: TextInputAction.next,
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _p2,
-                        decoration: const InputDecoration(
-                          labelText: 'Passwort wiederholen',
+                        const SizedBox(height: 12),
+                        const Text('Passwort geändert ✅'),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.go('/');
+                            context.push('/loginpage');
+                          },
+                          child: const Text('Jetzt einloggen'),
                         ),
-                        obscureText: true,
-                        autofillHints: const [AutofillHints.newPassword],
-                        onSubmitted: (_) => _submit(),
-                      ),
-                      const SizedBox(height: 12),
-                      if (_error != null)
-                        Text(
-                          _error!,
-                          style: const TextStyle(color: Colors.red),
+                      ],
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: _p1,
+                          decoration: const InputDecoration(
+                            labelText: 'Neues Passwort',
+                          ),
+                          obscureText: true,
+                          autofillHints: const [AutofillHints.newPassword],
+                          textInputAction: TextInputAction.next,
                         ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _loading ? null : _submit,
-                          child: _loading
-                              ? const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text('Passwort speichern'),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _p2,
+                          decoration: const InputDecoration(
+                            labelText: 'Passwort wiederholen',
+                          ),
+                          obscureText: true,
+                          autofillHints: const [AutofillHints.newPassword],
+                          onSubmitted: (_) => _submit(),
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(height: 12),
+                        if (_error != null)
+                          Text(
+                            _error!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _loading ? null : _submit,
+                            child: _loading
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text('Passwort speichern'),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
           ),
         ),
       ),

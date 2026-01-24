@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
+import 'package:meetmaap/app/controller/setting_controller.dart';
 import 'package:meetmaap/app/model/location_full.dart';
 import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
@@ -11,6 +12,7 @@ import 'package:meetmaap/app/view/authentication/registercheckemailpage.dart';
 import 'package:meetmaap/app/view/authentication/registerpage.dart';
 import 'package:meetmaap/app/view/authentication/resetpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
+import 'package:meetmaap/app/view/setting/setting_page.dart';
 import 'package:meetmaap/testexample/testshowmodal.dart';
 import 'package:meetmaap/testexample/testslidergps.dart';
 import 'package:meetmaap/app/view/location/locationdetail_page.dart';
@@ -26,6 +28,7 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => MapViewController(mapController: MapController()),
         ),
+        ChangeNotifierProvider(create: (_) => SettingsController()),
       ],
       child: const MainApplication(),
     ),
@@ -166,6 +169,10 @@ class MainApplication extends StatelessWidget {
             }
             return ResetPasswordPage(token: token);
           },
+        ),
+        GoRoute(
+          path: '/settingspage',
+          builder: (context, state) => const SettingsPage(),
         ),
       ],
     );

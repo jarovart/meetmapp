@@ -104,6 +104,10 @@ class HomePageState extends State<HomePage> {
                           _toggleMenu();
                           context.push('/test-slidergps');
                           return;
+                        } else if (label == "Einstellungen") {
+                          _toggleMenu();
+                          context.push('/settingspage');
+                          return;
                         }
                         ExceptionMessage.showError(
                           context,

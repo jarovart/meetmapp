@@ -89,82 +89,84 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Register')),
       body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Registrieren',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _userCtrl,
-                  autofillHints: const [AutofillHints.newUsername],
-                  decoration: const InputDecoration(labelText: 'Username'),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _firstname,
-                        autofillHints: const [AutofillHints.givenName],
-                        decoration: const InputDecoration(
-                          labelText: 'Firstname',
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _lastname,
-                        autofillHints: const [AutofillHints.familyName],
-                        decoration: const InputDecoration(
-                          labelText: 'Familyname',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _emailCtrl,
-                  autofillHints: const [AutofillHints.email],
-                  decoration: const InputDecoration(labelText: 'E-Mail'),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _passCtrl,
-                  autofillHints: const [AutofillHints.newPassword],
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Passwort'),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _passCtrl2,
-                  autofillHints: const [AutofillHints.newPassword],
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Passwort wiederholen',
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 620),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Registrieren',
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                ),
-                const SizedBox(height: 16),
-                if (_error != null)
-                  Text(_error!, style: const TextStyle(color: Colors.red)),
-                ElevatedButton(
-                  onPressed: (_loading || _cooldown > 0) ? null : _submit,
-                  child: _loading
-                      ? const CircularProgressIndicator()
-                      : _cooldown > 0
-                      ? Text('Bitte warten ($_cooldown s)')
-                      : const Text('Registrieren'),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _userCtrl,
+                    autofillHints: const [AutofillHints.newUsername],
+                    decoration: const InputDecoration(labelText: 'Username'),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _firstname,
+                          autofillHints: const [AutofillHints.givenName],
+                          decoration: const InputDecoration(
+                            labelText: 'Firstname',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: _lastname,
+                          autofillHints: const [AutofillHints.familyName],
+                          decoration: const InputDecoration(
+                            labelText: 'Familyname',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _emailCtrl,
+                    autofillHints: const [AutofillHints.email],
+                    decoration: const InputDecoration(labelText: 'E-Mail'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _passCtrl,
+                    autofillHints: const [AutofillHints.newPassword],
+                    obscureText: true,
+                    decoration: const InputDecoration(labelText: 'Passwort'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _passCtrl2,
+                    autofillHints: const [AutofillHints.newPassword],
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Passwort wiederholen',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (_error != null)
+                    Text(_error!, style: const TextStyle(color: Colors.red)),
+                  ElevatedButton(
+                    onPressed: (_loading || _cooldown > 0) ? null : _submit,
+                    child: _loading
+                        ? const CircularProgressIndicator()
+                        : _cooldown > 0
+                        ? Text('Bitte warten ($_cooldown s)')
+                        : const Text('Registrieren'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
