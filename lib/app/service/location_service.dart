@@ -30,7 +30,7 @@ class LocationService {
   }
 
   static Future searchLocations(String text) async {
-    return LocationService.searchLocations(text);
+    return LocationRepository.searchLocations(text);
   }
 
   static Future<LocationFull>? fetchFullLocation(int id) async {

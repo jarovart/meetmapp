@@ -73,34 +73,25 @@ class MapPage extends StatelessWidget {
   ) {
     return MarkerClusterLayerWidget(
       options: MarkerClusterLayerOptions(
-        maxClusterRadius: 45,
+        maxClusterRadius: 40,
         size: const Size(40, 40),
         zoomToBoundsOnClick: false,
         spiderfyCluster: false,
-        markers:
-            mapViewController.locations
-                .map(
-                  (loc) => Marker(
-                    point: loc.position,
-                    width: 80,
-                    height: 80,
-                    child: LocationMarker(
-                      location: loc,
-                      isSelected:
-                          mapViewController.selectedLocation?.id == loc.id,
-                      onTap: () =>
-                          _onLocationTapped(context, mapViewController, loc),
-                    ),
-                  ),
-                )
-                .toList()
-              ..sort((a, b) {
-                if (a.point == mapViewController.selectedLocation?.position)
-                  return 1;
-                if (b.point == mapViewController.selectedLocation?.position)
-                  return -1;
-                return 0;
-              }),
+        markers: mapViewController.locations
+            .map(
+              (loc) => Marker(
+                point: loc.position,
+                width: 30,
+                height: 30,
+                child: LocationMarker(
+                  location: loc,
+                  isSelected: mapViewController.selectedLocation?.id == loc.id,
+                  onTap: () =>
+                      _onLocationTapped(context, mapViewController, loc),
+                ),
+              ),
+            )
+            .toList(),
         // 🔹 Cluster-Design
         builder: (context, markers) {
           // 🔥 Gewinner ermitteln

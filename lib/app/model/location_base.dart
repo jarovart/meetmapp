@@ -4,6 +4,7 @@ class LocationBase {
   final int id; //äquivalent zu java long 64bit
   final String title;
   final String description;
+  final String address;
   final DateTime creationDateTime;
   final DateTime
   startDateTime; // für ui DateFormat('dd.MM.yyyy HH:mm').format(location.startDateTime)
@@ -21,6 +22,7 @@ class LocationBase {
     required this.id,
     required this.title,
     required this.description,
+    required this.address,
     required this.creationDateTime,
     required this.startDateTime,
     required this.endDateTime,
@@ -37,6 +39,7 @@ class LocationBase {
       id: map['id'] as int,
       title: map['title'] as String,
       description: map['description'] ?? '',
+      address: map['address'] ?? '',
       creationDateTime: DateTime.parse(map['creationDateTime']),
       startDateTime: DateTime.parse(map['startDateTime']),
       endDateTime: DateTime.parse(map['endDateTime']),

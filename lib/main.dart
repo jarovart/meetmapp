@@ -62,7 +62,7 @@ class MainApplication extends StatelessWidget {
             final mockLocation = LocationFull(
               id: int.tryParse(id) ?? 0,
               title: "Chill Spot $id",
-              //address: "Adresse $id in Bremen",
+              address: "Adresse $id in Bremen",
               description:
                   "Eine sehr coole Location zum Chillen, Essen und Treffen1.",
               creationDateTime: DateTime.now(),

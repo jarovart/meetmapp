@@ -47,7 +47,8 @@ class _LocationsPageState extends State<LocationsPage> {
         (i) => LocationBase(
           id: i,
           title: "Coole Location #$i",
-          description: "Adresse $i, Bremen",
+          description: "Beschreibung $i, Bremen",
+          address: "Adresse $i, Bremen",
           creationDateTime: DateTime.now(),
           startDateTime: DateTime.now().add(const Duration(days: 1)),
           endDateTime: DateTime.now().add(const Duration(days: 2)),

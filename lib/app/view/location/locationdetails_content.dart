@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:meetmaap/app/model/location_full.dart';
 import 'package:meetmaap/app/view/util/imageviewer_widget.dart';
 
@@ -18,6 +19,7 @@ class LocationDetailsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final formatter = DateFormat('dd.MM.yyyy HH:mm');
     List<String> imageUrls = [];
     if (location.imageUrls?.isNotEmpty ?? false) {
       imageUrls = [location.thumbnailUrl] + location.imageUrls!;
@@ -30,7 +32,6 @@ class LocationDetailsContent extends StatelessWidget {
       ];
     }
 
-    debugPrint(imageUrls.toString());
     return ListView(
       padding: const EdgeInsets.all(16),
       controller: scrollController,
@@ -56,12 +57,15 @@ class LocationDetailsContent extends StatelessWidget {
         Text(location.description, style: const TextStyle(fontSize: 16)),
 
         const SizedBox(height: 12),
+        Text(location.address, style: const TextStyle(fontSize: 16)),
+
+        const SizedBox(height: 12),
         Wrap(
           spacing: 22,
           runSpacing: 8,
           children: [
-            Text(location.startDateTime.toString()),
-            Text(location.endDateTime.toIso8601String()),
+            Text("Startzeit: ${formatter.format(location.startDateTime)} Uhr"),
+            Text("Endzeit: ${formatter.format(location.endDateTime)} Uhr"),
           ],
         ),
 

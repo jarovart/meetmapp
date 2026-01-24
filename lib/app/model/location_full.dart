@@ -5,6 +5,7 @@ class LocationFull {
   final int id;
   final String title;
   final String description;
+  final String address;
   final DateTime creationDateTime;
   final DateTime startDateTime;
   final DateTime endDateTime;
@@ -21,6 +22,7 @@ class LocationFull {
     required this.id,
     required this.title,
     required this.description,
+    required this.address,
     required this.creationDateTime,
     required this.startDateTime,
     required this.endDateTime,
@@ -38,6 +40,7 @@ class LocationFull {
       "id": id,
       "title": title,
       "description": description,
+      "address": address,
       "creationDateTime": creationDateTime.toIso8601String(),
       "startDateTime": startDateTime.toIso8601String(),
       "endDateTime": endDateTime.toIso8601String(),
@@ -68,6 +71,7 @@ class LocationFull {
       id: map['id'] as int,
       title: map['title'] as String,
       description: map['description'] ?? '',
+      address: map['address'] ?? '',
       creationDateTime: DateTime.parse(map['creationDateTime']),
       startDateTime: DateTime.parse(map['startDateTime']),
       endDateTime: DateTime.parse(map['endDateTime']),
