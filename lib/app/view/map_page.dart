@@ -211,9 +211,7 @@ class MapPage extends StatelessWidget {
                     title: Text(loc.title),
                     subtitle: Text(loc.description),
                     onTap: () {
-                      mapViewController.viewMoveTo(loc.position);
-                      mapViewController.selectLocation(loc);
-                      mapViewController.locations.add(loc);
+                      _onLocationTapped(context, mapViewController, loc);
                       mapViewController.clearSearchResults();
                       mapViewController.searchController.clear();
                       mapViewController.fetchLocations();
