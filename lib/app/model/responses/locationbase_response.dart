@@ -1,8 +1,8 @@
-import 'dart:typed_data';
-
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/model/utils/location_utils.dart';
 
-class CreateLocationRequest {
+class LocationBaseResponse {
+  final int id;
   final String title;
   final String description;
   final String address;
@@ -11,10 +11,13 @@ class CreateLocationRequest {
   final DateTime endDateTime;
   final LatLng position;
   final String thumbnailUrl;
-  final List<String> imageUrls;
+  final int createdUserId;
   final String createdUsername;
+  final int joinedUserCount;
+  final int likedUserCount;
 
-  CreateLocationRequest({
+  LocationBaseResponse({
+    required this.id,
     required this.title,
     required this.description,
     required this.address,
@@ -23,28 +26,21 @@ class CreateLocationRequest {
     required this.endDateTime,
     required this.position,
     required this.thumbnailUrl,
-    required this.imageUrls,
+    required this.createdUserId,
     required this.createdUsername,
+    required this.joinedUserCount,
+    required this.likedUserCount,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      "title": title,
-      "description": description,
-      "address": address,
-      "creationDateTime": creationDateTime.toIso8601String(),
-      "startDateTime": startDateTime.toIso8601String(),
-      "endDateTime": endDateTime.toIso8601String(),
-      "latitude": position.latitude,
-      "longitude": position.longitude,
-      "thumbnailUrl": thumbnailUrl,
-      "imageUrls": imageUrls,
-      "createdUsername": createdUsername,
-    };
-  }
+  factory LocationBaseResponse.fromMap(Map<String, dynamic> map) {
+    final rawImage = map['thumbnailUrl'] ?? '';
 
-  factory CreateLocationRequest.fromMap(Map<String, dynamic> map) {
-    return CreateLocationRequest(
+    final thumbnailUrl = rawImage is String
+        ? LocationUtils.toAbsolute(rawImage)
+        : '';
+
+    return LocationBaseResponse(
+      id: map['id'] as int,
       title: map['title'] as String,
       description: map['description'] ?? '',
       address: map['address'] ?? '',
@@ -55,9 +51,11 @@ class CreateLocationRequest {
         (map['latitude'] as num).toDouble(),
         (map['longitude'] as num).toDouble(),
       ),
-      thumbnailUrl: map['thumbnailUrl'] ?? '',
-      imageUrls: List<String>.from(map['imageUrls'] ?? []),
+      thumbnailUrl: thumbnailUrl,
+      createdUserId: map['createdUserId'] as int,
       createdUsername: map['createdUsername'] as String,
+      joinedUserCount: map['joinedUserCount'] ?? 0,
+      likedUserCount: map['likedUserCount'] ?? 0,
     );
   }
 }

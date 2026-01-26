@@ -4,7 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
 import 'package:meetmaap/app/controller/setting_controller.dart';
-import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';
@@ -62,7 +62,7 @@ class MainApplication extends StatelessWidget {
           builder: (context, state) {
             final id = state.pathParameters['id']!;
 
-            final mockLocation = LocationFull(
+            final mockLocation = LocationFullResponse(
               id: int.tryParse(id) ?? 0,
               title: "Chill Spot $id",
               address: "Adresse $id in Bremen",

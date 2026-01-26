@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/location_base.dart';
-import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/location/locationdetails_content.dart';
 
 class LocationDetailsGeneralDialog extends StatelessWidget {
-  final LocationBase locationBase;
+  final LocationBaseResponse locationBase;
 
   const LocationDetailsGeneralDialog({super.key, required this.locationBase});
 
   static Future<void> show(
     BuildContext context, {
-    required LocationBase locationBase,
+    required LocationBaseResponse locationBase,
   }) {
     return showGeneralDialog(
       context: context,
@@ -63,7 +63,7 @@ class LocationDetailsGeneralDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<LocationFull>(
+    return FutureBuilder<LocationFullResponse>(
       future: LocationService.fetchFullLocation(locationBase.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

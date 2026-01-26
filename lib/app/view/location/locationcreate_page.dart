@@ -11,8 +11,8 @@ import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/service/image_service.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/model/exceptions/exception_message.dart';
-import 'package:meetmaap/app/model/location_base.dart';
-import 'package:meetmaap/app/model/createlocation_request.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/requests/createlocation_request.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 
@@ -148,9 +148,8 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
         createdUsername: _userName!,
       );
 
-      final LocationBase locationBase = await LocationService.uploadLocation(
-        createdLocation,
-      );
+      final LocationBaseResponse locationBase =
+          await LocationService.uploadLocation(createdLocation);
       if (!mounted) return;
       context.pop(locationBase);
     } catch (e) {
@@ -292,7 +291,6 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                     itemCount: _images.length,
                     onReorder: _reorderImages,
                     itemBuilder: (context, index) {
-                      final img = _images[index];
                       return Card(
                         key: ValueKey(_images[index]),
                         child: ListTile(

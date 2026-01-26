@@ -1,8 +1,8 @@
 import 'package:flutter_map/flutter_map.dart';
-import 'package:meetmaap/app/model/createlocation_request.dart';
+import 'package:meetmaap/app/model/requests/createlocation_request.dart';
 import 'package:meetmaap/app/model/exceptions/geolocationpermission_exception.dart';
-import 'package:meetmaap/app/model/location_base.dart';
-import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 import 'package:meetmaap/app/repository/location_repository.dart';
 
 /// Ergebnis-Typ für Location-Abfragen
@@ -11,13 +11,13 @@ class LocationService {
     return LocationRepository.getCurrentLocation();
   }
 
-  static Future<LocationBase> uploadLocation(
+  static Future<LocationBaseResponse> uploadLocation(
     CreateLocationRequest createdLocation,
   ) async {
     return LocationRepository.uploadLocation(createdLocation);
   }
 
-  static Future<List<LocationBase>> fetchLocationsWithinWithTime(
+  static Future<List<LocationBaseResponse>> fetchLocationsWithinWithTime(
     LatLngBounds bounds,
     DateTime startDate,
     DateTime endDate,
@@ -33,11 +33,36 @@ class LocationService {
     return LocationRepository.searchLocations(text);
   }
 
-  static Future<LocationFull>? fetchFullLocation(int id) async {
+  static Future<LocationFullResponse>? fetchFullLocation(int id) async {
     return LocationRepository.fetchFullLocation(id);
   }
 
   static Future<String?> reverseGeocodeOSM(double latitude, double longitude) {
     return LocationRepository.reverseGeocodeOSM(latitude, longitude);
+  }
+
+  static int getLocationScore({
+    required int likedUserCount,
+    required int joinedUserCount,
+    required DateTime startDateTime,
+    required DateTime endDateTime,
+    DateTime? now,
+  }) {
+    final n = now ?? DateTime.now();
+
+    var score = likedUserCount * 3 + joinedUserCount;
+
+    // Bonus: Event läuft gerade
+    if (startDateTime.isBefore(n) && endDateTime.isAfter(n)) {
+      score += 5;
+    }
+
+    // Bonus: Startet bald (< 24h) – optional: nur wenn noch nicht gestartet
+    final hoursToStart = startDateTime.difference(n).inHours;
+    if (hoursToStart >= 0 && hoursToStart < 24) {
+      score += 2;
+    }
+
+    return score;
   }
 }

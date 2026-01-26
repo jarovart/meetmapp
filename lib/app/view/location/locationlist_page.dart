@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/config/api_config.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 
 class LocationsPage extends StatefulWidget {
   final String locationId; // falls du sie brauchst – sonst entfernen
@@ -15,7 +16,7 @@ class LocationsPage extends StatefulWidget {
 }
 
 class _LocationsPageState extends State<LocationsPage> {
-  late Future<List<LocationBase>> _futureLocations;
+  late Future<List<LocationBaseResponse>> _futureLocations;
 
   @override
   void initState() {
@@ -27,10 +28,10 @@ class _LocationsPageState extends State<LocationsPage> {
     _futureLocations = _fetchLocations();
   }
 
-  Future<List<LocationBase>> _fetchLocations() async {
+  Future<List<LocationBaseResponse>> _fetchLocations() async {
     debugPrint("Start: load locations from backend");
     final response = await http.get(
-      Uri.parse('http://localhost:8080/api/locations'),
+      Uri.parse('${ApiConfig.baseUrl}/api/locations'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -38,13 +39,13 @@ class _LocationsPageState extends State<LocationsPage> {
       final List<dynamic> body = jsonDecode(response.body);
       debugPrint("Executed: load locations from backend");
       return body
-          .map((e) => LocationBase.fromMap(e as Map<String, dynamic>))
+          .map((e) => LocationBaseResponse.fromMap(e as Map<String, dynamic>))
           .toList();
     } else {
       // Beispiel-Daten – später ersetzt durch Backend
       return List.generate(
         20,
-        (i) => LocationBase(
+        (i) => LocationBaseResponse(
           id: i,
           title: "Coole Location #$i",
           description: "Beschreibung $i, Bremen",
@@ -70,7 +71,7 @@ class _LocationsPageState extends State<LocationsPage> {
     return Scaffold(
       appBar: AppBar(title: const Text("Locations"), centerTitle: true),
       backgroundColor: Colors.grey.shade200,
-      body: FutureBuilder<List<LocationBase>>(
+      body: FutureBuilder<List<LocationBaseResponse>>(
         future: _futureLocations,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

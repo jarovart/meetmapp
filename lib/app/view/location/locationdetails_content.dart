@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 import 'package:meetmaap/app/view/util/imageviewer_widget.dart';
 
 class LocationDetailsContent extends StatelessWidget {
-  final LocationFull location;
+  final LocationFullResponse location;
   final ScrollController? scrollController;
   final bool dragHandle;
 
@@ -21,8 +21,8 @@ class LocationDetailsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final formatter = DateFormat('dd.MM.yyyy HH:mm');
     List<String> imageUrls = [];
-    if (location.imageUrls?.isNotEmpty ?? false) {
-      imageUrls = [location.thumbnailUrl] + location.imageUrls!;
+    if (location.imageUrls.isNotEmpty) {
+      imageUrls = [location.thumbnailUrl] + location.imageUrls;
     } else {
       imageUrls = [
         "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",

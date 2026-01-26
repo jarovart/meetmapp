@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/debouncer.dart';
 import 'package:meetmaap/app/model/exceptions/geolocationpermission_exception.dart';
-import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
 
@@ -20,8 +20,8 @@ class MapViewController extends ChangeNotifier {
   // STATE
   // ─────────────────────────────────────────────
   bool _isLoaded = false;
-  List<LocationBase> _locations = [];
-  LocationBase? _selectedLocation;
+  List<LocationBaseResponse> _locations = [];
+  LocationBaseResponse? _selectedLocation;
   LatLng _initialCenter = LatLng(51.1657, 10.4515); // Mitte von Deutschland
   LatLng? _currentPosition;
   LatLng? _mapCenterBeforeSheet;
@@ -36,13 +36,13 @@ class MapViewController extends ChangeNotifier {
   ];
 
   final TextEditingController _searchController = TextEditingController();
-  List<LocationBase> _searchResults = [];
+  List<LocationBaseResponse> _searchResults = [];
 
   late Debouncer _debouncer;
   Timer? _searchDebounce;
 
-  List<LocationBase> get locations => _locations;
-  LocationBase? get selectedLocation => _selectedLocation;
+  List<LocationBaseResponse> get locations => _locations;
+  LocationBaseResponse? get selectedLocation => _selectedLocation;
   LatLng get initialCenter => _initialCenter;
   LatLng? get currentPosition => _currentPosition;
   LatLng? get mapCenterBeforeSheet => _mapCenterBeforeSheet;
@@ -53,7 +53,7 @@ class MapViewController extends ChangeNotifier {
   DateTime get _endDate => _dateFromIndex(_selectedRange.end.round());
 
   TextEditingController get searchController => _searchController;
-  List<LocationBase> get searchResults => _searchResults;
+  List<LocationBaseResponse> get searchResults => _searchResults;
 
   Debouncer get debouncer => _debouncer;
 
@@ -71,12 +71,12 @@ class MapViewController extends ChangeNotifier {
     return _dayOptions[index.round()];
   }
 
-  void selectLocation(LocationBase? location) {
+  void selectLocation(LocationBaseResponse? location) {
     _selectedLocation = location;
     notifyListeners();
   }
 
-  void updateSearchResults(List<LocationBase> results) {
+  void updateSearchResults(List<LocationBaseResponse> results) {
     _searchResults = results;
     debugPrint("updateSearchResults: ${results.length}");
     notifyListeners();
@@ -152,10 +152,26 @@ class MapViewController extends ChangeNotifier {
     _mapCenterBeforeSheet = null;
   }
 
-  LocationBase pickBestLocationFromCluster(List<Marker> markers) {
+  LocationBaseResponse pickBestLocationFromCluster(List<Marker> markers) {
     return markers
         .map((m) => (m.child as LocationMarker).location)
-        .reduce((a, b) => a.getLocationScore() >= b.getLocationScore() ? a : b);
+        .reduce(
+          (a, b) =>
+              LocationService.getLocationScore(
+                    likedUserCount: a.likedUserCount,
+                    joinedUserCount: a.joinedUserCount,
+                    startDateTime: a.startDateTime,
+                    endDateTime: a.endDateTime,
+                  ) >=
+                  LocationService.getLocationScore(
+                    likedUserCount: b.likedUserCount,
+                    joinedUserCount: b.joinedUserCount,
+                    startDateTime: b.startDateTime,
+                    endDateTime: b.endDateTime,
+                  )
+              ? a
+              : b,
+        );
   }
 
   DateTime _dateFromIndex(int index) {
@@ -260,12 +276,14 @@ class MapViewController extends ChangeNotifier {
   // ─────────────────────────────────────────────
 
   void createLocation(BuildContext context, LatLng tapPosition) async {
+    final router = GoRouter.of(context);
+
     final geoAddress = await LocationService.reverseGeocodeOSM(
       tapPosition.latitude,
       tapPosition.longitude,
     );
 
-    final createdLocation = await context.push<LocationBase>(
+    final createdLocation = await router.push<LocationBaseResponse>(
       "/locationcreate",
       extra: {
         'lat': tapPosition.latitude,

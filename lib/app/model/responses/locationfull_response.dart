@@ -1,7 +1,7 @@
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/config/api_config.dart';
+import 'package:meetmaap/app/model/utils/location_utils.dart';
 
-class LocationFull {
+class LocationFullResponse {
   final int id;
   final String title;
   final String description;
@@ -11,14 +11,13 @@ class LocationFull {
   final DateTime endDateTime;
   final LatLng position;
   final String thumbnailUrl;
-  //final String imageUrl;
   final List<String> imageUrls;
   final int createdUserId;
   final String createdUsername;
   final int joinedUserCount;
   final int likedUserCount;
 
-  LocationFull({
+  LocationFullResponse({
     required this.id,
     required this.title,
     required this.description,
@@ -55,19 +54,19 @@ class LocationFull {
     };
   }
 
-  factory LocationFull.fromMap(Map<String, dynamic> map) {
+  factory LocationFullResponse.fromMap(Map<String, dynamic> map) {
     final rawImage = map['thumbnailUrl'] ?? '';
     final rawImages = (map['imageUrls'] as List?) ?? [];
 
     final thumbnailUrl = rawImage is String
-        ? LocationFull.toAbsolute(rawImage)
+        ? LocationUtils.toAbsolute(rawImage)
         : '';
     final imageUrls = rawImages
         .whereType<String>()
-        .map(LocationFull.toAbsolute)
+        .map(LocationUtils.toAbsolute)
         .toList();
 
-    return LocationFull(
+    return LocationFullResponse(
       id: map['id'] as int,
       title: map['title'] as String,
       description: map['description'] ?? '',
@@ -88,10 +87,5 @@ class LocationFull {
       joinedUserCount: map['joinedUserCount'] ?? 0,
       likedUserCount: map['likedUserCount'] ?? 0,
     );
-  }
-
-  static String toAbsolute(String url) {
-    if (url.startsWith('http')) return url;
-    return '${ApiConfig.baseUrl}$url';
   }
 }

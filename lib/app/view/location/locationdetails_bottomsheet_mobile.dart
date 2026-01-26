@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 import 'package:meetmaap/app/service/location_service.dart';
-import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/view/location/locationdetails_content.dart';
 
 class LocationDetailsBottomSheet extends StatelessWidget {
-  final LocationBase locationBase;
+  final LocationBaseResponse locationBase;
 
   const LocationDetailsBottomSheet({super.key, required this.locationBase});
 
   // 🔹 Imperativ: öffnet das Sheet
   static Future<void> show(
     BuildContext context, {
-    required LocationBase locationBase,
+    required LocationBaseResponse locationBase,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -30,7 +30,7 @@ class LocationDetailsBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<LocationFull>(
+    return FutureBuilder<LocationFullResponse>(
       future: LocationService.fetchFullLocation(locationBase.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

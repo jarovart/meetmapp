@@ -6,7 +6,7 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
-import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/view/location/locationdetails_bottomsheet_mobile.dart';
 import 'package:meetmaap/app/view/location/locationdetails_generaldialog_nomobile.dart';
 import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
@@ -23,7 +23,6 @@ class MapPage extends StatelessWidget {
 
     return Stack(
       children: [
-        // FlutterMap with only layer children
         FlutterMap(
           mapController: mapViewController.mapController,
           options: MapOptions(
@@ -313,7 +312,7 @@ class MapPage extends StatelessWidget {
   void _onLocationTapped(
     BuildContext context,
     MapViewController mapViewController,
-    LocationBase location,
+    LocationBaseResponse location,
   ) {
     mapViewController.selectLocation(
       mapViewController.selectedLocation?.id == location.id ? null : location,

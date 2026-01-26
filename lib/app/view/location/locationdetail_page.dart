@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 
 class LocationDetailPage extends StatelessWidget {
-  final LocationFull location;
+  final LocationFullResponse location;
 
   const LocationDetailPage({super.key, required this.location});
 

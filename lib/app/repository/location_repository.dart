@@ -6,13 +6,13 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/config/api_config.dart';
 import 'package:meetmaap/app/model/exceptions/geolocationpermission_exception.dart';
-import 'package:meetmaap/app/model/location_base.dart';
-import 'package:meetmaap/app/model/createlocation_request.dart';
-import 'package:meetmaap/app/model/location_full.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/requests/createlocation_request.dart';
+import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 
 class LocationRepository {
-  static final Map<int, LocationFull> _fullLocationCache = {};
+  static final Map<int, LocationFullResponse> _fullLocationCache = {};
 
   static Future<LocationResult> getCurrentLocation() async {
     try {
@@ -42,7 +42,7 @@ class LocationRepository {
     }
   }
 
-  static Future<LocationBase> uploadLocation(
+  static Future<LocationBaseResponse> uploadLocation(
     CreateLocationRequest location,
   ) async {
     final token = await AuthRepository.getToken();
@@ -68,11 +68,11 @@ class LocationRepository {
     }
 
     final body = jsonDecode(response.body);
-    return LocationBase.fromMap(body);
+    return LocationBaseResponse.fromMap(body);
   }
 
   //not used
-  static Future<List<LocationBase>> fetchAllLocationsInView(
+  static Future<List<LocationBaseResponse>> fetchAllLocationsInView(
     LatLngBounds bounds,
   ) async {
     final minLat = bounds.southWest.latitude;
@@ -91,10 +91,10 @@ class LocationRepository {
     }
 
     final body = jsonDecode(response.body) as List;
-    return body.map((e) => LocationBase.fromMap(e)).toList();
+    return body.map((e) => LocationBaseResponse.fromMap(e)).toList();
   }
 
-  static Future<List<LocationBase>> fetchLocationsWithinWithTime(
+  static Future<List<LocationBaseResponse>> fetchLocationsWithinWithTime(
     LatLngBounds bounds,
     DateTime startDate,
     DateTime endDate,
@@ -117,10 +117,12 @@ class LocationRepository {
       throw Exception('Failed to load locations');
     }
     final body = jsonDecode(response.body) as List;
-    return body.map((e) => LocationBase.fromMap(e)).toList();
+    return body.map((e) => LocationBaseResponse.fromMap(e)).toList();
   }
 
-  static Future<List<LocationBase>> searchLocations(String query) async {
+  static Future<List<LocationBaseResponse>> searchLocations(
+    String query,
+  ) async {
     final url = Uri.parse(
       '${ApiConfig.baseUrl}/api/locations/search?query=$query',
     );
@@ -132,10 +134,10 @@ class LocationRepository {
     }
 
     final body = jsonDecode(response.body) as List;
-    return body.map((e) => LocationBase.fromMap(e)).toList();
+    return body.map((e) => LocationBaseResponse.fromMap(e)).toList();
   }
 
-  static Future<LocationFull> fetchFullLocation(int id) async {
+  static Future<LocationFullResponse> fetchFullLocation(int id) async {
     // 🔥 1. Cache-Hit
     if (_fullLocationCache.containsKey(id)) {
       debugPrint('🟢 Location $id aus Cache');
@@ -152,7 +154,7 @@ class LocationRepository {
     if (response.statusCode != 200) {
       throw Exception('Failed to load location');
     }
-    final location = LocationFull.fromMap(jsonDecode(response.body));
+    final location = LocationFullResponse.fromMap(jsonDecode(response.body));
 
     // 🔥 3. Cache speichern
     _fullLocationCache[id] = location;

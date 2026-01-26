@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/location_base.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 
 class LocationMarker extends StatelessWidget {
-  final LocationBase location;
+  final LocationBaseResponse location;
   final bool isSelected;
   final VoidCallback onTap;
 
