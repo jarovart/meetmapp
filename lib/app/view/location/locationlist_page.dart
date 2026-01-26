@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/config/api_config.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/service/location_service.dart';
 
 class LocationsPage extends StatefulWidget {
   final String locationId; // falls du sie brauchst – sonst entfernen
@@ -29,19 +27,10 @@ class _LocationsPageState extends State<LocationsPage> {
   }
 
   Future<List<LocationBaseResponse>> _fetchLocations() async {
-    debugPrint("Start: load locations from backend");
-    final response = await http.get(
-      Uri.parse('${ApiConfig.baseUrl}/api/locations'),
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> body = jsonDecode(response.body);
-      debugPrint("Executed: load locations from backend");
-      return body
-          .map((e) => LocationBaseResponse.fromMap(e as Map<String, dynamic>))
-          .toList();
-    } else {
+    try {
+      return await LocationService.fetchLocations();
+    } catch (e) {
+      debugPrint('Error fetching all locations: $e');
       // Beispiel-Daten – später ersetzt durch Backend
       return List.generate(
         20,

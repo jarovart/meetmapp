@@ -33,6 +33,10 @@ class LocationService {
     return LocationRepository.searchLocations(text);
   }
 
+  static Future<List<LocationBaseResponse>> fetchLocations() async {
+    return LocationRepository.fetchLocations();
+  }
+
   static Future<LocationFullResponse>? fetchFullLocation(int id) async {
     return LocationRepository.fetchFullLocation(id);
   }

@@ -137,6 +137,22 @@ class LocationRepository {
     return body.map((e) => LocationBaseResponse.fromMap(e)).toList();
   }
 
+  static Future<List<LocationBaseResponse>> fetchLocations() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/api/locations'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Fehler beim Suchen");
+    }
+
+    final List<dynamic> body = jsonDecode(response.body);
+    return body
+        .map((e) => LocationBaseResponse.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
   static Future<LocationFullResponse> fetchFullLocation(int id) async {
     // 🔥 1. Cache-Hit
     if (_fullLocationCache.containsKey(id)) {
