@@ -4,7 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
 import 'package:meetmaap/app/controller/setting_controller.dart';
-import 'package:meetmaap/app/model/responses/locationfull_response.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';
@@ -47,43 +47,24 @@ class MainApplication extends StatelessWidget {
         /// Home (Startseite)
         GoRoute(path: '/', builder: (context, state) => const HomePage()),
 
-        /// Location Listen-Seite ohne Parameter
+        /// Location Listen-Seite
         GoRoute(
-          path: '/locationlist/:id',
+          path: '/locationlist',
           builder: (context, state) {
-            final id = state.pathParameters['id']!;
-            return LocationsPage(locationId: id);
+            final data = state.extra! as Map<String, dynamic>;
+            return LocationsListPage(
+              geoposition: LatLng(data['lat'], data['lng']),
+            );
           },
         ),
 
-        /// Location-Seite mit Parameter EXAMPLE
+        /// Location-Seite
         GoRoute(
-          path: '/location/:id',
+          path: '/locationdetail',
           builder: (context, state) {
-            final id = state.pathParameters['id']!;
-
-            final mockLocation = LocationFullResponse(
-              id: int.tryParse(id) ?? 0,
-              title: "Chill Spot $id",
-              address: "Adresse $id in Bremen",
-              description:
-                  "Eine sehr coole Location zum Chillen, Essen und Treffen1.",
-              creationDateTime: DateTime.now(),
-              startDateTime: DateTime.now(),
-              endDateTime: DateTime.now(),
-              position: LatLng(53.0, 8.8),
-              thumbnailUrl:
-                  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
-              imageUrls: [
-                "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
-              ],
-              createdUserId: 12,
-              createdUsername: "jarovart",
-              joinedUserCount: 14,
-              likedUserCount: 13,
-            );
-
-            return LocationDetailPage(location: mockLocation);
+            final locationbase =
+                state.extra as LocationBaseResponse; // oder LocationBase
+            return LocationDetailPage(locationbase: locationbase);
           },
         ),
 
@@ -96,22 +77,6 @@ class MainApplication extends StatelessWidget {
               point: LatLng(data['lat'], data['lng']),
               geoAddress: data['geoAddress'],
             );
-          },
-        ),
-
-        /// Test ShowModal-Seite
-        GoRoute(
-          path: '/test-showmodal',
-          builder: (context, state) {
-            return TestShowModal();
-          },
-        ),
-
-        /// Test Slider/GPS-Seite
-        GoRoute(
-          path: '/test-slidergps',
-          builder: (context, state) {
-            return TestSliderGps();
           },
         ),
         GoRoute(
@@ -141,7 +106,7 @@ class MainApplication extends StatelessWidget {
           },
         ),
         GoRoute(
-          path: '/verify',
+          path: '/verifyemail',
           builder: (context, state) {
             final token = state.uri.queryParameters['token'];
 
@@ -173,6 +138,22 @@ class MainApplication extends StatelessWidget {
         GoRoute(
           path: '/settingspage',
           builder: (context, state) => const SettingsPage(),
+        ),
+
+        /// Test ShowModal-Seite
+        GoRoute(
+          path: '/test-showmodal',
+          builder: (context, state) {
+            return TestShowModal();
+          },
+        ),
+
+        /// Test Slider/GPS-Seite
+        GoRoute(
+          path: '/test-slidergps',
+          builder: (context, state) {
+            return TestSliderGps();
+          },
         ),
       ],
     );

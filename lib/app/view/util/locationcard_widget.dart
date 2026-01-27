@@ -1,26 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 
 class LocationCard extends StatelessWidget {
-  final int id;
-  final String title;
-  final String subtitle;
-  final String imageUrl;
-  final String date;
+  final LocationBaseResponse locationbase;
 
-  const LocationCard({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.imageUrl,
-    required this.date,
-  });
+  const LocationCard({required this.locationbase});
 
   @override
   Widget build(BuildContext context) {
+    final formatter = DateFormat('dd.MM.yyyy HH:mm');
+
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => context.push('/location/$id'),
+      onTap: () => context.push('/locationdetail', extra: locationbase),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -41,7 +35,7 @@ class LocationCard extends StatelessWidget {
                 top: Radius.circular(16),
               ),
               child: Image.network(
-                imageUrl,
+                locationbase.thumbnailUrl,
                 height: 130,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -59,7 +53,7 @@ class LocationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    locationbase.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -67,23 +61,56 @@ class LocationCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+
                   const SizedBox(height: 4),
                   Text(
-                    subtitle,
+                    locationbase.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(color: Colors.grey[700]),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on_outlined, size: 20),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Wrap(
+                          spacing: 22,
+                          runSpacing: 8,
+                          children: [
+                            Text(
+                              locationbase.address,
+                              style: const TextStyle(fontSize: 16),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
                       const Icon(Icons.calendar_today, size: 16),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text(
-                          date,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        child: Wrap(
+                          spacing: 22,
+                          runSpacing: 8,
+                          children: [
+                            Text(
+                              "Startzeit: ${formatter.format(locationbase.startDateTime)} Uhr",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              "Endzeit: ${formatter.format(locationbase.endDateTime)} Uhr",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
                     ],

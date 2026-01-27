@@ -1,10 +1,7 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meetmaap/app/model/responses/locationfull_response.dart';
-import 'package:meetmaap/app/view/util/imageviewer_widget.dart';
+import 'package:meetmaap/app/view/util/gallery_widget.dart';
 
 class LocationDetailsContent extends StatelessWidget {
   final LocationFullResponse location;
@@ -112,90 +109,9 @@ class LocationDetailsContent extends StatelessWidget {
         // Bilder
         const SizedBox(height: 24),
         const SizedBox(height: 24),
-        if (!dragHandle && !isMobile())
-          GridView.builder(
-            shrinkWrap: true,
-            physics:
-                const NeverScrollableScrollPhysics(), // wichtig im ListView
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 180, // 🔥 max Breite pro Bild
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1, // quadratisch
-            ),
-            itemCount: imageUrls.length,
-            itemBuilder: (context, index) {
-              final url = imageUrls[index];
 
-              return GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      opaque: false,
-                      pageBuilder: (_, _, _) => ImageGalleryViewer(
-                        imageUrls: imageUrls,
-                        initialIndex: index,
-                      ),
-                    ),
-                  );
-                },
-                child: Hero(
-                  tag: url,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(url, fit: BoxFit.cover),
-                  ),
-                ),
-              );
-            },
-          ),
-
-        if (dragHandle || isMobile())
-          SizedBox(
-            height: 160,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: imageUrls.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                final url = imageUrls[index];
-
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      PageRouteBuilder(
-                        opaque: false,
-                        pageBuilder: (_, _, _) => ImageGalleryViewer(
-                          imageUrls: imageUrls,
-                          initialIndex: index,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Hero(
-                    tag: url,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        url,
-                        width: 160,
-                        height: 160,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+        ImageGalleryWidget(imageUrls: imageUrls, dragHandle: dragHandle),
       ],
     );
-  }
-
-  bool isMobile() {
-    if (kIsWeb) return false;
-
-    // Mobile Portrait → BottomSheet
-    return (Platform.isAndroid || Platform.isIOS);
   }
 }

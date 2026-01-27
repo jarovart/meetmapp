@@ -1,19 +1,21 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/util/locationcard_widget.dart';
 
-class LocationsPage extends StatefulWidget {
-  final String locationId; // falls du sie brauchst – sonst entfernen
+class LocationsListPage extends StatefulWidget {
+  final LatLng geoposition; // falls du sie brauchst – sonst entfernen
 
-  const LocationsPage({super.key, required this.locationId});
+  const LocationsListPage({super.key, required this.geoposition});
 
   @override
-  State<LocationsPage> createState() => _LocationsPageState();
+  State<LocationsListPage> createState() => _LocationsListPageState();
 }
 
-class _LocationsPageState extends State<LocationsPage> {
+class _LocationsListPageState extends State<LocationsListPage> {
   late Future<List<LocationBaseResponse>> _futureLocations;
 
   @override
@@ -88,12 +90,7 @@ class _LocationsPageState extends State<LocationsPage> {
 
           return LayoutBuilder(
             builder: (context, constraints) {
-              int crossAxisCount = 1;
-              if (constraints.maxWidth >= 1200) {
-                crossAxisCount = 3;
-              } else if (constraints.maxWidth >= 800) {
-                crossAxisCount = 2;
-              }
+              int crossAxisCount = max(1, constraints.maxWidth ~/ 400);
 
               final grid = GridView.builder(
                 padding: const EdgeInsets.all(16),
@@ -101,20 +98,14 @@ class _LocationsPageState extends State<LocationsPage> {
                   crossAxisCount: crossAxisCount,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 4 / 3,
+                  //childAspectRatio: 4 / 3,
+                  mainAxisExtent: 300,
                 ),
                 itemCount: locations.length,
                 itemBuilder: (context, index) {
                   final loc = locations[index];
 
-                  return LocationCard(
-                    id: loc.id,
-                    title: loc.title,
-                    // Passe diese Felder an dein LocationBase an:
-                    subtitle: loc.description,
-                    imageUrl: loc.thumbnailUrl,
-                    date: loc.creationDateTime.toIso8601String(),
-                  );
+                  return LocationCard(locationbase: loc);
                 },
               );
 

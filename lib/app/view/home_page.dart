@@ -94,7 +94,13 @@ class HomePageState extends State<HomePage> {
                           return;
                         } else if (label == 'Locations') {
                           _toggleMenu();
-                          context.push('/locationlist/124');
+                          context.push(
+                            '/locationlist',
+                            extra: {
+                              'lat': 52.5200,
+                              'lng': 13.4050,
+                            }, //TODO: change with actual position
+                          );
                           return;
                         } else if (label == "Test-ShowModal") {
                           _toggleMenu();
