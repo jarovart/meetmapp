@@ -1,4 +1,5 @@
 import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/model/requests/createlocation_request.dart';
 import 'package:meetmaap/app/model/exceptions/geolocationpermission_exception.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
@@ -39,6 +40,20 @@ class LocationService {
 
   static Future<LocationFullResponse>? fetchFullLocation(int id) async {
     return LocationRepository.fetchFullLocation(id);
+  }
+
+  static Future<List<LocationBaseResponse>> fetchAllLocationsByFilter(
+    String searchText,
+    LatLng position,
+    DateTime startDateTime,
+    DateTime endDateTime,
+  ) async {
+    return LocationRepository.fetchAllLocationsByFilter(
+      searchText,
+      position,
+      startDateTime,
+      endDateTime,
+    );
   }
 
   static Future<String?> reverseGeocodeOSM(double latitude, double longitude) {

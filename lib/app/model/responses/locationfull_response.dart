@@ -1,37 +1,25 @@
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/model/utils/location_utils.dart';
 
-class LocationFullResponse {
-  final int id;
-  final String title;
-  final String description;
-  final String address;
-  final DateTime creationDateTime;
-  final DateTime startDateTime;
-  final DateTime endDateTime;
-  final LatLng position;
-  final String thumbnailUrl;
+class LocationFullResponse extends LocationBaseResponse {
   final List<String> imageUrls;
-  final int createdUserId;
-  final String createdUsername;
-  final int joinedUserCount;
-  final int likedUserCount;
 
   LocationFullResponse({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.address,
-    required this.creationDateTime,
-    required this.startDateTime,
-    required this.endDateTime,
-    required this.position,
-    required this.thumbnailUrl,
+    required super.id,
+    required super.title,
+    required super.description,
+    required super.address,
+    required super.creationDateTime,
+    required super.startDateTime,
+    required super.endDateTime,
+    required super.position,
+    required super.thumbnailUrl,
+    required super.createdUserId,
+    required super.createdUsername,
+    required super.joinedUserCount,
+    required super.likedUserCount,
     required this.imageUrls,
-    required this.createdUserId,
-    required this.createdUsername,
-    required this.joinedUserCount,
-    required this.likedUserCount,
   });
 
   Map<String, dynamic> toMap() {

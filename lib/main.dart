@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
 import 'package:meetmaap/app/controller/setting_controller.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';
@@ -12,6 +13,7 @@ import 'package:meetmaap/app/view/authentication/registercheckemailpage.dart';
 import 'package:meetmaap/app/view/authentication/registerpage.dart';
 import 'package:meetmaap/app/view/authentication/resetpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
+import 'package:meetmaap/app/view/map_page.dart';
 import 'package:meetmaap/app/view/setting/setting_page.dart';
 import 'package:meetmaap/testexample/testshowmodal.dart';
 import 'package:meetmaap/testexample/testslidergps.dart';
@@ -50,12 +52,7 @@ class MainApplication extends StatelessWidget {
         /// Location Listen-Seite
         GoRoute(
           path: '/locationlist',
-          builder: (context, state) {
-            final data = state.extra! as Map<String, dynamic>;
-            return LocationsListPage(
-              geoposition: LatLng(data['lat'], data['lng']),
-            );
-          },
+          builder: (context, state) => const LocationsListPage(),
         ),
 
         /// Location-Seite
@@ -65,6 +62,21 @@ class MainApplication extends StatelessWidget {
             final locationbase =
                 state.extra as LocationBaseResponse; // oder LocationBase
             return LocationDetailPage(locationbase: locationbase);
+          },
+        ),
+
+        GoRoute(
+          path: '/map',
+          builder: (context, state) {
+            final loc = state.extra as LocationFullResponse;
+            return ChangeNotifierProvider<MapViewController>(
+              create: (_) {
+                final c = MapViewController(mapController: MapController());
+                c.selectLocation(loc);
+                return c;
+              },
+              child: MapPage(locationToCheck: loc),
+            );
           },
         ),
 

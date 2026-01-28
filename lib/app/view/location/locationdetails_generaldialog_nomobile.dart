@@ -4,7 +4,7 @@ import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/location/locationdetails_content.dart';
 
-class LocationDetailsGeneralDialog extends StatelessWidget {
+class LocationDetailsGeneralDialog extends StatefulWidget {
   final LocationBaseResponse locationBase;
 
   const LocationDetailsGeneralDialog({super.key, required this.locationBase});
@@ -62,9 +62,26 @@ class LocationDetailsGeneralDialog extends StatelessWidget {
   }
 
   @override
+  State<LocationDetailsGeneralDialog> createState() =>
+      _LocationDetailsGeneralDialogState();
+}
+
+class _LocationDetailsGeneralDialogState
+    extends State<LocationDetailsGeneralDialog> {
+  late final Future<LocationFullResponse>? _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = widget.locationBase is LocationFullResponse
+        ? Future.value(widget.locationBase as LocationFullResponse)
+        : LocationService.fetchFullLocation(widget.locationBase.id);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<LocationFullResponse>(
-      future: LocationService.fetchFullLocation(locationBase.id),
+      future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(

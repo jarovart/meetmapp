@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/model/responses/locationfull_response.dart';
@@ -129,9 +130,9 @@ class _LocationDetailPageState extends State<LocationDetailPage> {
                     vertical: 6,
                   ),
                   child: GestureDetector(
-                    onTap: () => debugPrint(
-                      "Lat: ${position.latitude}, Lng: ${position.longitude}",
-                    ),
+                    onTap: full == null
+                        ? null
+                        : () => context.push('/map', extra: full),
                     child: Row(
                       children: [
                         const Icon(Icons.location_on_outlined, size: 20),

@@ -212,6 +212,32 @@ class LocationRepository {
     return formatAddress(data['address'] as Map<String, dynamic>);
   }
 
+  static Future<List<LocationBaseResponse>> fetchAllLocationsByFilter(
+    String searchText,
+    LatLng position,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/api/locations/allByFilter')
+        .replace(
+          queryParameters: {
+            'lat': position.latitude.toString(),
+            'long': position.longitude.toString(),
+            'searchText': searchText,
+            'rangeStart': startDate.toIso8601String(),
+            'rangeEnd': endDate.toIso8601String(),
+          },
+        );
+
+    final response = await http.get(uri);
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load locations');
+    }
+    final body = jsonDecode(response.body) as List;
+    return body.map((e) => LocationBaseResponse.fromMap(e)).toList();
+  }
+
   static String formatAddress(Map address) {
     final parts = [
       address['country'],

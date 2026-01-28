@@ -4,7 +4,7 @@ import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/view/location/locationdetails_content.dart';
 
-class LocationDetailsBottomSheet extends StatelessWidget {
+class LocationDetailsBottomSheet extends StatefulWidget {
   final LocationBaseResponse locationBase;
 
   const LocationDetailsBottomSheet({super.key, required this.locationBase});
@@ -29,9 +29,26 @@ class LocationDetailsBottomSheet extends StatelessWidget {
   }
 
   @override
+  State<LocationDetailsBottomSheet> createState() =>
+      _LocationDetailsBottomSheetState();
+}
+
+class _LocationDetailsBottomSheetState
+    extends State<LocationDetailsBottomSheet> {
+  late final Future<LocationFullResponse>? _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = widget.locationBase is LocationFullResponse
+        ? Future.value(widget.locationBase as LocationFullResponse)
+        : LocationService.fetchFullLocation(widget.locationBase.id);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<LocationFullResponse>(
-      future: LocationService.fetchFullLocation(locationBase.id),
+      future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(

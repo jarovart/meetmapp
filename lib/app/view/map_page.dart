@@ -7,6 +7,7 @@ import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_ti
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 import 'package:meetmaap/app/view/location/locationdetails_bottomsheet_mobile.dart';
 import 'package:meetmaap/app/view/location/locationdetails_generaldialog_nomobile.dart';
 import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
@@ -14,48 +15,103 @@ import 'package:meetmaap/app/view/util/geolocationbutton_widget.dart';
 import 'package:provider/provider.dart';
 
 class MapPage extends StatelessWidget {
-  const MapPage({super.key});
+  final LocationFullResponse? locationToCheck;
+
+  const MapPage({super.key, this.locationToCheck});
 
   @override
   Widget build(BuildContext context) {
     final mapViewController = context.watch<MapViewController>();
-    mapViewController.loadData();
 
+    // Show only a single location e.g. in a stack of location details
+    if (locationToCheck != null) {
+      return Scaffold(
+        appBar: AppBar(title: Text("Location von ${locationToCheck!.title}")),
+        body: buildMap(
+          context,
+          mapViewController,
+          locationToCheck: locationToCheck,
+        ),
+      );
+    }
+
+    // Standard process with full map and all locations
+    mapViewController.loadData();
+    return buildMap(context, mapViewController);
+  }
+
+  Widget buildMap(
+    BuildContext context,
+    MapViewController mapViewController, {
+    LocationFullResponse? locationToCheck,
+  }) {
+    bool noLocationToCheck = locationToCheck == null;
     return Stack(
       children: [
         FlutterMap(
           mapController: mapViewController.mapController,
-          options: MapOptions(
-            initialCenter: mapViewController.initialCenter,
-            initialZoom: 6.0,
-            onMapEvent: (event) {
-              if (event is MapEventTap) {
-                mapViewController.selectLocation(null);
-              } else if (event is MapEventLongPress) {
-                mapViewController.createLocation(context, event.tapPosition);
-              } else if (event is MapEventMoveEnd ||
-                  event is MapEventDoubleTapZoomEnd) {
-                mapViewController.fetchLocations();
-              } else if (event is MapEventScrollWheelZoom) {
-                mapViewController.debouncer.run(
-                  () => mapViewController.fetchLocations(),
-                );
-              }
-            },
+          options: noLocationToCheck
+              ? MapOptions(
+                  initialCenter: mapViewController.initialCenter,
+                  initialZoom: 6.0,
+                  onMapEvent: (event) {
+                    if (event is MapEventTap) {
+                      mapViewController.selectLocation(null);
+                    } else if (event is MapEventLongPress) {
+                      mapViewController.createLocation(
+                        context,
+                        event.tapPosition,
+                      );
+                    } else if (event is MapEventMoveEnd ||
+                        event is MapEventDoubleTapZoomEnd) {
+                      mapViewController.fetchLocations();
+                    } else if (event is MapEventScrollWheelZoom) {
+                      mapViewController.debouncer.run(
+                        () => mapViewController.fetchLocations(),
+                      );
+                    }
+                  },
+                )
+              : MapOptions(
+                  initialCenter: locationToCheck.position,
+                  initialZoom: 13.0,
+                  onMapEvent: (event) {
+                    if (event is MapEventTap) {
+                      mapViewController.selectLocation(null);
+                    }
+                  },
+                ),
+          children: _buildMapChildren(
+            context,
+            mapViewController,
+            noLocationToCheck,
+            locationToCheck,
           ),
-          children: [
-            _buildTileLayer(),
-            if (mapViewController.currentPosition != null)
-              _buildMyLocationMarker(mapViewController.currentPosition!),
-            _buildLocationsLayer(context, mapViewController),
-          ],
         ),
         // Overlay: Search Bar and Slider/GPS positioned on top
-        _buildDateSliderAndGps(context, mapViewController),
-        _buildSearchResults(context, mapViewController),
-        _buildSearchBar(context, mapViewController),
+        _buildMapSiblings(context, mapViewController, noLocationToCheck),
       ],
     );
+  }
+
+  List<Widget> _buildMapChildren(
+    BuildContext context,
+    MapViewController mapViewController,
+    bool noLocationToCheck,
+    LocationFullResponse? locationToCheck,
+  ) {
+    if (noLocationToCheck) {
+      return [
+        _buildTileLayer(),
+        if (mapViewController.currentPosition != null)
+          _buildMyLocationMarker(mapViewController.currentPosition!),
+        _buildLocationsLayer(context, mapViewController),
+      ];
+    }
+    return [
+      _buildTileLayer(),
+      _buildLocationSoloMarker(context, mapViewController, locationToCheck!),
+    ];
   }
 
   Widget _buildTileLayer() {
@@ -63,6 +119,49 @@ class MapPage extends StatelessWidget {
       urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
       tileProvider: CancellableNetworkTileProvider(),
       userAgentPackageName: 'de.jarovart.meetmaap',
+    );
+  }
+
+  Widget _buildMapSiblings(
+    BuildContext context,
+    MapViewController mapViewController,
+    bool noLocationToCheck,
+  ) {
+    if (!noLocationToCheck) return const SizedBox.shrink();
+
+    return Stack(
+      children: [
+        _buildDateSliderAndGps(context, mapViewController),
+        _buildSearchResults(context, mapViewController),
+        _buildSearchBar(context, mapViewController),
+      ],
+    );
+  }
+
+  Widget _buildLocationSoloMarker(
+    BuildContext context,
+    MapViewController mapViewController,
+    LocationFullResponse locationFullResponse,
+  ) {
+    return MarkerLayer(
+      markers: [
+        Marker(
+          point: locationFullResponse.position,
+          width: 30,
+          height: 30,
+          child: LocationMarker(
+            location: locationFullResponse,
+            isSelected:
+                mapViewController.selectedLocation?.id ==
+                locationFullResponse.id,
+            onTap: () => _onLocationTapped(
+              context,
+              mapViewController,
+              locationFullResponse,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -131,7 +230,7 @@ class MapPage extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final sidePadding = screenWidth * 0.15;
     final topOffset = 15.0;
-    TextEditingController searchController = mapViewController.searchController;
+    final searchController = mapViewController.searchController;
 
     return Positioned(
       left: sidePadding,
@@ -141,9 +240,13 @@ class MapPage extends StatelessWidget {
         top: false,
         child: Material(
           elevation: 0,
-          color: Colors.grey.withValues(alpha: 0.3),
+          color: const Color.fromARGB(
+            255,
+            223,
+            222,
+            222,
+          ).withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(24),
-          //color: Colors.white.withOpacity(0.1), // 90% transparent
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: TextField(
@@ -314,9 +417,7 @@ class MapPage extends StatelessWidget {
     MapViewController mapViewController,
     LocationBaseResponse location,
   ) {
-    mapViewController.selectLocation(
-      mapViewController.selectedLocation?.id == location.id ? null : location,
-    );
+    mapViewController.selectLocation(location);
     mapViewController.mapController.move(
       location.position,
       mapViewController.mapController.camera.zoom,

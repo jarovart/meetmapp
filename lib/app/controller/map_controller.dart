@@ -38,7 +38,7 @@ class MapViewController extends ChangeNotifier {
   final TextEditingController _searchController = TextEditingController();
   List<LocationBaseResponse> _searchResults = [];
 
-  late Debouncer _debouncer;
+  Debouncer? _debouncer;
   Timer? _searchDebounce;
 
   List<LocationBaseResponse> get locations => _locations;
@@ -55,12 +55,12 @@ class MapViewController extends ChangeNotifier {
   TextEditingController get searchController => _searchController;
   List<LocationBaseResponse> get searchResults => _searchResults;
 
-  Debouncer get debouncer => _debouncer;
+  Debouncer get debouncer => _debouncer!;
 
   // ─────────────────────────────────────────────
   // STATE MUTATION
   // ─────────────────────────────────────────────
-  void centerOnUser() async => await _determinePosition();
+  void centerOnUser() async => await _determinePosition(refreshLocation: true);
 
   void setDateRange(RangeValues values) {
     _selectedRange = values;
@@ -97,10 +97,18 @@ class MapViewController extends ChangeNotifier {
 
     _determinePosition();
     debugPrint("Start: InitState MapPage");
-    _debouncer = Debouncer(delay: Duration(milliseconds: 1000));
+    _debouncer ??= Debouncer(delay: const Duration(milliseconds: 1000));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       fetchLocations();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    _debouncer?.cancel();
+    super.dispose();
   }
 
   // ─────────────────────────────────────────────
@@ -154,7 +162,9 @@ class MapViewController extends ChangeNotifier {
 
   LocationBaseResponse pickBestLocationFromCluster(List<Marker> markers) {
     return markers
-        .map((m) => (m.child as LocationMarker).location)
+        .map((m) => m.child)
+        .whereType<LocationMarker>()
+        .map((w) => w.location)
         .reduce(
           (a, b) =>
               LocationService.getLocationScore(
@@ -188,10 +198,8 @@ class MapViewController extends ChangeNotifier {
   }
 
   void onSearchChanged(String text) {
-    notifyListeners();
     if (_searchDebounce?.isActive ?? false) {
       _searchDebounce!.cancel();
-      notifyListeners();
     }
 
     _searchDebounce = Timer(const Duration(milliseconds: 300), () async {
@@ -200,6 +208,7 @@ class MapViewController extends ChangeNotifier {
         return;
       }
 
+      notifyListeners();
       try {
         final results = await LocationService.searchLocations(text);
 
@@ -231,7 +240,7 @@ class MapViewController extends ChangeNotifier {
   // API CALL BEHAVIOR
   // ─────────────────────────────────────────────
 
-  Future<void> _determinePosition() async {
+  Future<void> _determinePosition({bool refreshLocation = false}) async {
     final result = await LocationService.getCurrentLocation();
 
     //if (!mounted) return; // Ist das Widget noch im Baum?
@@ -250,6 +259,10 @@ class MapViewController extends ChangeNotifier {
         debugPrint("Fehler: $message");
       //ExceptionMessage.showError(context, "Fehler: $message");
     }
+    if (refreshLocation) {
+      fetchLocations();
+    }
+
     notifyListeners();
   }
 
