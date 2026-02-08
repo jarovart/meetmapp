@@ -42,18 +42,22 @@ class LocationService {
     return LocationRepository.fetchFullLocation(id);
   }
 
-  static Future<List<LocationBaseResponse>> fetchAllLocationsByFilter(
+  static Future<List<LocationBaseResponse>> fetchLocationsByFilterSettings(
     String searchText,
     LatLng position,
+    double radiusKm,
     DateTime startDateTime,
     DateTime endDateTime,
   ) async {
+    return LocationRepository.fetchLocations();
+    /* TODO: API call fix
     return LocationRepository.fetchAllLocationsByFilter(
       searchText,
       position,
+      radiusKm,
       startDateTime,
       endDateTime,
-    );
+    );*/
   }
 
   static Future<String?> reverseGeocodeOSM(double latitude, double longitude) {

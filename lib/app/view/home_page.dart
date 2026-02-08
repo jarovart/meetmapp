@@ -49,6 +49,7 @@ class HomePageState extends State<HomePage> {
     final items = [
       "Login",
       "Locations",
+      "Benutzer",
       "Freunde",
       "Favoriten",
       "Test-ShowModal",
@@ -95,6 +96,10 @@ class HomePageState extends State<HomePage> {
                         } else if (label == 'Locations') {
                           _toggleMenu();
                           context.push('/locationlist');
+                          return;
+                        } else if (label == 'Benutzer') {
+                          _toggleMenu();
+                          context.push('/userlist');
                           return;
                         } else if (label == "Test-ShowModal") {
                           _toggleMenu();

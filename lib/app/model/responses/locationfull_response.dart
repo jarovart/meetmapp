@@ -1,6 +1,6 @@
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
-import 'package:meetmaap/app/model/utils/location_utils.dart';
+import 'package:meetmaap/app/model/utils/image_utils.dart';
 
 class LocationFullResponse extends LocationBaseResponse {
   final List<String> imageUrls;
@@ -47,11 +47,11 @@ class LocationFullResponse extends LocationBaseResponse {
     final rawImages = (map['imageUrls'] as List?) ?? [];
 
     final thumbnailUrl = rawImage is String
-        ? LocationUtils.toAbsolute(rawImage)
+        ? ImageUtils.toAbsolute(rawImage)
         : '';
     final imageUrls = rawImages
         .whereType<String>()
-        .map(LocationUtils.toAbsolute)
+        .map(ImageUtils.toAbsolute)
         .toList();
 
     return LocationFullResponse(

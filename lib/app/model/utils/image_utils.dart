@@ -1,6 +1,6 @@
 import 'package:meetmaap/app/config/api_config.dart';
 
-class LocationUtils {
+class ImageUtils {
   static String toAbsolute(String url) {
     if (url.isEmpty) return '';
     if (url.startsWith('http')) return url;

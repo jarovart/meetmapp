@@ -1,117 +1,36 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/model/exceptions/geolocationpermission_exception.dart';
+import 'package:intl/intl.dart';
+import 'package:meetmaap/app/controller/locationlist_controller.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
-import 'package:meetmaap/app/service/location_service.dart';
+import 'package:meetmaap/app/view/util/filterbutton_widget.dart';
 import 'package:meetmaap/app/view/util/locationcard_widget.dart';
+import 'package:provider/provider.dart';
 
-class LocationsListPage extends StatefulWidget {
+class LocationsListPage extends StatelessWidget {
   const LocationsListPage({super.key});
 
   @override
-  State<LocationsListPage> createState() => _LocationsListPageState();
-}
-
-class _LocationsListPageState extends State<LocationsListPage> {
-  late Future<List<LocationBaseResponse>> _futureLocations;
-  final TextEditingController _searchCtrl = TextEditingController();
-  LatLng? _currentLocation;
-  DateTime? _filterStart;
-  DateTime? _filterEnd;
-
-  String? _filterPlaceText; // z.B. "Bremen"
-  double _filterRadiusKm = 10;
-
-  // optional: falls du Koordinaten statt Text nutzen willst
-  LatLng? _filterCenter;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadLocations();
-  }
-
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
-
-  void _loadLocations() {
-    _determinePosition();
-    _futureLocations = _fetchLocations();
-  }
-
-  Future<void> _determinePosition() async {
-    final result = await LocationService.getCurrentLocation();
-
-    if (!mounted) return; // Ist das Widget noch im Baum?
-    switch (result) {
-      case LocationSuccess(:final position):
-        _currentLocation = position;
-      case LocationServiceDisabled():
-        debugPrint("Standortdienste sind deaktiviert");
-      case LocationPermissionDenied():
-        debugPrint("Standort-Berechtigung verweigert");
-      case LocationError(:final message):
-        debugPrint("Fehler: $message");
-    }
-  }
-
-  Future<List<LocationBaseResponse>> _fetchLocations() async {
-    try {
-      return await LocationService.fetchLocations();
-      /* TODO: Filter search einbauen
-      return await LocationService.fetchAllLocationsByFilter(
-        "searchText",
-        _currentLocation!,
-        DateTime.now(),
-        DateTime.now().add(const Duration(days: 7)),
-      );*/
-    } catch (e) {
-      debugPrint('Error fetching all locations: $e');
-      // Beispiel-Daten – später ersetzt durch Backend
-      return List.generate(
-        20,
-        (i) => LocationBaseResponse(
-          id: i,
-          title: "Coole Location #$i",
-          description: "Beschreibung $i, Bremen",
-          address: "Adresse $i, Bremen",
-          creationDateTime: DateTime.now(),
-          startDateTime: DateTime.now().add(const Duration(days: 1)),
-          endDateTime: DateTime.now().add(const Duration(days: 2)),
-          position: LatLng(52.0 + i, 8.0 + i),
-          thumbnailUrl:
-              "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
-          createdUserId: i,
-          createdUsername: "test123",
-          joinedUserCount: 123,
-          likedUserCount: 11,
-        ),
-      );
-      //throw Exception('Failed to load locations');
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final locationListController = context.watch<LocationListController>();
+
     return Scaffold(
       appBar: AppBar(title: const Text("Locations"), centerTitle: true),
       backgroundColor: Colors.grey.shade200,
       body: Stack(
         children: [
           FutureBuilder<List<LocationBaseResponse>>(
-            future: _futureLocations,
+            future: locationListController.futureLocations,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (locationListController.isLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (snapshot.hasError) {
-                return Center(child: Text('Fehler: ${snapshot.error}'));
+              if (locationListController.hasError) {
+                return Center(
+                  child: Text('Fehler: ${locationListController.errorMessage}'),
+                );
               }
 
               final locations = snapshot.data ?? [];
@@ -119,7 +38,8 @@ class _LocationsListPageState extends State<LocationsListPage> {
               // ⬇️ Optional: wenn keine Locations vorhanden sind
               if (locations.isEmpty) {
                 return RefreshIndicator(
-                  onRefresh: () async => _loadLocations(),
+                  onRefresh: () async =>
+                      locationListController.reloadLocations(),
                   child: ListView(
                     children: const [
                       SizedBox(height: 200),
@@ -159,9 +79,7 @@ class _LocationsListPageState extends State<LocationsListPage> {
                   // ⬇️ Pull-to-refresh, damit du manuell neu laden kannst
                   return RefreshIndicator(
                     onRefresh: () async {
-                      setState(() {
-                        _loadLocations();
-                      });
+                      locationListController.reloadLocations();
                     },
                     child: grid,
                   );
@@ -169,13 +87,16 @@ class _LocationsListPageState extends State<LocationsListPage> {
               );
             },
           ),
-          _buildSearchAndFilterBar(context),
+          _buildSearchAndFilterBar(context, locationListController),
         ],
       ),
     );
   }
 
-  Widget _buildSearchAndFilterBar(BuildContext context) {
+  Widget _buildSearchAndFilterBar(
+    BuildContext context,
+    LocationListController locationListController,
+  ) {
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -184,18 +105,19 @@ class _LocationsListPageState extends State<LocationsListPage> {
           children: [
             Expanded(
               child: TextField(
-                controller: _searchCtrl,
+                controller: locationListController.searchCtrl,
+                onChanged: locationListController.onSearchChanged,
                 textInputAction: TextInputAction.search,
-                onSubmitted: (_) => _applyFilters(),
+                onSubmitted: (_) => locationListController
+                    .reloadLocations(), //gibt es nicht bei mappage
                 decoration: InputDecoration(
                   hintText: "Suchen...",
                   prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchCtrl.text.isNotEmpty
+                  suffixIcon: locationListController.searchCtrl.text.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () {
-                            _searchCtrl.clear();
-                            _applyFilters();
+                            locationListController.clearSearchResults();
                           },
                         )
                       : null,
@@ -211,11 +133,6 @@ class _LocationsListPageState extends State<LocationsListPage> {
                     borderSide: BorderSide.none,
                   ),
                 ),
-                onChanged: (_) {
-                  // Optional: debounce, sonst zu viele reloads
-                  // erstmal simpel:
-                  setState(() {}); // damit suffixIcon korrekt reagiert
-                },
               ),
             ),
             const SizedBox(width: 10),
@@ -229,7 +146,7 @@ class _LocationsListPageState extends State<LocationsListPage> {
               borderRadius: BorderRadius.circular(16),
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
-                onTap: () => _openFilterDialog(context),
+                onTap: () => _openFilterDialog(context, locationListController),
                 child: const Padding(
                   padding: EdgeInsets.all(12),
                   child: Icon(Icons.tune),
@@ -242,11 +159,15 @@ class _LocationsListPageState extends State<LocationsListPage> {
     );
   }
 
-  Future<void> _openFilterDialog(BuildContext context) async {
-    DateTime? tempStart = _filterStart;
-    DateTime? tempEnd = _filterEnd;
-    String tempPlace = _filterPlaceText ?? '';
-    double tempRadius = _filterRadiusKm;
+  Future<void> _openFilterDialog(
+    BuildContext context,
+    LocationListController locationListController,
+  ) async {
+    DateTime? tempStart = locationListController.filterStart;
+    DateTime? tempEnd = locationListController.filterEnd;
+    String tempPlace = locationListController.filterPlaceText ?? '';
+    double tempRadius = locationListController.filterRadiusKm;
+    final dateTimeformatter = DateFormat('dd.MM.yyyy HH:mm');
 
     await showDialog(
       context: context,
@@ -310,21 +231,23 @@ class _LocationsListPageState extends State<LocationsListPage> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: _FilterButton(
-                                      label: "Start",
-                                      value:
-                                          tempStart?.toString() ??
-                                          "nicht gesetzt",
+                                    child: FilterButton(
+                                      label: "Startzeit",
+                                      value: dateTimeformatter.format(
+                                        tempStart ??
+                                            locationListController.resetStart,
+                                      ),
                                       onTap: pickStart,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
-                                    child: _FilterButton(
+                                    child: FilterButton(
                                       label: "Ende",
-                                      value:
-                                          tempEnd?.toString() ??
-                                          "nicht gesetzt",
+                                      value: dateTimeformatter.format(
+                                        tempEnd ??
+                                            locationListController.resetEnd,
+                                      ),
                                       onTap: pickEnd,
                                     ),
                                   ),
@@ -373,8 +296,8 @@ class _LocationsListPageState extends State<LocationsListPage> {
                           TextButton(
                             onPressed: () {
                               setLocalState(() {
-                                tempStart = null;
-                                tempEnd = null;
+                                tempStart = locationListController.resetStart;
+                                tempEnd = locationListController.resetEnd;
                                 tempPlace = '';
                                 tempRadius = 10;
                               });
@@ -384,17 +307,16 @@ class _LocationsListPageState extends State<LocationsListPage> {
                           const Spacer(),
                           ElevatedButton(
                             onPressed: () {
-                              setState(() {
-                                _filterStart = tempStart;
-                                _filterEnd = tempEnd;
-                                _filterPlaceText = tempPlace.trim().isEmpty
+                              locationListController.setFilterSettings(
+                                tempStart,
+                                tempEnd,
+                                tempPlace.trim().isEmpty
                                     ? null
-                                    : tempPlace.trim();
-                                _filterRadiusKm = tempRadius;
-                              });
-
+                                    : tempPlace.trim(),
+                                tempRadius,
+                              );
                               Navigator.of(dialogCtx).pop();
-                              _applyFilters();
+                              locationListController.reloadLocations();
                             },
                             child: const Text("Anwenden"),
                           ),
@@ -433,70 +355,5 @@ class _LocationsListPageState extends State<LocationsListPage> {
     if (time == null) return null;
 
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
-  }
-
-  void _applyFilters() {
-    setState(() {
-      _futureLocations = _fetchLocationsFiltered();
-    });
-  }
-
-  Future<List<LocationBaseResponse>> _fetchLocationsFiltered() async {
-    final query = _searchCtrl.text.trim();
-
-    // TODO: hier später Backend Call, z.B.
-    // return LocationService.fetchAllLocationsByFilter(
-    //   query,
-    //   center: _filterCenter ?? _currentLocation,
-    //   radiusKm: _filterRadiusKm,
-    //   start: _filterStart,
-    //   end: _filterEnd,
-    // );
-
-    // Bis Backend fertig ist: fallback auf normale fetch und client-side filtern:
-    final list = await LocationService.fetchLocations();
-
-    return list.where((loc) {
-      final matchesText =
-          query.isEmpty ||
-          loc.title.toLowerCase().contains(query.toLowerCase()) ||
-          loc.description.toLowerCase().contains(query.toLowerCase());
-
-      final matchesTime =
-          (_filterStart == null || !loc.endDateTime.isBefore(_filterStart!)) &&
-          (_filterEnd == null || !loc.startDateTime.isAfter(_filterEnd!));
-
-      return matchesText && matchesTime;
-    }).toList();
-  }
-}
-
-class _FilterButton extends StatelessWidget {
-  final String label;
-  final String value;
-  final VoidCallback onTap;
-
-  const _FilterButton({
-    required this.label,
-    required this.value,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
-          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis),
-        ],
-      ),
-    );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/model/utils/location_utils.dart';
+import 'package:meetmaap/app/model/utils/image_utils.dart';
 
 class LocationBaseResponse {
   final int id;
@@ -36,7 +36,7 @@ class LocationBaseResponse {
     final rawImage = map['thumbnailUrl'] ?? '';
 
     final thumbnailUrl = rawImage is String
-        ? LocationUtils.toAbsolute(rawImage)
+        ? ImageUtils.toAbsolute(rawImage)
         : '';
 
     return LocationBaseResponse(
