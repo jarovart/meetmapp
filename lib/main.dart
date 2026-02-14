@@ -8,6 +8,7 @@ import 'package:meetmaap/app/controller/setting_controller.dart';
 import 'package:meetmaap/app/controller/userlist_controller.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/model/responses/locationfull_response.dart';
+import 'package:meetmaap/app/model/responses/userbase_response.dart';
 import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';
@@ -17,6 +18,7 @@ import 'package:meetmaap/app/view/authentication/resetpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 import 'package:meetmaap/app/view/setting/setting_page.dart';
+import 'package:meetmaap/app/view/user/userdetail_page.dart';
 import 'package:meetmaap/app/view/user/userlist_page.dart';
 import 'package:meetmaap/testexample/testshowmodal.dart';
 import 'package:meetmaap/testexample/testslidergps.dart';
@@ -161,6 +163,14 @@ class MainApplication extends StatelessWidget {
         GoRoute(
           path: '/userlist',
           builder: (context, state) => const UserListPage(),
+        ),
+
+        GoRoute(
+          path: '/userdetail',
+          builder: (context, state) {
+            final userBase = state.extra as UserBaseResponse;
+            return UserDetailPage(userBase: userBase);
+          },
         ),
 
         /// Test ShowModal-Seite

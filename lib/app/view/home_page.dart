@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/model/exceptions/exception_message.dart';
+import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -46,17 +47,28 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _buildSlidingMenu() {
-    final items = [
-      "Login",
-      "Locations",
-      "Benutzer",
-      "Freunde",
-      "Favoriten",
-      "Test-ShowModal",
-      "Test-SliderGPS",
-      "Einstellungen",
-    ];
+    return FutureBuilder<bool>(
+      future: AuthRepository.isLoggedIn(),
+      builder: (context, snapshot) {
+        final loggedIn = snapshot.data ?? false;
 
+        final items = [
+          if (!loggedIn) "Login",
+          "Locations",
+          if (loggedIn) "Benutzer",
+          "Freunde",
+          "Favoriten",
+          "Test-ShowModal",
+          "Test-SliderGPS",
+          "Einstellungen",
+        ];
+
+        return _buildMenuWithItems(items);
+      },
+    );
+  }
+
+  Widget _buildMenuWithItems(List<String> items) {
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
