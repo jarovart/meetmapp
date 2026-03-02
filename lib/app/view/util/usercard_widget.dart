@@ -11,7 +11,7 @@ class UserCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => context.push('/userdetail', extra: userbase),
+      onTap: () => context.push('/profilepage', extra: userbase.id),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

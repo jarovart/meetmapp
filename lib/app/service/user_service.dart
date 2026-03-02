@@ -14,7 +14,15 @@ class UserService {
     return UserRepository.fetchFullUserById(id);
   }
 
+  static Future<UserFullResponse> fetchFullUserByUserName(int id) async {
+    return UserRepository.fetchFullUserById(id);
+  }
+
   static Future<UserFullResponse> fetchFullUser(UserBaseResponse user) async {
     return UserRepository.fetchFullUserById(user.id);
+  }
+
+  static Future fetchMyProfile() async {
+    return UserRepository.fetchMyProfile();
   }
 }

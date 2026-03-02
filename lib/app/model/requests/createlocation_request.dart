@@ -40,22 +40,4 @@ class CreateLocationRequest {
       "createdUsername": createdUsername,
     };
   }
-
-  factory CreateLocationRequest.fromMap(Map<String, dynamic> map) {
-    return CreateLocationRequest(
-      title: map['title'] as String,
-      description: map['description'] ?? '',
-      address: map['address'] ?? '',
-      creationDateTime: DateTime.parse(map['creationDateTime']),
-      startDateTime: DateTime.parse(map['startDateTime']),
-      endDateTime: DateTime.parse(map['endDateTime']),
-      position: LatLng(
-        (map['latitude'] as num).toDouble(),
-        (map['longitude'] as num).toDouble(),
-      ),
-      thumbnailUrl: map['thumbnailUrl'] ?? '',
-      imageUrls: List<String>.from(map['imageUrls'] ?? []),
-      createdUsername: map['createdUsername'] as String,
-    );
-  }
 }

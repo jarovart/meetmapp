@@ -70,18 +70,21 @@ class _UserDetailPageState extends State<UserDetailPage> {
               children: [
                 // Header
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CircleAvatar(
-                      radius: 32,
-                      backgroundImage: (user.profileUrl?.isNotEmpty ?? false)
+                      radius: 62,
+                      backgroundImage: (user.profileUrl.isNotEmpty)
                           ? NetworkImage(user.profileUrl!)
                           : null,
                       child: (user.profileUrl?.isNotEmpty ?? false)
                           ? null
                           : Text(
-                              user.username.isNotEmpty
-                                  ? user.username[0].toUpperCase()
-                                  : "?",
+                              _getTextForAvatar(
+                                user.username,
+                                user.firstName,
+                                user.lastName,
+                              ),
                               style: const TextStyle(fontSize: 24),
                             ),
                     ),
@@ -104,7 +107,6 @@ class _UserDetailPageState extends State<UserDetailPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 16),
 
                 if ((user.aboutMe?.isNotEmpty ?? false)) ...[
@@ -166,6 +168,14 @@ class _UserDetailPageState extends State<UserDetailPage> {
         },
       ),
     );
+  }
+
+  String _getTextForAvatar(String username, String firstName, String lastName) {
+    if (firstName.isEmpty || lastName.isEmpty) {
+      return username.substring(0, 2).toUpperCase();
+    }
+    String fullName = firstName[0] + lastName[0];
+    return fullName.toUpperCase();
   }
 }
 

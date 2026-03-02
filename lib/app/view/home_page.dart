@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/model/exceptions/exception_message.dart';
+import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 
@@ -12,8 +13,15 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  bool _loggedIn = false;
   bool _isMenuOpen = false;
   static const double _menuWidth = 260;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshAuth();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +35,11 @@ class HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  Future<void> _refreshAuth() async {
+    final loggedIn = await AuthRepository.isLoggedIn();
+    setState(() => _loggedIn = loggedIn);
   }
 
   /// ---------- UI-Aufteilung ----------
@@ -47,25 +60,19 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _buildSlidingMenu() {
-    return FutureBuilder<bool>(
-      future: AuthRepository.isLoggedIn(),
-      builder: (context, snapshot) {
-        final loggedIn = snapshot.data ?? false;
+    final items = [
+      if (!_loggedIn) "Login",
+      "Locations",
+      if (_loggedIn) "Benutzer",
+      "Freunde",
+      "Favoriten",
+      "Test-ShowModal",
+      "Test-SliderGPS",
+      "Einstellungen",
+      if (_loggedIn) "Logout",
+    ];
 
-        final items = [
-          if (!loggedIn) "Login",
-          "Locations",
-          if (loggedIn) "Benutzer",
-          "Freunde",
-          "Favoriten",
-          "Test-ShowModal",
-          "Test-SliderGPS",
-          "Einstellungen",
-        ];
-
-        return _buildMenuWithItems(items);
-      },
-    );
+    return _buildMenuWithItems(items);
   }
 
   Widget _buildMenuWithItems(List<String> items) {
@@ -99,11 +106,12 @@ class HomePageState extends State<HomePage> {
                     return ListTile(
                       title: Text(label),
                       leading: const Icon(Icons.arrow_right),
-                      onTap: () {
+                      onTap: () async {
                         // handle navigation for special entries
                         if (label == 'Login') {
                           _toggleMenu();
-                          context.push('/loginpage', extra: false);
+                          await context.push('/loginpage', extra: false);
+                          _refreshAuth();
                           return;
                         } else if (label == 'Locations') {
                           _toggleMenu();
@@ -124,6 +132,11 @@ class HomePageState extends State<HomePage> {
                         } else if (label == "Einstellungen") {
                           _toggleMenu();
                           context.push('/settingspage');
+                          return;
+                        } else if (label == "Logout") {
+                          _toggleMenu();
+                          AuthRepository.logout();
+                          _refreshAuth();
                           return;
                         }
                         ExceptionMessage.showError(
@@ -153,21 +166,47 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _buildProfileAvatar() {
-    return GestureDetector(
-      onTap: () {
-        /*Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ProfilePage()),*/
-        context.push('/profilepage');
-      },
-      child: const Padding(
-        padding: EdgeInsets.only(right: 12.0),
-        child: CircleAvatar(
-          backgroundImage: NetworkImage(
-            "https://ui-avatars.com/api/?name=Ajrtem&background=0D8ABC&color=fff",
-          ),
+    if (!_loggedIn) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 12.0),
+        child: OutlinedButton.icon(
+          onPressed: () async {
+            await context.push('/loginpage', extra: false);
+            _refreshAuth();
+          },
+          label: const Text("Login"),
         ),
-      ),
+      );
+    }
+    return FutureBuilder<UserMyProfileResponse?>(
+      future: AuthRepository.getMyUserProfile(),
+      builder: (context, snapshot) {
+        final myProfile = snapshot.data;
+        final initials = myProfile?.getInitials ?? "MM";
+
+        return GestureDetector(
+          onTap: () async => context.push(
+            '/profilepage',
+            extra: await AuthRepository.getUserId(),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(right: 12.0),
+            child: CircleAvatar(
+              radius: 25,
+              backgroundImage:
+                  myProfile?.profileUrl != null &&
+                      myProfile!.profileUrl.isNotEmpty
+                  ? NetworkImage(myProfile.profileUrl)
+                  : null,
+              child:
+                  (myProfile?.profileUrl == null ||
+                      myProfile!.profileUrl.isEmpty)
+                  ? Text(initials, style: const TextStyle(fontSize: 24))
+                  : null,
+            ),
+          ),
+        );
+      },
     );
   }
 }

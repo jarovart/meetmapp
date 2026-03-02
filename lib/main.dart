@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/controller/locationlist_controller.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
+import 'package:meetmaap/app/controller/profile_controller.dart';
 import 'package:meetmaap/app/controller/setting_controller.dart';
 import 'package:meetmaap/app/controller/userlist_controller.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
@@ -37,6 +38,7 @@ void main() {
         ),
         ChangeNotifierProvider(create: (_) => LocationListController()),
         ChangeNotifierProvider(create: (_) => UserListController()),
+        ChangeNotifierProvider(create: (_) => UserProfileController()),
         ChangeNotifierProvider(create: (_) => SettingsController()),
       ],
       child: const MainApplication(),
@@ -101,7 +103,11 @@ class MainApplication extends StatelessWidget {
         GoRoute(
           path: '/profilepage',
           builder: (context, state) {
-            return ProfilePage();
+            final userId = state.extra as int;
+            return ChangeNotifierProvider(
+              create: (_) => UserProfileController(),
+              child: UserProfilePage(userId: userId),
+            );
           },
         ),
         GoRoute(
