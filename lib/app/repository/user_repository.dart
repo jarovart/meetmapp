@@ -80,4 +80,39 @@ class UserRepository {
     debugPrint("my profile data: $body");
     return UserMyProfileResponse.fromMap(body);
   }
+
+  static Future<UserMyProfileResponse> updateMyProfile({
+    required String firstName,
+    required String lastName,
+    required String aboutMe,
+  }) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/api/users/me');
+
+    final headers = await _authHeaders();
+    final response = await http.patch(
+      uri,
+      headers: headers,
+      body: jsonEncode({
+        'firstName': firstName,
+        'lastName': lastName,
+        'aboutMe': aboutMe,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      debugPrint(
+        "Failed to update my profile (${response.statusCode}): ${response.body}",
+      );
+      throw Exception(
+        'Failed to update my profile (${response.statusCode}): ${response.body}',
+      );
+    }
+
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    final updatedProfile = UserMyProfileResponse.fromMap(body);
+
+    await AuthRepository.saveMyProfile(updatedProfile);
+
+    return updatedProfile;
+  }
 }

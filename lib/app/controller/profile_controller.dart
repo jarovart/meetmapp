@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:meetmaap/app/model/responses/userfull_response.dart';
 import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:meetmaap/app/repository/user_repository.dart';
 import 'package:meetmaap/app/service/user_service.dart';
 
 class UserProfileController extends ChangeNotifier {
   bool _isLoaded = false;
   bool _loading = false;
-  String? _error;
+  String? _errorMessage;
   UserFullResponse? _userData;
+  int? _loadedUserId;
 
   bool get isLoading => _loading;
-  String? get errorMessage => _error;
-  bool get hasError => _error != null && _error!.isNotEmpty;
+  String? get errorMessage => _errorMessage;
+  bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
 
   UserFullResponse? get userData => _userData;
 
@@ -27,7 +29,7 @@ class UserProfileController extends ChangeNotifier {
     if (_isLoaded) return;
     _isLoaded = true;
     _loading = true;
-    _error = null;
+    _errorMessage = null;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       initLoad1(userId: userId);
@@ -52,9 +54,79 @@ class UserProfileController extends ChangeNotifier {
         _userData = other;
       }
     } catch (e) {
-      _error = e.toString(); // besser: Failure mapping
+      _errorMessage = e.toString(); // besser: Failure mapping
     } finally {
       _loading = false;
+      notifyListeners();
+    }
+  }
+
+  bool _saving = false;
+  bool get isSaving => _saving;
+
+  Future<void> updateMyProfile({
+    required String firstName,
+    required String lastName,
+    required String aboutMe,
+  }) async {
+    _loading = true;
+    final me = myProfile;
+    if (me == null) {
+      _errorMessage = "Not my profile";
+      notifyListeners();
+      return;
+    }
+
+    _saving = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final updated = await UserRepository.updateMyProfile(
+        firstName: firstName,
+        lastName: lastName,
+        aboutMe: aboutMe,
+      );
+
+      // IMPORTANT: Controller-State aktualisieren
+      _userData = updated; // updated sollte UserMyProfileResponse sein
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _loading = false;
+      _saving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> reload() async {
+    if (_loadedUserId == null) return;
+    await load(userId: _loadedUserId!);
+  }
+
+  Future<void> load({required int userId}) async {
+    if (_isLoaded) return;
+
+    _isLoaded = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _loadedUserId = userId;
+
+      final myUserId = await AuthRepository.getUserId();
+
+      if (myUserId != null && myUserId == userId) {
+        final me = await UserRepository.fetchMyProfile();
+        _userData = me;
+      } else {
+        final other = await UserRepository.fetchFullUserById(userId);
+        _userData = other;
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoaded = false;
       notifyListeners();
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meetmaap/app/controller/profile_controller.dart';
+import 'package:meetmaap/app/view/user/edit_myprofile_page.dart';
 import 'package:provider/provider.dart';
 
 class UserProfilePage extends StatelessWidget {
@@ -20,13 +21,23 @@ class UserProfilePage extends StatelessWidget {
         centerTitle: true,
         actions: [
           if (controller.canEdit)
-            OutlinedButton.icon(
-              onPressed: () async {
-                // navigation to edit
-                // context.push('/editProfile');
-              },
-              label: const Text("Edit"),
-              icon: const Icon(Icons.edit_attributes_outlined),
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ChangeNotifierProvider.value(
+                        value: context.read<UserProfileController>(),
+                        child: const EditMyProfilePage(),
+                      ),
+                    ),
+                  );
+                  controller.reload();
+                },
+                label: const Text("Edit"),
+                icon: const Icon(Icons.edit_attributes_outlined),
+              ),
             ),
         ],
       ),
