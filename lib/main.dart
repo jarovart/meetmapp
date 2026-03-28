@@ -19,6 +19,7 @@ import 'package:meetmaap/app/view/authentication/resetpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 import 'package:meetmaap/app/view/setting/setting_page.dart';
+import 'package:meetmaap/app/view/user/edit_myprofile_page.dart';
 import 'package:meetmaap/app/view/user/userdetail_page.dart';
 import 'package:meetmaap/app/view/user/userlist_page.dart';
 import 'package:meetmaap/testexample/testshowmodal.dart';
@@ -103,13 +104,21 @@ class MainApplication extends StatelessWidget {
         GoRoute(
           path: '/profilepage',
           builder: (context, state) {
-            final userId = state.extra as int;
+            final userId = state.extra as int?;
             return ChangeNotifierProvider(
-              create: (_) => UserProfileController(),
+              create: (_) => UserProfileController()..load(userId: userId),
               child: UserProfilePage(userId: userId),
             );
           },
         ),
+
+        GoRoute(
+          path: '/editmyprofilepage',
+          builder: (context, state) {
+            return EditMyProfilePage();
+          },
+        ),
+
         GoRoute(
           path: '/loginpage',
           builder: (context, state) {
@@ -171,13 +180,13 @@ class MainApplication extends StatelessWidget {
           builder: (context, state) => const UserListPage(),
         ),
 
-        GoRoute(
+        /*GoRoute( TODO: check if needed. new userprofilepage
           path: '/userdetail',
           builder: (context, state) {
             final userBase = state.extra as UserBaseResponse;
             return UserDetailPage(userBase: userBase);
           },
-        ),
+        ),*/
 
         /// Test ShowModal-Seite
         GoRoute(

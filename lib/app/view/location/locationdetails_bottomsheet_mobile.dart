@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/responses/locationfull_response.dart';
-import 'package:meetmaap/app/service/location_service.dart';
+import 'package:meetmaap/app/controller/locationdetails_controller.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/view/location/locationdetails_content.dart';
+import 'package:provider/provider.dart';
 
-class LocationDetailsBottomSheet extends StatefulWidget {
-  final LocationBaseResponse locationBase;
+class LocationDetailsBottomSheet extends StatelessWidget {
+  const LocationDetailsBottomSheet({super.key});
 
-  const LocationDetailsBottomSheet({super.key, required this.locationBase});
-
-  // 🔹 Imperativ: öffnet das Sheet
   static Future<void> show(
     BuildContext context, {
     required LocationBaseResponse locationBase,
@@ -24,62 +21,45 @@ class LocationDetailsBottomSheet extends StatefulWidget {
         maxWidth: double.infinity,
         maxHeight: MediaQuery.of(context).size.height - 110,
       ),
-      builder: (_) => LocationDetailsBottomSheet(locationBase: locationBase),
+      builder: (_) {
+        return ChangeNotifierProvider(
+          create: (_) => LocationDetailsController(locationBase)..load(),
+          child: const LocationDetailsBottomSheet(),
+        );
+      },
     );
   }
 
   @override
-  State<LocationDetailsBottomSheet> createState() =>
-      _LocationDetailsBottomSheetState();
-}
-
-class _LocationDetailsBottomSheetState
-    extends State<LocationDetailsBottomSheet> {
-  late final Future<LocationFullResponse>? _future;
-
-  @override
-  void initState() {
-    super.initState();
-    _future = widget.locationBase is LocationFullResponse
-        ? Future.value(widget.locationBase as LocationFullResponse)
-        : LocationService.fetchFullLocation(widget.locationBase.id);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<LocationFullResponse>(
-      future: _future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Padding(
-            padding: EdgeInsets.all(32),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
+    final controller = context.watch<LocationDetailsController>();
 
-        if (snapshot.hasError) {
-          return const Padding(
-            padding: EdgeInsets.all(32),
-            child: Text('Fehler beim Laden der Location'),
-          );
-        }
+    if (controller.isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(32),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
 
-        final location = snapshot.data!;
+    if (controller.locationFull == null) {
+      return const Padding(
+        padding: EdgeInsets.all(32),
+        child: Text('Fehler beim Laden der Location'),
+      );
+    }
 
-        return DraggableScrollableSheet(
-          snap: true,
-          snapSizes: const [0.55, 1.0],
-          expand: false,
-          initialChildSize: 0.55, // 40% Höhe beim Öffnen
-          minChildSize: 0.25, // minimal (nach unten ziehen)
-          maxChildSize: 1.0, // 🔥 volle Höhe beim Hochziehen
-          builder: (_, scrollController) {
-            return LocationDetailsContent(
-              location: location,
-              scrollController: scrollController,
-              dragHandle: true,
-            );
-          },
+    return DraggableScrollableSheet(
+      snap: true,
+      snapSizes: const [0.55, 1.0],
+      expand: false,
+      initialChildSize: 0.55, // 40% Höhe beim Öffnen
+      minChildSize: 0.25, // minimal (nach unten ziehen)
+      maxChildSize: 1.0, // 🔥 volle Höhe beim Hochziehen
+      builder: (_, scrollController) {
+        return LocationDetailsContent(
+          controller: controller,
+          scrollController: scrollController,
+          dragHandle: true,
         );
       },
     );

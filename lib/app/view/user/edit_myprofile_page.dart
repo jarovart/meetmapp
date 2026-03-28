@@ -56,7 +56,7 @@ class _EditMyProfilePageState extends State<EditMyProfilePage> {
                     );
 
                     if (mounted && !c.hasError) {
-                      context.pop();
+                      context.pop(true);
                     }
                   },
             child: c.isSaving

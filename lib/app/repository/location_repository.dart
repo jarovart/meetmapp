@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/config/api_config.dart';
+import 'package:meetmaap/app/model/enums/locationtype_enum.dart';
 import 'package:meetmaap/app/model/exceptions/geolocationpermission_exception.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/model/requests/createlocation_request.dart';
@@ -43,25 +44,30 @@ class LocationRepository {
     }
   }
 
+  static String formatAddress(Map address) {
+    final parts = [
+      address['country'],
+      address['postcode'],
+      address['city'] ?? address['town'] ?? address['village'],
+      address['road'],
+      address['house_number'],
+    ];
+
+    return parts.where((e) => e != null).join(', ');
+  }
+
   static Future<LocationBaseResponse> uploadLocation(
     CreateLocationRequest location,
   ) async {
-    final token = await AuthRepository.getToken();
-
-    if (token == null) {
-      throw Exception('Not authenticated');
-    }
     final uploadLocationUrl = Uri.parse(
       '${ApiConfig.baseUrl}/api/locations/createLocation',
     );
+
     debugPrint("Uploading location to ${jsonEncode(location.toMap())}");
+    final headers = await AuthRepository.authHeaders();
     final response = await http.post(
       uploadLocationUrl,
-      headers: {
-        'Content-Type': 'application/json',
-
-        'Authorization': 'Bearer $token',
-      },
+      headers: headers,
       body: jsonEncode(location.toMap()),
     );
     if (response.statusCode != 201) {
@@ -156,23 +162,24 @@ class LocationRepository {
 
   static Future<LocationFullResponse> fetchFullLocation(int id) async {
     // 🔥 1. Cache-Hit
-    if (_fullLocationCache.containsKey(id)) {
+    /*if (_fullLocationCache.containsKey(id)) {
       debugPrint('🟢 Location $id aus Cache');
       return _fullLocationCache[id]!;
-    }
+    }*/
 
     // 🔥 2. API-Call
     debugPrint('🔵 Location $id vom Server laden');
     final url = Uri.parse(
       '${ApiConfig.baseUrl}/api/locations/findById',
     ).replace(queryParameters: {'id': id.toString()});
-    final response = await http.get(url);
+    final headers = await AuthRepository.authHeaders();
+    final response = await http.get(url, headers: headers);
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load location');
     }
     final location = LocationFullResponse.fromMap(jsonDecode(response.body));
-
+    debugPrint(location.toMap().toString());
     // 🔥 3. Cache speichern
     _fullLocationCache[id] = location;
 
@@ -239,15 +246,108 @@ class LocationRepository {
     return body.map((e) => LocationBaseResponse.fromMap(e)).toList();
   }
 
-  static String formatAddress(Map address) {
-    final parts = [
-      address['country'],
-      address['postcode'],
-      address['city'] ?? address['town'] ?? address['village'],
-      address['road'],
-      address['house_number'],
-    ];
+  static Future<List<LocationBaseResponse>> _fetchLocationsByUserId(
+    int userId,
+    LocationType locationType,
+  ) async {
+    final uri = Uri.parse(
+      '${ApiConfig.baseUrl}/api/users/$userId/locations/${locationType.path}',
+    );
 
-    return parts.where((e) => e != null).join(', ');
+    final headers = await AuthRepository.authHeaders();
+    final response = await http.get(uri, headers: headers);
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load locations');
+    }
+    final body = jsonDecode(response.body) as List;
+    return body.map((e) => LocationBaseResponse.fromMap(e)).toList();
+  }
+
+  static Future<List<LocationBaseResponse>> fetchJoinedLocationsByUserId(
+    int userId,
+  ) async {
+    return _fetchLocationsByUserId(userId, LocationType.joined);
+  }
+
+  static Future<List<LocationBaseResponse>> fetchCreatedLocationsByUserId(
+    int userId,
+  ) async {
+    return _fetchLocationsByUserId(userId, LocationType.created);
+  }
+
+  static Future<List<LocationBaseResponse>> fetchLikedLocationsByUserId(
+    int userId,
+  ) async {
+    return _fetchLocationsByUserId(userId, LocationType.liked);
+  }
+
+  static Future<void> like(int locationId) {
+    return _performLocationAction(locationId, "like", true);
+  }
+
+  static Future<void> unlike(int locationId) {
+    return _performLocationAction(locationId, "like", false);
+  }
+
+  static Future<void> join(int locationId) {
+    return _performLocationAction(locationId, "join", true);
+  }
+
+  static Future<void> unjoin(int locationId) {
+    return _performLocationAction(locationId, "join", false);
+  }
+
+  static Future<bool> isLiked(int locationId) {
+    return _checkUserLocationAction(locationId, "like");
+  }
+
+  static Future<bool> isJoined(int locationId) {
+    return _checkUserLocationAction(locationId, "join");
+  }
+
+  static Future<void> _performLocationAction(
+    int locationId,
+    String action,
+    bool toPost,
+  ) async {
+    final uri = Uri.parse(
+      '${ApiConfig.baseUrl}/api/locations/$locationId/$action',
+    );
+
+    final headers = await AuthRepository.authHeaders();
+    final response = toPost
+        ? await http.post(uri, headers: headers)
+        : await http.delete(uri, headers: headers);
+
+    if (response.statusCode != 204 &&
+        (response.statusCode < 200 || response.statusCode >= 300)) {
+      throw Exception(
+        'Failed to update action "$action" for location $locationId. '
+        'Status: ${response.statusCode}',
+      );
+    }
+  }
+
+  static Future<bool> _checkUserLocationAction(
+    int locationId,
+    String action,
+  ) async {
+    final uri = Uri.parse(
+      '${ApiConfig.baseUrl}/api/locations/$locationId/$action',
+    );
+
+    final headers = await AuthRepository.authHeaders();
+    final response = await http.get(uri, headers: headers);
+
+    if (response.statusCode != 204 &&
+        (response.statusCode < 200 || response.statusCode >= 300)) {
+      throw Exception(
+        'Failed to update action "$action" for location $locationId. '
+        'Status: ${response.statusCode}',
+      );
+    }
+
+    return true;
   }
 }

@@ -422,6 +422,7 @@ class MapPage extends StatelessWidget {
       location.position,
       mapViewController.mapController.camera.zoom,
     );
+    debugPrint("onLocationTapped is called");
 
     if (_useBottomSheetForMobile(context)) {
       mapViewController.shiftTargetForView(location.position);
@@ -436,6 +437,7 @@ class MapPage extends StatelessWidget {
         location.position,
         isMobileSheetOpen: false,
       );
+      //LocationDetailsGeneralDialog.show(context, locationDetailsController).then((
       LocationDetailsGeneralDialog.show(context, locationBase: location).then((
         _,
       ) {

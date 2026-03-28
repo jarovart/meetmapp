@@ -7,6 +7,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/model/responses/image_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/service/image_service.dart';
 import 'package:meetmaap/app/service/location_service.dart';
@@ -122,18 +123,6 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
     setState(() => _uploading = true);
     // Rückgabe an vorherige Seite
     try {
-      String thumbnailUrl = '';
-      List<String> imageUrls = [];
-
-      if (_images.isNotEmpty) {
-        thumbnailUrl = (await ImageService.uploadImages(
-          _images.take(1).toList(),
-        )).first;
-        if (_images.length > 1) {
-          imageUrls = await ImageService.uploadImages(_images.skip(1).toList());
-        }
-      }
-
       // 👇 HIER erstellst du das Objekt (LocationFull)
       final createdLocation = CreateLocationRequest(
         title: titleController.text.trim(),
@@ -143,13 +132,27 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
         startDateTime: selectedStartDateTime!,
         endDateTime: selectedEndDateTime!,
         position: LatLng(widget.point.latitude, widget.point.longitude),
-        thumbnailUrl: thumbnailUrl,
-        imageUrls: imageUrls,
         createdUsername: _userName!,
       );
 
-      final LocationBaseResponse locationBase =
-          await LocationService.uploadLocation(createdLocation);
+      LocationBaseResponse locationBase = await LocationService.uploadLocation(
+        createdLocation,
+      );
+
+      List<ImageResponse> imageResponses = [];
+
+      if (_images.isNotEmpty) {
+        imageResponses = await ImageService.uploadImages(
+          _images.toList(),
+          locationBase.id,
+        );
+        ImageResponse thumbnail = imageResponses.first;
+        locationBase = await ImageService.patchLocationThumbnail(
+          locationBase.id,
+          thumbnail.id,
+        );
+      }
+
       if (!mounted) return;
       context.pop(locationBase);
     } catch (e) {

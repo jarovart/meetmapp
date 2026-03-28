@@ -1,9 +1,9 @@
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/model/responses/image_response.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
-import 'package:meetmaap/app/model/utils/image_utils.dart';
 
 class LocationFullResponse extends LocationBaseResponse {
-  final List<String> imageUrls;
+  final List<ImageResponse> images;
 
   LocationFullResponse({
     required super.id,
@@ -14,12 +14,14 @@ class LocationFullResponse extends LocationBaseResponse {
     required super.startDateTime,
     required super.endDateTime,
     required super.position,
-    required super.thumbnailUrl,
+    required super.thumbnailImage,
     required super.createdUserId,
     required super.createdUsername,
-    required super.joinedUserCount,
     required super.likedUserCount,
-    required this.imageUrls,
+    required super.joinedUserCount,
+    required super.likedByCurrentUser,
+    required super.joinedByCurrentUser,
+    required this.images,
   });
 
   Map<String, dynamic> toMap() {
@@ -33,27 +35,18 @@ class LocationFullResponse extends LocationBaseResponse {
       "endDateTime": endDateTime.toIso8601String(),
       "latitude": position.latitude,
       "longitude": position.longitude,
-      "thumbnailUrl": thumbnailUrl,
-      "imageUrls": imageUrls,
+      "thumbnailImage": thumbnailImage,
+      "images": images,
       "createdUserId": createdUserId,
       "createdUsername": createdUsername,
-      "joinedUserCount": joinedUserCount,
       "likedUserCount": likedUserCount,
+      "joinedUserCount": joinedUserCount,
+      "likedByCurrentUser": likedByCurrentUser,
+      "joinedByCurrentUser": joinedByCurrentUser,
     };
   }
 
   factory LocationFullResponse.fromMap(Map<String, dynamic> map) {
-    final rawImage = map['thumbnailUrl'] ?? '';
-    final rawImages = (map['imageUrls'] as List?) ?? [];
-
-    final thumbnailUrl = rawImage is String
-        ? ImageUtils.toAbsolute(rawImage)
-        : '';
-    final imageUrls = rawImages
-        .whereType<String>()
-        .map(ImageUtils.toAbsolute)
-        .toList();
-
     return LocationFullResponse(
       id: map['id'] as int,
       title: map['title'] as String,
@@ -66,14 +59,20 @@ class LocationFullResponse extends LocationBaseResponse {
         (map['latitude'] as num).toDouble(),
         (map['longitude'] as num).toDouble(),
       ),
-      thumbnailUrl: thumbnailUrl,
-      //imageUrl: map['imageUrl'] ?? '',
-      //imageUrls: List<String>.from(map['imageUrls'] ?? []),
-      imageUrls: imageUrls,
+      thumbnailImage: map['thumbnailImage'] != null
+          ? ImageResponse.fromMap(map['thumbnailImage'])
+          : null,
+      images:
+          (map['images'] as List<dynamic>?)
+              ?.map((e) => ImageResponse.fromMap(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       createdUserId: map['createdUserId'] as int,
       createdUsername: map['createdUsername'] as String,
-      joinedUserCount: map['joinedUserCount'] ?? 0,
       likedUserCount: map['likedUserCount'] ?? 0,
+      joinedUserCount: map['joinedUserCount'] ?? 0,
+      likedByCurrentUser: map['likedByCurrentUser'],
+      joinedByCurrentUser: map['joinedByCurrentUser'],
     );
   }
 }

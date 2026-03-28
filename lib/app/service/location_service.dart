@@ -9,13 +9,13 @@ import 'package:meetmaap/app/repository/location_repository.dart';
 /// Ergebnis-Typ für Location-Abfragen
 class LocationService {
   static Future<LocationResult> getCurrentLocation() async {
-    return LocationRepository.getCurrentLocation();
+    return await LocationRepository.getCurrentLocation();
   }
 
   static Future<LocationBaseResponse> uploadLocation(
     CreateLocationRequest createdLocation,
   ) async {
-    return LocationRepository.uploadLocation(createdLocation);
+    return await LocationRepository.uploadLocation(createdLocation);
   }
 
   static Future<List<LocationBaseResponse>> fetchLocationsWithinWithTime(
@@ -23,7 +23,7 @@ class LocationService {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    return LocationRepository.fetchLocationsWithinWithTime(
+    return await LocationRepository.fetchLocationsWithinWithTime(
       bounds,
       startDate,
       endDate,
@@ -31,15 +31,15 @@ class LocationService {
   }
 
   static Future searchLocations(String text) async {
-    return LocationRepository.searchLocations(text);
+    return await LocationRepository.searchLocations(text);
   }
 
   static Future<List<LocationBaseResponse>> fetchLocations() async {
-    return LocationRepository.fetchLocations();
+    return await LocationRepository.fetchLocations();
   }
 
   static Future<LocationFullResponse>? fetchFullLocation(int id) async {
-    return LocationRepository.fetchFullLocation(id);
+    return await LocationRepository.fetchFullLocation(id);
   }
 
   static Future<List<LocationBaseResponse>> fetchLocationsByFilterSettings(
@@ -49,7 +49,7 @@ class LocationService {
     DateTime startDateTime,
     DateTime endDateTime,
   ) async {
-    return LocationRepository.fetchLocations();
+    return await LocationRepository.fetchLocations();
     /* TODO: API call fix
     return LocationRepository.fetchAllLocationsByFilter(
       searchText,
@@ -60,8 +60,11 @@ class LocationService {
     );*/
   }
 
-  static Future<String?> reverseGeocodeOSM(double latitude, double longitude) {
-    return LocationRepository.reverseGeocodeOSM(latitude, longitude);
+  static Future<String?> reverseGeocodeOSM(
+    double latitude,
+    double longitude,
+  ) async {
+    return await LocationRepository.reverseGeocodeOSM(latitude, longitude);
   }
 
   static int getLocationScore({
@@ -87,5 +90,47 @@ class LocationService {
     }
 
     return score;
+  }
+
+  static Future<List<LocationBaseResponse>> getJoinedLocationsByUserId(
+    int userId,
+  ) async {
+    return await LocationRepository.fetchJoinedLocationsByUserId(userId);
+  }
+
+  static Future<List<LocationBaseResponse>> getCreatedLocationsByUserId(
+    int userId,
+  ) async {
+    return await LocationRepository.fetchCreatedLocationsByUserId(userId);
+  }
+
+  static Future<List<LocationBaseResponse>> getLikedLocationsByUserId(
+    int userId,
+  ) async {
+    return await LocationRepository.fetchLikedLocationsByUserId(userId);
+  }
+
+  static Future<void> like(int locationId) async {
+    await LocationRepository.like(locationId);
+  }
+
+  static Future<void> unlike(int locationId) async {
+    await LocationRepository.unlike(locationId);
+  }
+
+  static Future<void> join(int locationId) async {
+    await LocationRepository.join(locationId);
+  }
+
+  static Future<void> unjoin(int locationId) async {
+    await LocationRepository.unjoin(locationId);
+  }
+
+  static Future<bool> isLiked(int locationId) async {
+    return await LocationRepository.isLiked(locationId);
+  }
+
+  static Future<bool> isJoined(int locationId) async {
+    return await LocationRepository.isJoined(locationId);
   }
 }

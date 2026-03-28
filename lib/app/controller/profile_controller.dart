@@ -1,75 +1,157 @@
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/model/responses/userfull_response.dart';
 import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/repository/user_repository.dart';
-import 'package:meetmaap/app/service/user_service.dart';
+import 'package:meetmaap/app/service/location_service.dart';
 
 class UserProfileController extends ChangeNotifier {
-  bool _isLoaded = false;
-  bool _loading = false;
+  bool _isLoading = false;
   String? _errorMessage;
   UserFullResponse? _userData;
   int? _loadedUserId;
 
-  bool get isLoading => _loading;
-  String? get errorMessage => _errorMessage;
+  List<LocationBaseResponse> _createdLocations = [];
+  List<LocationBaseResponse> _joinedLocations = [];
+  List<LocationBaseResponse> _likedLocations = [];
+
+  bool _isLoadingCreated = false;
+  bool _isLoadingJoined = false;
+  bool _isLoadingLiked = false;
+
+  bool _createdLoaded = false;
+  bool _joinedLoaded = false;
+  bool _likedLoaded = false;
+
+  bool _saving = false;
+
+  bool get isLoading => _isLoading;
+  bool get isSaving => _saving;
   bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
+  String? get errorMessage => _errorMessage;
 
   UserFullResponse? get userData => _userData;
-
-  bool get canEdit => _userData is UserMyProfileResponse;
-
   UserMyProfileResponse? get myProfile => _userData is UserMyProfileResponse
       ? _userData as UserMyProfileResponse
       : null;
 
-  Future<void> initLoad({required int userId}) async {
-    // simple guard gegen doppelte loads
-    if (_isLoaded) return;
-    _isLoaded = true;
-    _loading = true;
+  bool get canEdit => _userData is UserMyProfileResponse;
+
+  List<LocationBaseResponse> get createdLocations => _createdLocations;
+  List<LocationBaseResponse> get joinedLocations => _joinedLocations;
+  List<LocationBaseResponse> get likedLocations => _likedLocations;
+
+  bool get isLoadingCreated => _isLoadingCreated;
+  bool get isLoadingJoined => _isLoadingJoined;
+  bool get isLoadingLiked => _isLoadingLiked;
+
+  Future<void> load({int? userId}) async {
+    if (_isLoading) return;
+    if (userId == null) return;
+
+    _isLoading = true;
     _errorMessage = null;
+    notifyListeners();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      initLoad1(userId: userId);
-    });
-  }
-
-  Future<void> initLoad1({required int userId}) async {
     try {
-      final isLoggedIn = await AuthRepository.isLoggedIn();
+      _loadedUserId = userId;
 
-      // Du brauchst irgendeine sichere ID des eingeloggten Users:
-      // ideal: AuthRepository.getUserId()
-      final int? myUserId = isLoggedIn
-          ? await AuthRepository.getUserId()
-          : null;
+      final myUserId = await AuthRepository.getUserId();
 
       if (myUserId != null && myUserId == userId) {
-        final me = await UserService.fetchMyProfile(); // <-- endpoint /me
+        final me = await UserRepository.fetchMyProfile();
         _userData = me;
       } else {
-        final other = await UserService.fetchFullUserById(userId);
+        final other = await UserRepository.fetchFullUserById(userId);
         _userData = other;
       }
+
+      // reset tab data when switching profile
+      _createdLocations = []; //TODO: implement logic
+      _joinedLocations = [];
+      _likedLocations = [];
+      _createdLoaded = false;
+      _joinedLoaded = false;
+      _likedLoaded = false;
     } catch (e) {
-      _errorMessage = e.toString(); // besser: Failure mapping
+      _errorMessage = e.toString();
     } finally {
-      _loading = false;
+      _isLoading = false;
       notifyListeners();
     }
   }
 
-  bool _saving = false;
-  bool get isSaving => _saving;
+  Future<void> reload() async {
+    final userId = _loadedUserId;
+    if (userId == null) return;
+    await load(userId: userId);
+  }
+
+  Future<void> loadCreatedLocations() async {
+    final userId = _loadedUserId;
+    if (userId == null || _isLoadingCreated || _createdLoaded) return;
+
+    _isLoadingCreated = true;
+    notifyListeners();
+
+    try {
+      _createdLocations = await LocationService.getCreatedLocationsByUserId(
+        userId,
+      );
+      _createdLoaded = true;
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoadingCreated = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadJoinedLocations() async {
+    final userId = _loadedUserId;
+    if (userId == null || _isLoadingJoined || _joinedLoaded) return;
+
+    _isLoadingJoined = true;
+    notifyListeners();
+
+    try {
+      _joinedLocations = await LocationService.getJoinedLocationsByUserId(
+        userId,
+      );
+      _joinedLoaded = true;
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoadingJoined = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadLikedLocations() async {
+    final userId = _loadedUserId;
+    if (userId == null || _isLoadingLiked || _likedLoaded) return;
+
+    _isLoadingLiked = true;
+    notifyListeners();
+
+    try {
+      _likedLocations = await LocationService.getLikedLocationsByUserId(userId);
+      _likedLoaded = true;
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoadingLiked = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> updateMyProfile({
     required String firstName,
     required String lastName,
     required String aboutMe,
   }) async {
-    _loading = true;
+    _isLoading = true;
     final me = myProfile;
     if (me == null) {
       _errorMessage = "Not my profile";
@@ -93,40 +175,8 @@ class UserProfileController extends ChangeNotifier {
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
-      _loading = false;
+      _isLoading = false;
       _saving = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> reload() async {
-    if (_loadedUserId == null) return;
-    await load(userId: _loadedUserId!);
-  }
-
-  Future<void> load({required int userId}) async {
-    if (_isLoaded) return;
-
-    _isLoaded = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      _loadedUserId = userId;
-
-      final myUserId = await AuthRepository.getUserId();
-
-      if (myUserId != null && myUserId == userId) {
-        final me = await UserRepository.fetchMyProfile();
-        _userData = me;
-      } else {
-        final other = await UserRepository.fetchFullUserById(userId);
-        _userData = other;
-      }
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoaded = false;
       notifyListeners();
     }
   }

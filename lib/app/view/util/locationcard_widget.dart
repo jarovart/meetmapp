@@ -35,7 +35,7 @@ class LocationCard extends StatelessWidget {
                 top: Radius.circular(16),
               ),
               child: Image.network(
-                locationbase.thumbnailUrl,
+                locationbase.thumbnailImage?.imageUrl ?? '',
                 height: 130,
                 width: double.infinity,
                 fit: BoxFit.cover,

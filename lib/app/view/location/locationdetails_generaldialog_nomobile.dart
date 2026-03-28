@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/controller/locationdetails_controller.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/model/responses/locationfull_response.dart';
+import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/location/locationdetails_content.dart';
+import 'package:provider/provider.dart';
 
-class LocationDetailsGeneralDialog extends StatefulWidget {
-  final LocationBaseResponse locationBase;
-
-  const LocationDetailsGeneralDialog({super.key, required this.locationBase});
+class LocationDetailsGeneralDialog extends StatelessWidget {
+  const LocationDetailsGeneralDialog({super.key});
 
   static Future<void> show(
     BuildContext context, {
@@ -20,26 +21,27 @@ class LocationDetailsGeneralDialog extends StatefulWidget {
       barrierColor: Colors.black.withValues(alpha: 0.25),
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (_, _, _) {
-        return SafeArea(
-          left: false,
-          right: true,
-          bottom: false,
-          top: true,
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Material(
-              elevation: 16,
-              borderRadius: const BorderRadius.horizontal(
-                right: Radius.circular(16),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: SizedBox(
-                width: 420,
-                height: MediaQuery.of(context).size.height,
-                child: SafeArea(
-                  left: true,
-                  child: LocationDetailsGeneralDialog(
-                    locationBase: locationBase,
+        return ChangeNotifierProvider(
+          create: (_) => LocationDetailsController(locationBase)..load(),
+          child: SafeArea(
+            left: false,
+            right: true,
+            bottom: false,
+            top: true,
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Material(
+                elevation: 16,
+                borderRadius: const BorderRadius.horizontal(
+                  right: Radius.circular(16),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: SizedBox(
+                  width: 420,
+                  height: MediaQuery.of(context).size.height,
+                  child: SafeArea(
+                    left: true,
+                    child: LocationDetailsGeneralDialog(),
                   ),
                 ),
               ),
@@ -62,45 +64,24 @@ class LocationDetailsGeneralDialog extends StatefulWidget {
   }
 
   @override
-  State<LocationDetailsGeneralDialog> createState() =>
-      _LocationDetailsGeneralDialogState();
-}
-
-class _LocationDetailsGeneralDialogState
-    extends State<LocationDetailsGeneralDialog> {
-  late final Future<LocationFullResponse>? _future;
-
-  @override
-  void initState() {
-    super.initState();
-    _future = widget.locationBase is LocationFullResponse
-        ? Future.value(widget.locationBase as LocationFullResponse)
-        : LocationService.fetchFullLocation(widget.locationBase.id);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<LocationFullResponse>(
-      future: _future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Padding(
-            padding: EdgeInsets.all(32),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
+    final controller = context.watch<LocationDetailsController>();
+    debugPrint("super rebuild");
 
-        if (snapshot.hasError) {
-          return const Padding(
-            padding: EdgeInsets.all(32),
-            child: Text('Fehler beim Laden der Location'),
-          );
-        }
+    if (controller.isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(32),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
 
-        final location = snapshot.data!;
+    if (controller.locationFull == null) {
+      return const Padding(
+        padding: EdgeInsets.all(32),
+        child: Text('Fehler beim Laden der Location'),
+      );
+    }
 
-        return LocationDetailsContent(location: location);
-      },
-    );
+    return LocationDetailsContent(controller: controller);
   }
 }

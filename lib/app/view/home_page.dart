@@ -171,7 +171,7 @@ class HomePageState extends State<HomePage> {
         padding: const EdgeInsets.only(right: 12.0),
         child: OutlinedButton.icon(
           onPressed: () async {
-            await context.push('/loginpage', extra: false);
+            await context.push('/profilepage');
             _refreshAuth();
           },
           label: const Text("Login"),

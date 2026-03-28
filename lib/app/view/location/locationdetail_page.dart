@@ -53,9 +53,10 @@ class _LocationDetailPageState extends State<LocationDetailPage> {
           final endDateTime =
               full?.endDateTime ?? widget.locationbase.endDateTime;
           final position = full?.position ?? widget.locationbase.position;
-          final thumbnailUrl = (full?.thumbnailUrl.isNotEmpty ?? false)
-              ? full!.thumbnailUrl
-              : widget.locationbase.thumbnailUrl;
+          final thumbnailUrl =
+              (full?.thumbnailImage?.imageUrl.isNotEmpty ?? false)
+              ? full!.thumbnailImage!.imageUrl
+              : widget.locationbase.thumbnailImage?.imageUrl ?? '';
           final createdUsername =
               full?.createdUsername ?? widget.locationbase.createdUsername;
           final joinedUserCount =
@@ -64,8 +65,8 @@ class _LocationDetailPageState extends State<LocationDetailPage> {
               full?.likedUserCount ?? widget.locationbase.likedUserCount;
 
           //Only full location data
-          final List<String> imageUrls = (full?.imageUrls.isNotEmpty ?? false)
-              ? full!.imageUrls
+          final List<String> imageUrls = (full?.images.isNotEmpty ?? false)
+              ? full!.images.map((image) => image.imageUrl).toList()
               : [];
 
           return SingleChildScrollView(

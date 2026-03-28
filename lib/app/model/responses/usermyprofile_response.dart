@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:meetmaap/app/model/responses/userfull_response.dart';
 import 'package:meetmaap/app/model/utils/image_utils.dart';
 
@@ -21,6 +22,7 @@ class UserMyProfileResponse extends UserFullResponse {
   });
 
   factory UserMyProfileResponse.fromMap(Map<String, dynamic> map) {
+    debugPrint(map['profileUrl']?.toString() ?? "no profile url");
     return UserMyProfileResponse(
       id: map['id'] as int,
       username: map['username'] as String,

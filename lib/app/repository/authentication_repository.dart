@@ -209,4 +209,15 @@ class AuthRepository {
   static Future<void> clearCachedMyProfile() async {
     await _storage.delete(key: _myProfileKey);
   }
+
+  static Future<Map<String, String>> authHeaders() async {
+    final token = await AuthRepository.getToken();
+    if (token == null || token.isEmpty) {
+      return {'Content-Type': 'application/json'};
+    }
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
 }

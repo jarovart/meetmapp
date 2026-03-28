@@ -9,23 +9,12 @@ import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 
 class UserRepository {
-  static Future<Map<String, String>> _authHeaders() async {
-    final token = await AuthRepository.getToken();
-    if (token == null || token.isEmpty) {
-      throw Exception('Not logged in (missing token)');
-    }
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
-  }
-
   static Future<List<UserBaseResponse>> fetchUsersByQuery(String query) async {
     final uri = Uri.parse(
       '${ApiConfig.baseUrl}/api/users/query',
     ).replace(queryParameters: {'query': query});
 
-    final headers = await _authHeaders();
+    final headers = await AuthRepository.authHeaders();
     final response = await http.get(uri, headers: headers);
 
     if (response.statusCode != 200) {
@@ -38,7 +27,7 @@ class UserRepository {
   static Future<List<UserBaseResponse>> fetchAllUsers() async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/api/users/all');
 
-    final headers = await _authHeaders();
+    final headers = await AuthRepository.authHeaders();
     final response = await http.get(uri, headers: headers);
 
     if (response.statusCode != 200) {
@@ -54,7 +43,7 @@ class UserRepository {
       '${ApiConfig.baseUrl}/api/users/findById',
     ).replace(queryParameters: {'id': id.toString()});
 
-    final headers = await _authHeaders();
+    final headers = await AuthRepository.authHeaders();
     final response = await http.get(uri, headers: headers);
 
     if (response.statusCode != 200) {
@@ -67,7 +56,7 @@ class UserRepository {
   static Future<UserMyProfileResponse> fetchMyProfile() async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/api/users/me');
 
-    final headers = await _authHeaders();
+    final headers = await AuthRepository.authHeaders();
     final response = await http.get(uri, headers: headers);
 
     if (response.statusCode != 200) {
@@ -88,7 +77,7 @@ class UserRepository {
   }) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/api/users/me');
 
-    final headers = await _authHeaders();
+    final headers = await AuthRepository.authHeaders();
     final response = await http.patch(
       uri,
       headers: headers,

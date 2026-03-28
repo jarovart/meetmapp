@@ -1,47 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:meetmaap/app/controller/profile_controller.dart';
-import 'package:meetmaap/app/view/user/edit_myprofile_page.dart';
+import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:meetmaap/app/controller/profile_controller.dart';
+import 'package:meetmaap/app/view/util/locationlisttab_widget.dart';
 
-class UserProfilePage extends StatelessWidget {
-  final int userId;
+class UserProfilePage extends StatefulWidget {
+  final int? userId;
 
-  const UserProfilePage({super.key, required this.userId});
+  const UserProfilePage({super.key, this.userId});
+
+  @override
+  State<UserProfilePage> createState() => _UserProfilePageState();
+}
+
+class _UserProfilePageState extends State<UserProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.userId == null) {
+      _checkAuth();
+    }
+  }
+
+  Future<void> _checkAuth() async {
+    final loggedIn = await AuthRepository.isLoggedIn();
+
+    if (!mounted) return;
+
+    if (!loggedIn) {
+      final ok = await context.push<bool>('/loginpage');
+
+      if (ok != true) {
+        // User hat Login abgebrochen → Seite schließen
+        if (mounted) context.pop();
+        return;
+      }
+    }
+    final userId = await AuthRepository.getUserId();
+    if (!mounted) return;
+    context.read<UserProfileController>().load(userId: userId);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<UserProfileController>();
 
-    controller.initLoad(userId: userId);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Profil"),
-        centerTitle: true,
-        actions: [
-          if (controller.canEdit)
-            Padding(
-              padding: const EdgeInsets.only(right: 12.0),
-              child: OutlinedButton.icon(
-                onPressed: () async {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ChangeNotifierProvider.value(
-                        value: context.read<UserProfileController>(),
-                        child: const EditMyProfilePage(),
-                      ),
-                    ),
-                  );
-                  controller.reload();
-                },
-                label: const Text("Edit"),
-                icon: const Icon(Icons.edit_attributes_outlined),
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Profil"),
+          centerTitle: true,
+          actions: [
+            if (controller.canEdit)
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final result = await context.push<bool>(
+                      "/editmyprofilepage",
+                    );
+                    if (result ?? false) {
+                      // Profil wurde erfolgreich aktualisiert, Daten neu laden
+                      final userId = await AuthRepository.getUserId();
+                      if (userId != null) {
+                        await controller.load(userId: userId);
+                      }
+                    }
+                    setState(() {});
+                  },
+                  label: const Text("Edit"),
+                  icon: const Icon(Icons.edit_attributes_outlined),
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
+        body: _buildBody(context, controller),
       ),
-      body: _buildBody(context, controller),
     );
   }
 
@@ -49,11 +91,13 @@ class UserProfilePage extends StatelessWidget {
     if (controller.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (controller.hasError) {
+
+    if (controller.hasError && controller.userData == null) {
       return Center(
         child: Text(controller.errorMessage ?? "Unbekannter Fehler"),
       );
     }
+
     final user = controller.userData;
     if (user == null) {
       return const Center(child: Text("Kein User geladen."));
@@ -62,38 +106,91 @@ class UserProfilePage extends StatelessWidget {
     final me = controller.myProfile;
     final dateFormat = DateFormat("dd.MM.yyyy");
 
-    final profileUrl = user.profileUrl;
-    final firstName = user.firstName;
-    final lastName = user.lastName;
-    final aboutMe = user.aboutMe;
-    final joinedLocations = user.joinedLocationCount;
-    final likedLocations = user.likedLocationCount;
-
-    // createdLocations gibt’s nur bei me
-    final createdLocations = me?.createdLocations;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(
-            context,
-            profileUrl: profileUrl,
-            firstName: firstName,
-            lastName: lastName,
-            email: me?.email, // nur bei mir
-            createdAt: me?.createdAt,
-            dateFormat: dateFormat,
+    return NestedScrollView(
+      headerSliverBuilder: (context, innerBoxIsScrolled) {
+        return [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  _buildHeader(
+                    context,
+                    profileUrl: user.profileUrl,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    username: user.username,
+                    email: me?.email,
+                    createdAt: me?.createdAt,
+                    dateFormat: dateFormat,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildInfoSection(context, aboutMe: user.aboutMe),
+                  const SizedBox(height: 24),
+                  _buildStatsSection(
+                    context,
+                    createdLocations: me?.createdLocations,
+                    joinedLocations: user.joinedLocationCount,
+                    likedLocations: user.likedLocationCount,
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
-          _buildInfoSection(context, aboutMe: aboutMe),
-          const SizedBox(height: 24),
-          _buildStatsSection(
-            context,
-            createdLocations: createdLocations, // nullable
-            joinedLocations: joinedLocations,
-            likedLocations: likedLocations,
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _TabBarSliverDelegate(
+              TabBar(
+                onTap: (index) {
+                  final c = context.read<UserProfileController>();
+                  if (index == 0) {
+                    c.loadCreatedLocations();
+                  } else if (index == 1) {
+                    c.loadJoinedLocations();
+                  } else if (index == 2) {
+                    c.loadLikedLocations();
+                  }
+                },
+                tabs: const [
+                  Tab(text: 'Erstellt'),
+                  Tab(text: 'Beigetreten'),
+                  Tab(text: 'Geliked'),
+                ],
+              ),
+            ),
+          ),
+        ];
+      },
+      body: TabBarView(
+        children: [
+          LocationListTab(
+            title: "Erstellte Locations",
+            locations: controller.createdLocations,
+            isLoading: controller.isLoadingCreated,
+            onRetry: () =>
+                context.read<UserProfileController>().loadCreatedLocations(),
+            onLoadMore: () {
+              debugPrint("loaded more");
+              return context
+                  .read<UserProfileController>()
+                  .loadCreatedLocations(); //context.read<UserProfileController>().loadMoreCreatedLocations(),
+            },
+            isLoadingMore: false, //controller.isLoadingMoreCreated,
+            hasMore: true, //controller.hasMoreCreated,
+          ),
+          LocationListTab(
+            title: "Beigetretene Locations",
+            locations: controller.joinedLocations,
+            isLoading: controller.isLoadingJoined,
+            onRetry: () =>
+                context.read<UserProfileController>().loadJoinedLocations(),
+          ),
+          LocationListTab(
+            title: "Gelikte Locations",
+            locations: controller.likedLocations,
+            isLoading: controller.isLoadingLiked,
+            onRetry: () =>
+                context.read<UserProfileController>().loadLikedLocations(),
           ),
         ],
       ),
@@ -105,10 +202,17 @@ class UserProfilePage extends StatelessWidget {
     required String? profileUrl,
     required String firstName,
     required String lastName,
+    required String username,
     required DateFormat dateFormat,
     String? email,
     DateTime? createdAt,
   }) {
+    final initials = _buildInitials(
+      firstName: firstName,
+      lastName: lastName,
+      username: username,
+    );
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -118,10 +222,7 @@ class UserProfilePage extends StatelessWidget {
               ? NetworkImage(profileUrl)
               : null,
           child: (profileUrl == null || profileUrl.isEmpty)
-              ? Text(
-                  firstName.isNotEmpty ? firstName[0].toUpperCase() : "?",
-                  style: const TextStyle(fontSize: 30),
-                )
+              ? Text(initials, style: const TextStyle(fontSize: 26))
               : null,
         ),
         const SizedBox(width: 20),
@@ -130,19 +231,20 @@ class UserProfilePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "$firstName $lastName",
+                "$firstName $lastName".trim(),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 6),
-
-              if (email != null && email.isNotEmpty)
+              Text("@$username", style: Theme.of(context).textTheme.bodyMedium),
+              if (email != null && email.isNotEmpty) ...[
+                const SizedBox(height: 6),
                 Text(
                   email,
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
                 ),
-
+              ],
               if (createdAt != null) ...[
                 const SizedBox(height: 6),
                 Text(
@@ -188,7 +290,6 @@ class UserProfilePage extends StatelessWidget {
     required int joinedLocations,
     required int likedLocations,
   }) {
-    // Wenn nicht my profile: "Erstellt" weglassen oder als 0 anzeigen
     final items = <Widget>[
       if (createdLocations != null)
         _buildStatCard("Erstellt", createdLocations, Icons.create),
@@ -197,7 +298,6 @@ class UserProfilePage extends StatelessWidget {
     ];
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: items
           .map(
             (w) => Expanded(
@@ -231,5 +331,57 @@ class UserProfilePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _buildInitials({
+    required String? firstName,
+    required String? lastName,
+    required String? username,
+  }) {
+    String result = '';
+
+    if (firstName != null && firstName.trim().isNotEmpty) {
+      result += firstName.trim()[0];
+    }
+    if (lastName != null && lastName.trim().isNotEmpty) {
+      result += lastName.trim()[0];
+    }
+
+    if (result.isEmpty && username != null && username.trim().isNotEmpty) {
+      final trimmed = username.trim();
+      result = trimmed.length >= 2 ? trimmed.substring(0, 2) : trimmed[0];
+    }
+
+    return result.toUpperCase();
+  }
+}
+
+class _TabBarSliverDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar tabBar;
+
+  _TabBarSliverDelegate(this.tabBar);
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      elevation: overlapsContent ? 2 : 0,
+      child: tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_TabBarSliverDelegate oldDelegate) {
+    return oldDelegate.tabBar != tabBar;
   }
 }

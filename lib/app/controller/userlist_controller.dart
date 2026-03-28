@@ -31,7 +31,7 @@ class UserListController extends ChangeNotifier {
   // ─────────────────────────────────────────────
 
   // ─────────────────────────────────────────────
-  // DATA
+  // FUNCTIONS
   // ─────────────────────────────────────────────
 
   Future<void> loadData() async {
@@ -80,14 +80,15 @@ class UserListController extends ChangeNotifier {
   Future<List<UserBaseResponse>> _fetchUsersByQuery() async {
     debugPrint("_fetchUsersByFilterSettings called");
     try {
+      _isLoading = true;
       activateLoadingState();
       final query = _searchCtrl.text.trim();
       final list = await UserService.fetchUsersByQuery(query);
       return list;
-    } /*catch (e) {
+    } catch (e) {
       _errorMessage = "Error fetching locations: $e";
       return [];
-    }*/ finally {
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
