@@ -64,17 +64,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 padding: const EdgeInsets.only(right: 12.0),
                 child: OutlinedButton.icon(
                   onPressed: () async {
+                    final myUserId = await AuthRepository.getUserId();
+                    if (!context.mounted || myUserId == null) return;
+
                     final result = await context.push<bool>(
                       "/editmyprofilepage",
+                      extra: controller.myProfile?.id,
                     );
-                    if (result ?? false) {
-                      // Profil wurde erfolgreich aktualisiert, Daten neu laden
-                      final userId = await AuthRepository.getUserId();
-                      if (userId != null) {
-                        await controller.load(userId: userId);
-                      }
+                    if (result == true) {
+                      controller.reload();
                     }
-                    setState(() {});
                   },
                   label: const Text("Edit"),
                   icon: const Icon(Icons.edit_attributes_outlined),
