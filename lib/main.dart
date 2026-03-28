@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetmaap/app/controller/editmyprofile_controller.dart';
 import 'package:meetmaap/app/controller/locationlist_controller.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
 import 'package:meetmaap/app/controller/profile_controller.dart';
@@ -9,7 +10,6 @@ import 'package:meetmaap/app/controller/setting_controller.dart';
 import 'package:meetmaap/app/controller/userlist_controller.dart';
 import 'package:meetmaap/app/model/responses/locationbase_response.dart';
 import 'package:meetmaap/app/model/responses/locationfull_response.dart';
-import 'package:meetmaap/app/model/responses/userbase_response.dart';
 import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';
@@ -20,7 +20,6 @@ import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 import 'package:meetmaap/app/view/setting/setting_page.dart';
 import 'package:meetmaap/app/view/user/edit_myprofile_page.dart';
-import 'package:meetmaap/app/view/user/userdetail_page.dart';
 import 'package:meetmaap/app/view/user/userlist_page.dart';
 import 'package:meetmaap/testexample/testshowmodal.dart';
 import 'package:meetmaap/testexample/testslidergps.dart';
@@ -39,7 +38,6 @@ void main() {
         ),
         ChangeNotifierProvider(create: (_) => LocationListController()),
         ChangeNotifierProvider(create: (_) => UserListController()),
-        ChangeNotifierProvider(create: (_) => UserProfileController()),
         ChangeNotifierProvider(create: (_) => SettingsController()),
       ],
       child: const MainApplication(),
@@ -115,7 +113,11 @@ class MainApplication extends StatelessWidget {
         GoRoute(
           path: '/editmyprofilepage',
           builder: (context, state) {
-            return EditMyProfilePage();
+            final userId = state.extra as int?;
+            return ChangeNotifierProvider(
+              create: (_) => EditMyProfileController()..load(userId: userId),
+              child: EditMyProfilePage(),
+            );
           },
         ),
 

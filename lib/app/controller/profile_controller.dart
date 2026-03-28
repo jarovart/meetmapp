@@ -145,39 +145,4 @@ class UserProfileController extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  Future<void> updateMyProfile({
-    required String firstName,
-    required String lastName,
-    required String aboutMe,
-  }) async {
-    _isLoading = true;
-    final me = myProfile;
-    if (me == null) {
-      _errorMessage = "Not my profile";
-      notifyListeners();
-      return;
-    }
-
-    _saving = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final updated = await UserRepository.updateMyProfile(
-        firstName: firstName,
-        lastName: lastName,
-        aboutMe: aboutMe,
-      );
-
-      // IMPORTANT: Controller-State aktualisieren
-      _userData = updated; // updated sollte UserMyProfileResponse sein
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      _saving = false;
-      notifyListeners();
-    }
-  }
 }
