@@ -32,7 +32,7 @@ class UserCard extends StatelessWidget {
                 top: Radius.circular(16),
               ),
               child: Image.network(
-                userbase.profileUrl,
+                userbase.profileImage?.imageUrl ?? '',
                 height: 130,
                 width: double.infinity,
                 fit: BoxFit.cover,

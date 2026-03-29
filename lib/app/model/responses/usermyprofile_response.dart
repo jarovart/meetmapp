@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/model/responses/image_response.dart';
 import 'package:meetmaap/app/model/responses/userfull_response.dart';
-import 'package:meetmaap/app/model/utils/image_utils.dart';
 
 class UserMyProfileResponse extends UserFullResponse {
   final String email;
@@ -12,7 +12,7 @@ class UserMyProfileResponse extends UserFullResponse {
     required super.username,
     required super.firstName,
     required super.lastName,
-    required super.profileUrl,
+    required super.profileImage,
     required super.aboutMe,
     required super.likedLocationCount,
     required super.joinedLocationCount,
@@ -28,7 +28,9 @@ class UserMyProfileResponse extends UserFullResponse {
       username: map['username'] as String,
       firstName: map['firstName'] ?? '',
       lastName: map['lastName'] ?? '',
-      profileUrl: ImageUtils.toAbsolute(map['profileUrl']?.toString() ?? ''),
+      profileImage: map['profileImage'] != null
+          ? ImageResponse.fromMap(map['profileImage'])
+          : null,
       aboutMe: map['aboutMe'] ?? '',
       likedLocationCount: map['likedLocationCount'] ?? 0,
       joinedLocationCount: map['joinedLocationCount'] ?? 0,
@@ -44,7 +46,7 @@ class UserMyProfileResponse extends UserFullResponse {
       'username': username,
       'firstName': firstName,
       'lastName': lastName,
-      'profileUrl': profileUrl,
+      'profileImage': profileImage?.toMap(),
       'aboutMe': aboutMe,
       'likedLocationCount': likedLocationCount,
       'joinedLocationCount': joinedLocationCount,

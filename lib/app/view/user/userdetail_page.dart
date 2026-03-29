@@ -74,10 +74,11 @@ class _UserDetailPageState extends State<UserDetailPage> {
                   children: [
                     CircleAvatar(
                       radius: 62,
-                      backgroundImage: (user.profileUrl.isNotEmpty)
-                          ? NetworkImage(user.profileUrl!)
+                      backgroundImage:
+                          (user.profileImage?.imageUrl.isNotEmpty ?? false)
+                          ? NetworkImage(user.profileImage!.imageUrl)
                           : null,
-                      child: (user.profileUrl?.isNotEmpty ?? false)
+                      child: (user.profileImage?.imageUrl.isNotEmpty ?? false)
                           ? null
                           : Text(
                               _getTextForAvatar(

@@ -115,7 +115,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 children: [
                   _buildHeader(
                     context,
-                    profileUrl: user.profileUrl,
+                    profileUrl: user.profileImage?.imageUrl ?? '',
                     firstName: user.firstName,
                     lastName: user.lastName,
                     username: user.username,

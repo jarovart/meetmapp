@@ -194,13 +194,13 @@ class HomePageState extends State<HomePage> {
             child: CircleAvatar(
               radius: 25,
               backgroundImage:
-                  myProfile?.profileUrl != null &&
-                      myProfile!.profileUrl.isNotEmpty
-                  ? NetworkImage(myProfile.profileUrl)
+                  myProfile?.profileImage != null &&
+                      myProfile!.profileImage!.imageUrl.isNotEmpty
+                  ? NetworkImage(myProfile.profileImage!.imageUrl)
                   : null,
               child:
-                  (myProfile?.profileUrl == null ||
-                      myProfile!.profileUrl.isEmpty)
+                  (myProfile?.profileImage?.imageUrl == null ||
+                      myProfile!.profileImage!.imageUrl.isEmpty)
                   ? Text(initials, style: const TextStyle(fontSize: 24))
                   : null,
             ),

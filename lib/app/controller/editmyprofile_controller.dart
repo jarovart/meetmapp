@@ -1,10 +1,17 @@
+import 'dart:io';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart';
 import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/repository/user_repository.dart';
+import 'package:meetmaap/app/service/image_service.dart';
 
 class EditMyProfileController extends ChangeNotifier {
   bool _isLoading = false;
+  bool _uploading = false;
   String? _errorMessage;
   bool _saving = false;
   UserMyProfileResponse? _myProfile;
@@ -13,8 +20,13 @@ class EditMyProfileController extends ChangeNotifier {
   final TextEditingController _firstNameCtrl = TextEditingController();
   final TextEditingController _lastNameCtrl = TextEditingController();
   final TextEditingController _aboutMeCtrl = TextEditingController();
+  final _imagePicker = ImagePicker();
+  Uint8List? _selectedProfileImage; // neues lokales Bild
+  bool _removeCurrentProfileImage = false; // altes Bild bewusst löschen
+  String? _currentProfileImageUrl; // bestehendes Bild vom Server
 
   bool get isLoading => _isLoading;
+  bool get isUploading => _uploading;
   bool get isSaving => _saving;
   bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
   String? get errorMessage => _errorMessage;
@@ -22,6 +34,15 @@ class EditMyProfileController extends ChangeNotifier {
   TextEditingController get firstNameCtrl => _firstNameCtrl;
   TextEditingController get lastNameCtrl => _lastNameCtrl;
   TextEditingController get aboutMeCtrl => _aboutMeCtrl;
+  ImageProvider? get previewImageProvider => _getPreviewImageProvider();
+
+  Uint8List? get selectedProfileImageBytes => _selectedProfileImage;
+  bool get removeCurrentProfileImage => _removeCurrentProfileImage;
+  String? get currentProfileImageUrl => _currentProfileImageUrl;
+
+  void setCurrentProfileImageUrl(String? url) {
+    _currentProfileImageUrl = url;
+  }
 
   Future<void> load({int? userId}) async {
     if (_isLoading) return;
@@ -39,6 +60,7 @@ class EditMyProfileController extends ChangeNotifier {
 
       if (myUserId != null && myUserId == userId) {
         _myProfile = await UserRepository.fetchMyProfile();
+        setCurrentProfileImageUrl(_myProfile?.profileImage?.imageUrl ?? '');
       } else {
         throw Exception("Can not edit profile of other user");
       }
@@ -60,6 +82,14 @@ class EditMyProfileController extends ChangeNotifier {
 
     try {
       await _updateMyProfile();
+
+      if (_removeCurrentProfileImage) {
+        await ImageService.deleteMyProfileImage();
+      } else if (_selectedProfileImage != null) {
+        final imageResponse = await ImageService.uploadImage(
+          _selectedProfileImage!,
+        );
+      }
     } catch (e) {
       debugPrint("Error on EditMyProfileController: $e");
       _errorMessage = e.toString();
@@ -67,6 +97,74 @@ class EditMyProfileController extends ChangeNotifier {
       _saving = false;
       notifyListeners();
     }
+  }
+
+  Future<void> pickProfileImage(BuildContext context) async {
+    final picked = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 100,
+    );
+
+    if (picked == null) return;
+    if (!context.mounted) return;
+
+    final screen = MediaQuery.of(context).size;
+    final cropperWidth = screen.width * 0.85;
+    final cropperHeight = screen.height * 0.55;
+
+    final CroppedFile? cropped = await ImageCropper().cropImage(
+      sourcePath: picked.path,
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Profilbild zuschneiden',
+          lockAspectRatio: true,
+          hideBottomControls: false,
+        ),
+        IOSUiSettings(
+          title: 'Profilbild zuschneiden',
+          aspectRatioLockEnabled: true,
+        ),
+        if (kIsWeb)
+          WebUiSettings(
+            context: context, // nur falls du Web nutzt
+            presentStyle: WebPresentStyle.dialog,
+            size: CropperSize(
+              width: cropperWidth.clamp(280, 520).toInt(),
+              height: cropperHeight.clamp(320, 700).toInt(),
+            ),
+            viewwMode: WebViewMode.mode_1,
+            dragMode: WebDragMode.move,
+            zoomable: true,
+            scalable: true,
+            movable: true,
+            zoomOnTouch: true,
+            zoomOnWheel: true,
+          ),
+      ],
+    );
+
+    if (cropped == null) return;
+
+    _uploading = true;
+    notifyListeners();
+    try {
+      final bytes = await cropped.readAsBytes(); //or picked v
+      _selectedProfileImage = await compute(_compressImage, bytes);
+      _removeCurrentProfileImage = false;
+    } catch (e) {
+      _errorMessage = "Failed to process image: $e";
+      debugPrint(_errorMessage);
+    } finally {
+      _uploading = false;
+      notifyListeners();
+    }
+  }
+
+  void removeProfileImage() {
+    _selectedProfileImage = null;
+    _removeCurrentProfileImage = true;
+    notifyListeners();
   }
 
   Future<void> _updateMyProfile() async {
@@ -92,5 +190,30 @@ class EditMyProfileController extends ChangeNotifier {
     _firstNameCtrl.text = _myProfile?.firstName ?? "";
     _lastNameCtrl.text = _myProfile?.lastName ?? "";
     _aboutMeCtrl.text = _myProfile?.aboutMe ?? "";
+  }
+
+  ImageProvider? _getPreviewImageProvider() {
+    if (_selectedProfileImage != null) {
+      return MemoryImage(_selectedProfileImage!);
+    } else if (_removeCurrentProfileImage) {
+      return null;
+    } else if (_currentProfileImageUrl != null &&
+        _currentProfileImageUrl!.isNotEmpty) {
+      return NetworkImage(_currentProfileImageUrl!);
+    } else {
+      return null;
+    }
+  }
+
+  static Uint8List _compressImage(Uint8List bytes) {
+    final image = img.decodeImage(bytes);
+    if (image == null) return bytes;
+
+    final resized = img.copyResize(
+      image,
+      width: image.width > 1280 ? 1280 : image.width,
+    );
+
+    return Uint8List.fromList(img.encodeJpg(resized, quality: 80));
   }
 }

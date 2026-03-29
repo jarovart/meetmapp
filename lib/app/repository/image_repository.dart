@@ -49,6 +49,11 @@ class ImageRepository {
     return decoded.cast<String>();
   }
 
+  static Future<ImageResponse> uploadImage(Uint8List image) async {
+    final imageResponses = await uploadImages([image]);
+    return imageResponses.first;
+  }
+
   static Future<List<ImageResponse>> uploadImages(
     List<Uint8List> images, {
     int? locationId,
@@ -56,14 +61,11 @@ class ImageRepository {
     if (images.isEmpty) {
       throw Exception('No images to upload');
     }
-    final token = await AuthRepository.getToken();
-    if (token == null || token.isEmpty) {
-      throw Exception('Not authenticated');
-    }
+    final headers = await AuthRepository.authHeadersWithException();
 
     final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/uploadImages');
     final request = http.MultipartRequest('POST', uri);
-    request.headers['Authorization'] = 'Bearer $token';
+    request.headers.addAll(headers);
 
     if (locationId != null) {
       request.fields['locationId'] = locationId.toString();
@@ -75,7 +77,7 @@ class ImageRepository {
           'files',
           images[i],
           filename: 'image_$i.jpg',
-          contentType: MediaType('image', 'jpeg'),
+          //contentType: MediaType('image', 'jpeg'), TODO: still work?
         ),
       );
     }
@@ -124,20 +126,13 @@ class ImageRepository {
     int locationId,
     UpdateThumbnailRequest updateThumbnailRequest,
   ) async {
-    final token = await AuthRepository.getToken();
-    if (token == null || token.isEmpty) {
-      throw Exception('Not authenticated');
-    }
-
+    final headers = await AuthRepository.authHeaders();
     final uri = Uri.parse(
       '${ApiConfig.baseUrl}/api/locations/$locationId/thumbnail',
     );
     final response = await http.patch(
       uri,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: headers,
       body: jsonEncode(updateThumbnailRequest.toMap()),
     );
 
@@ -150,4 +145,6 @@ class ImageRepository {
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     return LocationBaseResponse.fromMap(decoded);
   }
+
+  static Future<void> deleteMyProfileImage() async {}
 }

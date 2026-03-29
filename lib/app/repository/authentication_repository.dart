@@ -220,4 +220,15 @@ class AuthRepository {
       'Authorization': 'Bearer $token',
     };
   }
+
+  static Future<Map<String, String>> authHeadersWithException() async {
+    final token = await AuthRepository.getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception("Not authenticated");
+    }
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
 }

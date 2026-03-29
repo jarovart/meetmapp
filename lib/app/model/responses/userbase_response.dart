@@ -1,18 +1,18 @@
-import 'package:meetmaap/app/model/utils/image_utils.dart';
+import 'package:meetmaap/app/model/responses/image_response.dart';
 
 class UserBaseResponse {
   final int id;
   final String username;
   final String firstName;
   final String lastName;
-  final String profileUrl;
+  final ImageResponse? profileImage;
 
   UserBaseResponse({
     required this.id,
     required this.username,
     required this.firstName,
     required this.lastName,
-    required this.profileUrl,
+    required this.profileImage,
   });
 
   factory UserBaseResponse.fromMap(Map<String, dynamic> map) {
@@ -21,7 +21,9 @@ class UserBaseResponse {
       username: map['username'] as String,
       firstName: map['firstName'] ?? '',
       lastName: map['lastName'] ?? '',
-      profileUrl: ImageUtils.toAbsolute(map['profileUrl']?.toString() ?? ''),
+      profileImage: map['profileImage'] != null
+          ? ImageResponse.fromMap(map['profileImage'])
+          : null,
     );
   }
 }

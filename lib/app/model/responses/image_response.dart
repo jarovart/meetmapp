@@ -14,4 +14,8 @@ class ImageResponse {
 
     return ImageResponse(id: map['id'] as int, imageUrl: imageUrl);
   }
+
+  Map<String, dynamic> toMap() {
+    return {'id': id, 'imageUrl': imageUrl};
+  }
 }
