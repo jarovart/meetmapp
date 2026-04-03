@@ -1,13 +1,13 @@
-import 'dart:io';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
+import 'package:meetmaap/app/model/requests/editmyprofile_request.dart';
 import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/repository/user_repository.dart';
-import 'package:meetmaap/app/service/image_service.dart';
+import 'package:meetmaap/app/service/user_service.dart';
 
 class EditMyProfileController extends ChangeNotifier {
   bool _isLoading = false;
@@ -82,14 +82,6 @@ class EditMyProfileController extends ChangeNotifier {
 
     try {
       await _updateMyProfile();
-
-      if (_removeCurrentProfileImage) {
-        await ImageService.deleteMyProfileImage();
-      } else if (_selectedProfileImage != null) {
-        final imageResponse = await ImageService.uploadImage(
-          _selectedProfileImage!,
-        );
-      }
     } catch (e) {
       debugPrint("Error on EditMyProfileController: $e");
       _errorMessage = e.toString();
@@ -170,12 +162,20 @@ class EditMyProfileController extends ChangeNotifier {
   Future<void> _updateMyProfile() async {
     if (_myProfile == null) throw Exception("Not my profile");
 
-    final updatedProfile = await UserRepository.updateMyProfile(
+    final profileRequest = EditMyProfileRequest(
       firstName: firstNameCtrl.text.trim(),
       lastName: lastNameCtrl.text.trim(),
       aboutMe: aboutMeCtrl.text.trim(),
     );
+
+    final updatedProfile = await UserService.updateMyProfile(
+      profileRequest,
+      _selectedProfileImage,
+      _removeCurrentProfileImage,
+    );
     _myProfile = updatedProfile;
+    _currentProfileImageUrl = _myProfile?.profileImage?.imageUrl ?? '';
+    _removeCurrentProfileImage = false;
   }
 
   @override

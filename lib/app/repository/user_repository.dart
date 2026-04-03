@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:meetmaap/app/config/api_config.dart';
+import 'package:meetmaap/app/model/requests/editmyprofile_request.dart';
 import 'package:meetmaap/app/model/responses/userbase_response.dart';
 import 'package:meetmaap/app/model/responses/userfull_response.dart';
 import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
@@ -70,38 +71,28 @@ class UserRepository {
     return UserMyProfileResponse.fromMap(body);
   }
 
-  static Future<UserMyProfileResponse> updateMyProfile({
-    required String firstName,
-    required String lastName,
-    required String aboutMe,
-  }) async {
+  static Future<UserMyProfileResponse> updateMyProfile(
+    EditMyProfileRequest request,
+  ) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/api/users/me');
-
     final headers = await AuthRepository.authHeaders();
     final response = await http.patch(
       uri,
       headers: headers,
-      body: jsonEncode({
-        'firstName': firstName,
-        'lastName': lastName,
-        'aboutMe': aboutMe,
-      }),
+      body: jsonEncode(request.toMap()),
     );
 
     if (response.statusCode != 200) {
-      debugPrint(
-        "Failed to update my profile (${response.statusCode}): ${response.body}",
-      );
-      throw Exception(
-        'Failed to update my profile (${response.statusCode}): ${response.body}',
-      );
+      String exceptionMessage =
+          'Failed to update profile. Status: ${response.statusCode}, Body: ${response.body}';
+      debugPrint(exceptionMessage);
+      throw Exception(exceptionMessage);
     }
 
     final body = jsonDecode(response.body) as Map<String, dynamic>;
     final updatedProfile = UserMyProfileResponse.fromMap(body);
 
     await AuthRepository.saveMyProfile(updatedProfile);
-
     return updatedProfile;
   }
 }

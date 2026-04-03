@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:meetmaap/app/config/api_config.dart';
@@ -50,8 +51,32 @@ class ImageRepository {
   }
 
   static Future<ImageResponse> uploadImage(Uint8List image) async {
-    final imageResponses = await uploadImages([image]);
-    return imageResponses.first;
+    final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/me');
+    final headers = await AuthRepository.authHeadersWithException();
+    final request = http.MultipartRequest('POST', uri);
+    request.headers.addAll(headers);
+
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'file',
+        image,
+        filename: 'image.jpg',
+        contentType: MediaType('image', 'jpeg'),
+      ),
+    );
+
+    final response = await request.send();
+    final body = await response.stream.bytesToString();
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      String exceptionMessage =
+          'Image upload failed (${response.statusCode}): $body';
+      debugPrint(exceptionMessage);
+      throw Exception(exceptionMessage);
+    }
+
+    final decoded = jsonDecode(body) as Map<String, dynamic>;
+    return ImageResponse.fromMap(decoded);
   }
 
   static Future<List<ImageResponse>> uploadImages(
@@ -126,7 +151,7 @@ class ImageRepository {
     int locationId,
     UpdateThumbnailRequest updateThumbnailRequest,
   ) async {
-    final headers = await AuthRepository.authHeaders();
+    final headers = await AuthRepository.authHeadersWithException();
     final uri = Uri.parse(
       '${ApiConfig.baseUrl}/api/locations/$locationId/thumbnail',
     );
@@ -146,5 +171,17 @@ class ImageRepository {
     return LocationBaseResponse.fromMap(decoded);
   }
 
-  static Future<void> deleteMyProfileImage() async {}
+  static Future<void> deleteMyProfileImage() async {
+    final headers = await AuthRepository.authHeadersWithException();
+    final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/me');
+    final response = await http.delete(uri, headers: headers);
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      String exceptionMessage =
+          'Failed to delete profile image. '
+          'Status: ${response.statusCode}, Body: ${response.body}';
+      debugPrint(exceptionMessage);
+      throw Exception(exceptionMessage);
+    }
+  }
 }
