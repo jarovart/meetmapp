@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
-import 'package:meetmaap/app/model/responses/userfull_response.dart';
-import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/userfull_response.dart';
+import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
+import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/repository/user_repository.dart';
 import 'package:meetmaap/app/service/location_service.dart';
@@ -74,8 +75,14 @@ class UserProfileController extends ChangeNotifier {
       _createdLoaded = false;
       _joinedLoaded = false;
       _likedLoaded = false;
-    } catch (e) {
-      _errorMessage = e.toString();
+    } catch (e, st) {
+      debugPrint('Error while loading profile: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Fehler beim Laden des Profils.',
+      );
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -100,8 +107,14 @@ class UserProfileController extends ChangeNotifier {
         userId,
       );
       _createdLoaded = true;
-    } catch (e) {
-      _errorMessage = e.toString();
+    } catch (e, st) {
+      debugPrint('Error while loading created locations: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Fehler beim Laden der Locations.',
+      );
     } finally {
       _isLoadingCreated = false;
       notifyListeners();
@@ -120,8 +133,14 @@ class UserProfileController extends ChangeNotifier {
         userId,
       );
       _joinedLoaded = true;
-    } catch (e) {
-      _errorMessage = e.toString();
+    } catch (e, st) {
+      debugPrint('Error while loading joined locations: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Fehler beim Laden der Locations.',
+      );
     } finally {
       _isLoadingJoined = false;
       notifyListeners();
@@ -138,8 +157,14 @@ class UserProfileController extends ChangeNotifier {
     try {
       _likedLocations = await LocationService.getLikedLocationsByUserId(userId);
       _likedLoaded = true;
-    } catch (e) {
-      _errorMessage = e.toString();
+    } catch (e, st) {
+      debugPrint('Error while loading liked locations: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Fehler beim Laden der Locations.',
+      );
     } finally {
       _isLoadingLiked = false;
       notifyListeners();

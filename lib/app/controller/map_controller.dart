@@ -6,8 +6,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/debouncer.dart';
-import 'package:meetmaap/app/model/exceptions/geolocationpermission_exception.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
 
@@ -25,6 +26,7 @@ class MapViewController extends ChangeNotifier {
   LatLng _initialCenter = LatLng(51.1657, 10.4515); // Mitte von Deutschland
   LatLng? _currentPosition;
   LatLng? _mapCenterBeforeSheet;
+  String? _errorMessage; //TODO: errormessage einbinden
 
   RangeValues _selectedRange = const RangeValues(0, 4);
   final List<String> _dayOptions = [
@@ -229,9 +231,16 @@ class MapViewController extends ChangeNotifier {
           });
         }
         updateSearchResults(results);
-      } catch (e) {
+      } catch (e, st) {
+        debugPrint('Error while searching for locations in mapcontroller: $e');
+        debugPrintStack(stackTrace: st);
+
+        _errorMessage = AppErrorMapper.toUserMessage(
+          e,
+          fallback: 'Suche fehlgeschlagen.',
+        );
         //ExceptionMessage.showError(context, "Suche fehlgeschlagen");
-        debugPrint("Suche fehlgeschlagen");
+        //debugPrint("Suche fehlgeschlagen");
       }
     });
   }
@@ -276,8 +285,14 @@ class MapViewController extends ChangeNotifier {
         _endDate,
       );
       debugPrint("Execute: _fetchLocationsWithinWithTime");
-    } catch (e) {
-      debugPrint("Exception: _fetchLocationsWithinWithTime");
+    } catch (e, st) {
+      debugPrint('Exception: _fetchLocationsWithinWithTime: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Fehler beim Suchen der Locations.',
+      );
       //ExceptionMessage.showError(context, "Fehler beim Laden der Locations");
     } finally {
       notifyListeners();

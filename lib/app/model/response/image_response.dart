@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/utils/image_utils.dart';
+import 'package:meetmaap/app/model/util/image_utils.dart';
 
 class ImageResponse {
   final int id;

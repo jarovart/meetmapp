@@ -45,6 +45,15 @@ class EditMyProfilePage extends StatelessWidget {
               key: editController.formKey,
               child: ListView(
                 children: [
+                  if (editController.hasError) ...[
+                    Center(
+                      child: Text(
+                        editController.errorMessage ?? "Fehler",
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   buildProfileImageSection(context, editController),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -62,13 +71,6 @@ class EditMyProfilePage extends StatelessWidget {
                     maxLines: 6,
                     decoration: const InputDecoration(labelText: "Über mich"),
                   ),
-                  if (editController.hasError) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      editController.errorMessage ?? "Fehler",
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ],
                 ],
               ),
             ),

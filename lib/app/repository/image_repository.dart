@@ -5,183 +5,102 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:meetmaap/app/config/api_config.dart';
-import 'package:meetmaap/app/model/requests/updatethumbnail_request.dart';
-import 'package:meetmaap/app/model/responses/image_response.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/request/updatethumbnail_request.dart';
+import 'package:meetmaap/app/model/response/image_response.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/util/api_exception_wrapper.dart';
+import 'package:meetmaap/app/repository/util/api_response_handler.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 
 class ImageRepository {
-  static Future<List<String>> uploadImages1({
-    required List<Uint8List> images,
-    int? locationId,
-  }) async {
-    final token = await AuthRepository.getToken();
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/upload');
-
-    final request = http.MultipartRequest('POST', uri);
-    request.headers['Authorization'] = 'Bearer $token';
-
-    if (locationId != null) {
-      request.fields['locationId'] = locationId.toString();
-    }
-
-    for (int i = 0; i < images.length; i++) {
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'files',
-          images[i],
-          filename: 'image_$i.jpg',
-          contentType: MediaType('image', 'jpeg'),
-        ),
-      );
-    }
-
-    final response = await request.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Image upload failed (${response.statusCode}): $body');
-    }
-
-    //return List<String>.from(jsonDecode(body));
-    // Backend liefert List<ImageResponse> => du extrahierst urls:
-    final decoded = jsonDecode(body) as List;
-    //return decoded.map((e) => e['url'] as String).toList();
-    return decoded.cast<String>();
-  }
-
-  static Future<ImageResponse> uploadImage(Uint8List image) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/me');
-    final headers = await AuthRepository.authHeadersWithException();
-    final request = http.MultipartRequest('POST', uri);
-    request.headers.addAll(headers);
-
-    request.files.add(
-      http.MultipartFile.fromBytes(
-        'file',
-        image,
-        filename: 'image.jpg',
-        contentType: MediaType('image', 'jpeg'),
-      ),
-    );
-
-    final response = await request.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      String exceptionMessage =
-          'Image upload failed (${response.statusCode}): $body';
-      debugPrint(exceptionMessage);
-      throw Exception(exceptionMessage);
-    }
-
-    final decoded = jsonDecode(body) as Map<String, dynamic>;
-    return ImageResponse.fromMap(decoded);
-  }
-
-  static Future<List<ImageResponse>> uploadImages(
-    List<Uint8List> images, {
-    int? locationId,
-  }) async {
-    if (images.isEmpty) {
-      throw Exception('No images to upload');
-    }
-    final headers = await AuthRepository.authHeadersWithException();
-
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/uploadImages');
-    final request = http.MultipartRequest('POST', uri);
-    request.headers.addAll(headers);
-
-    if (locationId != null) {
-      request.fields['locationId'] = locationId.toString();
-    }
-
-    for (int i = 0; i < images.length; i++) {
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'files',
-          images[i],
-          filename: 'image_$i.jpg',
-          //contentType: MediaType('image', 'jpeg'), TODO: still work?
-        ),
-      );
-    }
-
-    final response = await request.send();
-    final body = await response.stream.bytesToString();
-
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Image upload failed (${response.statusCode}): $body');
-    }
-
-    final decoded = jsonDecode(body) as List;
-    return decoded
-        .map((e) => ImageResponse.fromMap(e as Map<String, dynamic>))
-        .toList();
-  }
-
-  static Future<void> uploadImageByBytes(
-    List<int> imageBytes,
-    int index,
+  static Future<ImageResponse> uploadImageForUserProfile(
+    Uint8List image,
   ) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/upload');
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/me');
+      final headers = await AuthRepository.authHeadersWithException();
+      final request = http.MultipartRequest('POST', uri);
+      request.headers.addAll(headers);
 
-    final request = http.MultipartRequest('POST', uri)
-      ..files.add(
+      request.files.add(
         http.MultipartFile.fromBytes(
           'file',
-          imageBytes,
-          filename: 'image_$index.jpg',
+          image,
+          filename: 'image.jpg',
           contentType: MediaType('image', 'jpeg'),
         ),
       );
 
-    final response = await request.send();
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
-    if (response.statusCode != 200) {
-      throw Exception('Upload failed');
-    }
+      final decoded = ApiResponseHandler.parseJsonObject(response);
+      return ImageResponse.fromMap(decoded);
+    });
   }
 
-  Future<void> deleteImageFromServer(int imageId) async {
-    await http.delete(Uri.parse('${ApiConfig.baseUrl}/api/images/$imageId'));
+  static Future<List<ImageResponse>> uploadImagesOfLocations(
+    List<Uint8List> images,
+    int locationId,
+  ) async {
+    return ApiExceptionWrapper.guard(() async {
+      if (images.isEmpty) {
+        throw Exception('No images to upload');
+      }
+      final headers = await AuthRepository.authHeadersWithException();
+
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/uploadImages');
+      final request = http.MultipartRequest('POST', uri);
+      request.headers.addAll(headers);
+      request.fields['locationId'] = locationId.toString();
+
+      for (int i = 0; i < images.length; i++) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'files',
+            images[i],
+            filename: 'image_$i.jpg',
+          ),
+        );
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      final decoded = ApiResponseHandler.parseJsonList(response);
+      return decoded
+          .map((e) => ImageResponse.fromMap(e as Map<String, dynamic>))
+          .toList();
+    });
   }
 
   static Future<LocationBaseResponse> patchLocationThumbnail(
     int locationId,
     UpdateThumbnailRequest updateThumbnailRequest,
   ) async {
-    final headers = await AuthRepository.authHeadersWithException();
-    final uri = Uri.parse(
-      '${ApiConfig.baseUrl}/api/locations/$locationId/thumbnail',
-    );
-    final response = await http.patch(
-      uri,
-      headers: headers,
-      body: jsonEncode(updateThumbnailRequest.toMap()),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Patch thumbnail failed (${response.statusCode}): ${response.body}',
+    return ApiExceptionWrapper.guard(() async {
+      final headers = await AuthRepository.authHeadersWithException();
+      final uri = Uri.parse(
+        '${ApiConfig.baseUrl}/api/locations/$locationId/thumbnail',
       );
-    }
+      final response = await http.patch(
+        uri,
+        headers: headers,
+        body: jsonEncode(updateThumbnailRequest.toMap()),
+      );
 
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-    return LocationBaseResponse.fromMap(decoded);
+      final decoded = ApiResponseHandler.parseJsonObject(response);
+      return LocationBaseResponse.fromMap(decoded);
+    });
   }
 
   static Future<void> deleteMyProfileImage() async {
-    final headers = await AuthRepository.authHeadersWithException();
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/me');
-    final response = await http.delete(uri, headers: headers);
+    return ApiExceptionWrapper.guard(() async {
+      final headers = await AuthRepository.authHeadersWithException();
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/images/me');
+      final response = await http.delete(uri, headers: headers);
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      String exceptionMessage =
-          'Failed to delete profile image. '
-          'Status: ${response.statusCode}, Body: ${response.body}';
-      debugPrint(exceptionMessage);
-      throw Exception(exceptionMessage);
-    }
+      ApiResponseHandler.ensureSuccess(response);
+    });
   }
 }

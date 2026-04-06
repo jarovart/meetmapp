@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/view/location/locationdetails_content.dart';
 import 'package:provider/provider.dart';
 
@@ -38,13 +38,6 @@ class LocationDetailsBottomSheet extends StatelessWidget {
       return const Padding(
         padding: EdgeInsets.all(32),
         child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (controller.locationFull == null) {
-      return const Padding(
-        padding: EdgeInsets.all(32),
-        child: Text('Fehler beim Laden der Location'),
       );
     }
 

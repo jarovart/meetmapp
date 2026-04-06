@@ -3,11 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
-import 'package:meetmaap/app/model/requests/editmyprofile_request.dart';
-import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
+import 'package:meetmaap/app/model/request/editmyprofile_request.dart';
+import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/repository/user_repository.dart';
 import 'package:meetmaap/app/service/user_service.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class EditMyProfileController extends ChangeNotifier {
   bool _isLoading = false;
@@ -65,8 +66,14 @@ class EditMyProfileController extends ChangeNotifier {
         throw Exception("Can not edit profile of other user");
       }
       _initEditFields();
-    } catch (e) {
-      _errorMessage = e.toString();
+    } catch (e, st) {
+      debugPrint('load editprofile failed: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Profil konnte nicht geladen werden.',
+      );
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -82,9 +89,14 @@ class EditMyProfileController extends ChangeNotifier {
 
     try {
       await _updateMyProfile();
-    } catch (e) {
-      debugPrint("Error on EditMyProfileController: $e");
-      _errorMessage = e.toString();
+    } catch (e, st) {
+      debugPrint('saveProfile failed: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Profil konnte nicht gespeichert werden.',
+      );
     } finally {
       _saving = false;
       notifyListeners();
@@ -144,9 +156,14 @@ class EditMyProfileController extends ChangeNotifier {
       final bytes = await cropped.readAsBytes(); //or picked v
       _selectedProfileImage = await compute(_compressImage, bytes);
       _removeCurrentProfileImage = false;
-    } catch (e) {
-      _errorMessage = "Failed to process image: $e";
-      debugPrint(_errorMessage);
+    } catch (e, st) {
+      debugPrint('Failed to process image: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Bild konnte nicht verarbeitet werden.',
+      );
     } finally {
       _uploading = false;
       notifyListeners();

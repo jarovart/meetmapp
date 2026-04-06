@@ -1,6 +1,6 @@
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/model/responses/image_response.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/image_response.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
 
 class LocationFullResponse extends LocationBaseResponse {
   final List<ImageResponse> images;

@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/responses/userbase_response.dart';
+import 'package:meetmaap/app/model/response/userbase_response.dart';
+import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
 import 'package:meetmaap/app/service/user_service.dart';
 
 class UserListController extends ChangeNotifier {
@@ -85,8 +86,14 @@ class UserListController extends ChangeNotifier {
       final query = _searchCtrl.text.trim();
       final list = await UserService.fetchUsersByQuery(query);
       return list;
-    } catch (e) {
-      _errorMessage = "Error fetching locations: $e";
+    } catch (e, st) {
+      debugPrint('Error while loading users: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Fehler beim Laden der Locations.',
+      );
       return [];
     } finally {
       _isLoading = false;

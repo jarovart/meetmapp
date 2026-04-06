@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:meetmaap/app/model/exceptions/cooldownexception.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
+import 'package:meetmaap/app/model/exception/cooldownexception.dart';
 import 'package:meetmaap/app/config/api_config.dart';
-import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
+import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/user_repository.dart';
 
 class AuthRepository {
@@ -224,7 +225,7 @@ class AuthRepository {
   static Future<Map<String, String>> authHeadersWithException() async {
     final token = await AuthRepository.getToken();
     if (token == null || token.isEmpty) {
-      throw Exception("Not authenticated");
+      throw NotLoggedInException();
     }
     return {
       'Content-Type': 'application/json',

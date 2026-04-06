@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
-import 'package:meetmaap/app/model/responses/locationfull_response.dart';
-import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/locationfull_response.dart';
+import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
+import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 
@@ -26,12 +27,27 @@ class LocationDetailsController extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _myProfile != null;
+  LocationBaseResponse get locationBase => _locationBase;
   LocationFullResponse? get locationFull => _locationFull;
 
   bool get isLiked => _isLiked;
   bool get isJoined => _isJoined;
   int get likedUserCount => _likedUserCount;
   int get joinedUserCount => _joinedUserCount;
+
+  List<String> get imageUrls {
+    if (locationFull == null) {
+      String thumbnailUrl = _locationBase.thumbnailImage?.imageUrl ?? '';
+      return [thumbnailUrl];
+    }
+    return _locationFull?.images.map((image) => image.imageUrl).toList() ??
+        [
+          "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+          "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+          "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+          "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
+        ];
+  }
 
   // ─────────────────────────────────────────────
   // STATE MUTATION
@@ -59,8 +75,13 @@ class LocationDetailsController extends ChangeNotifier {
       _joinedUserCount = _locationFull!.joinedUserCount;
       _isLiked = _locationFull!.likedByCurrentUser ?? false;
       _isJoined = _locationFull!.joinedByCurrentUser ?? false;
-    } catch (e) {
-      _errorMessage = "Error loading location details: $e";
+    } catch (e, st) {
+      debugPrint('Error while loading location details: $e');
+      debugPrintStack(stackTrace: st);
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Location konnte nicht geladen werden.',
+      );
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -87,10 +108,16 @@ class LocationDetailsController extends ChangeNotifier {
       } else {
         await LocationService.unlike(_locationFull!.id);
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error while toggling like: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Fehler beim Liken der Location.',
+      );
       _isLiked = previousLiked;
       _likedUserCount = previousCount;
-      _errorMessage = "Error toggling like: $e";
       notifyListeners();
     }
   }
@@ -111,10 +138,16 @@ class LocationDetailsController extends ChangeNotifier {
       } else {
         await LocationService.unjoin(_locationFull!.id);
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error while toggling join: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Fehler beim Beitreten der Location.',
+      );
       _isJoined = previousJoined;
       _joinedUserCount = previousCount;
-      _errorMessage = "Error toggling join: $e";
       notifyListeners();
     }
   }

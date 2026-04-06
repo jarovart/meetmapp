@@ -1,9 +1,9 @@
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/model/requests/createlocation_request.dart';
-import 'package:meetmaap/app/model/exceptions/geolocationpermission_exception.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
-import 'package:meetmaap/app/model/responses/locationfull_response.dart';
+import 'package:meetmaap/app/model/request/createlocation_request.dart';
+import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/repository/location_repository.dart';
 
 /// Ergebnis-Typ für Location-Abfragen
@@ -64,7 +64,15 @@ class LocationService {
     double latitude,
     double longitude,
   ) async {
-    return await LocationRepository.reverseGeocodeOSM(latitude, longitude);
+    final dataMap = await LocationRepository.reverseGeocodeOSM(
+      latitude,
+      longitude,
+    );
+    if (dataMap['address'] == null) {
+      return dataMap['display_name'] as String?;
+    }
+
+    return _formatAddress(dataMap['address']);
   }
 
   static int getLocationScore({
@@ -132,5 +140,17 @@ class LocationService {
 
   static Future<bool> isJoined(int locationId) async {
     return await LocationRepository.isJoined(locationId);
+  }
+
+  static String _formatAddress(Map address) {
+    final parts = [
+      address['country'],
+      address['postcode'],
+      address['city'] ?? address['town'] ?? address['village'],
+      address['road'],
+      address['house_number'],
+    ];
+
+    return parts.where((e) => e != null).join(', ');
   }
 }

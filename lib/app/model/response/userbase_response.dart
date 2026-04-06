@@ -1,4 +1,4 @@
-import 'package:meetmaap/app/model/responses/image_response.dart';
+import 'package:meetmaap/app/model/response/image_response.dart';
 
 class UserBaseResponse {
   final int id;

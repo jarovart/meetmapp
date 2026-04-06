@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:meetmaap/app/model/requests/editmyprofile_request.dart';
-import 'package:meetmaap/app/model/responses/userbase_response.dart';
-import 'package:meetmaap/app/model/responses/userfull_response.dart';
-import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
+import 'package:meetmaap/app/model/request/editmyprofile_request.dart';
+import 'package:meetmaap/app/model/response/userbase_response.dart';
+import 'package:meetmaap/app/model/response/userfull_response.dart';
+import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/user_repository.dart';
 import 'package:meetmaap/app/service/image_service.dart';
 
@@ -39,7 +39,7 @@ class UserService {
     if (removeCurrentImage) {
       await ImageService.deleteMyProfileImage();
     } else if (profileImage != null && profileImage.isNotEmpty) {
-      await ImageService.uploadImage(profileImage);
+      await ImageService.uploadImageForUserProfile(profileImage);
     }
     UserMyProfileResponse userResponse = await UserRepository.updateMyProfile(
       request,

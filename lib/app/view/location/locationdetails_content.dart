@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
-import 'package:meetmaap/app/model/responses/locationfull_response.dart';
 import 'package:meetmaap/app/view/util/gallery_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -19,18 +18,8 @@ class LocationDetailsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formatter = DateFormat('dd.MM.yyyy HH:mm');
-    final location = controller.locationFull!;
-    List<String> imageUrls = [];
-    if (location.images.isNotEmpty) {
-      imageUrls = location.images.map((image) => image.imageUrl).toList();
-    } else {
-      imageUrls = [
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-      ];
-    }
+    final location = controller.locationFull ?? controller.locationBase;
+    List<String> imageUrls = controller.imageUrls;
 
     return Material(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),

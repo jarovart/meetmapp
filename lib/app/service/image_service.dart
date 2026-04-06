@@ -1,28 +1,23 @@
 import 'dart:typed_data';
 
-import 'package:meetmaap/app/model/requests/updatethumbnail_request.dart';
-import 'package:meetmaap/app/model/responses/image_response.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/request/updatethumbnail_request.dart';
+import 'package:meetmaap/app/model/response/image_response.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/repository/image_repository.dart';
 
 class ImageService {
-  static Future<List<String>> uploadImages1(List<Uint8List> images) async {
-    return await ImageRepository.uploadImages1(images: images);
-  }
-
-  static Future<ImageResponse> uploadImage(Uint8List image) async {
-    if (!(await AuthRepository.isLoggedIn())) {
-      throw Exception("Not logged in");
-    }
-    return await ImageRepository.uploadImage(image);
+  static Future<ImageResponse> uploadImageForUserProfile(
+    Uint8List image,
+  ) async {
+    return await ImageRepository.uploadImageForUserProfile(image);
   }
 
   static Future<List<ImageResponse>> uploadImages(
     List<Uint8List> images,
     int locationId,
   ) async {
-    return await ImageRepository.uploadImages(images, locationId: locationId);
+    return await ImageRepository.uploadImagesOfLocations(images, locationId);
   }
 
   static Future<LocationBaseResponse> patchLocationThumbnail(
