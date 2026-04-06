@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
 
 class LocationListTab extends StatefulWidget {
   final String title;

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/model/exceptions/cooldownexception.dart';
+import 'package:meetmaap/app/model/exception/cooldownexception.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 
 class RegisterPage extends StatefulWidget {

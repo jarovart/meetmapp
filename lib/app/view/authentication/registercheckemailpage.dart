@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/exceptions/cooldownexception.dart';
+import 'package:meetmaap/app/model/exception/cooldownexception.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 
 class RegisterCheckEmailPage extends StatefulWidget {
@@ -21,7 +21,7 @@ class _RegisterCheckEmailPageState extends State<RegisterCheckEmailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
-      body: Center (
+      body: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16),

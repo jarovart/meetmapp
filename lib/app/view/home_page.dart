@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/model/exceptions/exception_message.dart';
-import 'package:meetmaap/app/model/responses/usermyprofile_response.dart';
+import 'package:meetmaap/app/model/exception/exception_message.dart';
+import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 

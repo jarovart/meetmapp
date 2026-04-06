@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/model/responses/userbase_response.dart';
+import 'package:meetmaap/app/model/response/userbase_response.dart';
 
 class UserCard extends StatelessWidget {
   final UserBaseResponse userbase;

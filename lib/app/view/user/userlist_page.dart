@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:meetmaap/app/controller/userlist_controller.dart';
-import 'package:meetmaap/app/model/responses/userbase_response.dart';
+import 'package:meetmaap/app/model/response/userbase_response.dart';
 import 'package:meetmaap/app/view/util/usercard_widget.dart';
 import 'package:provider/provider.dart';
 

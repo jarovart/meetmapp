@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/exceptions/cooldownexception.dart';
+import 'package:meetmaap/app/model/exception/cooldownexception.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 
 class ForgotPasswordPage extends StatefulWidget {

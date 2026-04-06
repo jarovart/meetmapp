@@ -7,13 +7,13 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/model/responses/image_response.dart';
+import 'package:meetmaap/app/model/response/image_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/service/image_service.dart';
 import 'package:meetmaap/app/service/location_service.dart';
-import 'package:meetmaap/app/model/exceptions/exception_message.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
-import 'package:meetmaap/app/model/requests/createlocation_request.dart';
+import 'package:meetmaap/app/model/exception/exception_message.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/request/createlocation_request.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 

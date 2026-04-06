@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meetmaap/app/controller/locationlist_controller.dart';
-import 'package:meetmaap/app/model/responses/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/view/util/filterbutton_widget.dart';
 import 'package:meetmaap/app/view/util/locationcard_widget.dart';
 import 'package:provider/provider.dart';

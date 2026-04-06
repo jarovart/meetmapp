@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/responses/userbase_response.dart';
-import 'package:meetmaap/app/model/responses/userfull_response.dart';
+import 'package:meetmaap/app/model/response/userbase_response.dart';
+import 'package:meetmaap/app/model/response/userfull_response.dart';
 import 'package:meetmaap/app/service/user_service.dart';
 
 class UserDetailPage extends StatefulWidget {
