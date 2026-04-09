@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/exception/cooldownexception.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:meetmaap/app/service/authentication_service.dart';
 
 class RegisterCheckEmailPage extends StatefulWidget {
   final String email;
@@ -61,19 +63,25 @@ class _RegisterCheckEmailPageState extends State<RegisterCheckEmailPage> {
     });
 
     try {
-      await AuthRepository.resendVerificationEmail(email: widget.email);
+      await AuthService.resendVerificationEmail(email: widget.email);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('E-Mail wurde erneut gesendet')),
       );
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error while checking email: $e');
+      if (!mounted) return;
       if (e is CooldownException) {
         startCooldown(e.seconds);
-        setState(() => _error = e.message);
-      } else {
-        setState(() => _error = e.toString());
       }
+      debugPrintStack(stackTrace: st);
+      setState(
+        () => _error = AppErrorMapper.toUserMessage(
+          e,
+          fallback: 'Fehler beim Verschicken der E-Mail.',
+        ),
+      );
     } finally {
       setState(() => _loading = false);
     }

@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
+import 'package:meetmaap/app/service/authentication_service.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String token;
@@ -36,15 +38,27 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       final p1 = _p1.text;
       final p2 = _p2.text;
 
-      if (p1.length < 8) throw Exception('Mindestens 8 Zeichen');
-      if (p1 != p2) throw Exception('Passwörter stimmen nicht überein');
+      if (p1.length < 8) {
+        throw CustomAppException('Passwort sollte mindestens 8 Zeichen haben');
+      }
+      if (p1 != p2) {
+        throw CustomAppException('Passwörter stimmen nicht überein');
+      }
 
-      await AuthRepository.resetPassword(token: widget.token, newPassword: p1);
+      await AuthService.resetPassword(token: widget.token, newPassword: p1);
       if (!mounted) return;
       setState(() => _done = true);
-    } catch (e) {
+    } catch (e, st) {
       if (!mounted) return;
-      setState(() => _error = e.toString());
+      debugPrint('Error while resetting password: $e');
+      debugPrintStack(stackTrace: st);
+
+      setState(
+        () => _error = AppErrorMapper.toUserMessage(
+          e,
+          fallback: 'Fehler beim Passwort zurücksetzen.',
+        ),
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -74,8 +88,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            context.go('/');
-                            context.push('/loginpage');
+                            context.go('/login');
                           },
                           child: const Text('Jetzt einloggen'),
                         ),

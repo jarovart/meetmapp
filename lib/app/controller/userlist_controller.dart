@@ -7,7 +7,7 @@ import 'package:meetmaap/app/service/user_service.dart';
 
 class UserListController extends ChangeNotifier {
   UserListController() {
-    _futureLocations = Future.value([]);
+    _futureUsers = Future.value([]);
     loadData();
   }
 
@@ -18,10 +18,10 @@ class UserListController extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   final TextEditingController _searchCtrl = TextEditingController();
-  late Future<List<UserBaseResponse>> _futureLocations;
+  late Future<List<UserBaseResponse>> _futureUsers;
   Timer? _searchDebounce;
 
-  Future<List<UserBaseResponse>> get futureLocations => _futureLocations;
+  Future<List<UserBaseResponse>> get futureUsers => _futureUsers;
   TextEditingController get searchCtrl => _searchCtrl;
   bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
   String? get errorMessage => _errorMessage;
@@ -39,12 +39,12 @@ class UserListController extends ChangeNotifier {
     if (_isLoaded) return;
     _isLoaded = true;
 
-    _futureLocations = _fetchUsersByQuery();
+    _futureUsers = _fetchUsersByQuery();
   }
 
   Future<void> reloadLocations() async {
     _errorMessage = null;
-    _futureLocations = _fetchUsersByQuery();
+    _futureUsers = _fetchUsersByQuery();
   }
 
   void onSearchChanged(String text) {
@@ -58,13 +58,13 @@ class UserListController extends ChangeNotifier {
         return;
       }
 
-      _futureLocations = _fetchUsersByQuery();
+      _futureUsers = _fetchUsersByQuery();
     });
   }
 
   void clearSearchResults() {
     _searchCtrl.clear();
-    _futureLocations = Future.value([]);
+    _futureUsers = Future.value([]);
     notifyListeners();
   }
 

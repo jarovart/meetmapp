@@ -231,6 +231,7 @@ class MapPage extends StatelessWidget {
     final sidePadding = screenWidth * 0.15;
     final topOffset = 15.0;
     final searchController = mapViewController.searchController;
+    final isFocused = mapViewController.searchFocusNode.hasFocus;
 
     return Positioned(
       left: sidePadding,
@@ -238,37 +239,61 @@ class MapPage extends StatelessWidget {
       top: topOffset,
       child: SafeArea(
         top: false,
-        child: Material(
-          elevation: 0,
-          color: const Color.fromARGB(
-            255,
-            223,
-            222,
-            222,
-          ).withValues(alpha: 0.7),
-          borderRadius: BorderRadius.circular(24),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: TextField(
-              controller: searchController,
-              onChanged: mapViewController.onSearchChanged,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: 'Suchen...',
-                border: InputBorder.none,
-                prefixIcon: Icon(Icons.search, color: Colors.grey[700]),
-                suffixIcon: searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(Icons.close, color: Colors.grey[700]),
-                        onPressed: () {
-                          searchController.clear();
-                          mapViewController.clearSearchResults();
-                        },
-                      )
-                    : null,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            color: isFocused
+                ? Colors.white.withValues(alpha: 0.95)
+                : const Color.fromARGB(
+                    255,
+                    223,
+                    222,
+                    222,
+                  ).withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isFocused ? Colors.blue : Colors.transparent,
+              width: 1.5,
+            ),
+            boxShadow: isFocused
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: TextField(
+                focusNode: mapViewController.searchFocusNode,
+                controller: searchController,
+                onChanged: mapViewController.onSearchChanged,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: 'Suchen...',
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[700]),
+                  suffixIcon: searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.close, color: Colors.grey[700]),
+                          onPressed: () {
+                            searchController.clear();
+                            mapViewController.clearSearchState();
+                          },
+                        )
+                      : null,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+                ),
+                style: const TextStyle(color: Colors.black),
               ),
-              style: const TextStyle(color: Colors.black),
             ),
           ),
         ),
@@ -280,7 +305,18 @@ class MapPage extends StatelessWidget {
     BuildContext context,
     MapViewController mapViewController,
   ) {
-    if (mapViewController.searchResults.isEmpty) return SizedBox.shrink();
+    final query = mapViewController.searchController.text.trim();
+    final hasQuery = query.isNotEmpty;
+    final hasResults = mapViewController.searchResults.isNotEmpty;
+    final hasError = mapViewController.searchErrorMessage != null;
+    final isLoading = mapViewController.isSearchLoading;
+    final showNoResults =
+        query.length >= 3 && !isLoading && !hasError && !hasResults;
+
+    if (!hasQuery && !hasResults && !hasError && !isLoading) {
+      return const SizedBox.shrink();
+    }
+
     final sidePadding = MediaQuery.of(context).size.width * 0.15;
 
     return Positioned.fill(
@@ -302,24 +338,80 @@ class MapPage extends StatelessWidget {
             child: Material(
               elevation: 6,
               borderRadius: BorderRadius.circular(12),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: mapViewController.searchResults.length,
-                itemBuilder: (context, index) {
-                  final loc = mapViewController.searchResults[index];
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 320),
+                child: Builder(
+                  builder: (context) {
+                    if (isLoading) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            SizedBox(width: 12),
+                            Text('Suche läuft...'),
+                          ],
+                        ),
+                      );
+                    }
 
-                  return ListTile(
-                    leading: Icon(Icons.location_on, color: Colors.green),
-                    title: Text(loc.title),
-                    subtitle: Text(loc.description),
-                    onTap: () {
-                      _onLocationTapped(context, mapViewController, loc);
-                      mapViewController.clearSearchResults();
-                      mapViewController.searchController.clear();
-                      mapViewController.fetchLocations();
-                    },
-                  );
-                },
+                    if (hasError) {
+                      return Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.error_outline, color: Colors.red),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                mapViewController.searchErrorMessage!,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    if (showNoResults) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Icon(Icons.search_off),
+                            SizedBox(width: 12),
+                            Expanded(child: Text('Keine Orte gefunden.')),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: mapViewController.searchResults.length,
+                      itemBuilder: (context, index) {
+                        final loc = mapViewController.searchResults[index];
+
+                        return ListTile(
+                          leading: Icon(Icons.location_on, color: Colors.green),
+                          title: Text(loc.title),
+                          subtitle: Text(loc.description),
+                          onTap: () {
+                            _onLocationTapped(context, mapViewController, loc);
+                            mapViewController.clearSearchResults();
+                            mapViewController.searchController.clear();
+                            mapViewController.fetchLocations();
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ),

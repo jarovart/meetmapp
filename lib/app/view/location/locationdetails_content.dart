@@ -195,7 +195,8 @@ class LocationBottomActions extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: controller.isLoggedIn
+                  child:
+                      controller.isLoggedIn && controller.locationFull != null
                       ? OutlinedButton.icon(
                           onPressed: controller.isLoggedIn
                               ? controller.toggleLike
@@ -214,7 +215,8 @@ class LocationBottomActions extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: controller.isLoggedIn
+                  child:
+                      controller.isLoggedIn && controller.locationFull != null
                       ? ElevatedButton.icon(
                           onPressed: controller.isLoggedIn
                               ? controller.toggleJoin

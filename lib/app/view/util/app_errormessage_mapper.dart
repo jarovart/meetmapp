@@ -6,6 +6,10 @@ class AppErrorMapper {
     Object error, {
     String fallback = 'Etwas ist schiefgelaufen. Bitte versuche es erneut.',
   }) {
+    if (error is CustomAppException) {
+      return error.message.isNotEmpty ? error.message : fallback;
+    }
+
     if (error is AppHttpException) {
       if (error.errorCode != null) {
         final mappedByCode = _mapErrorCode(error.errorCode!);
@@ -38,12 +42,16 @@ class AppErrorMapper {
         return 'Die angeforderten Daten wurden nicht gefunden.';
       case 409:
         return 'Die Aktion konnte nicht ausgeführt werden.';
+      case 410:
+        return 'Der Link ist abgelaufen';
       case 413:
         return 'Die hochgeladene Datei ist zu groß.';
       case 415:
         return 'Dieses Dateiformat wird nicht unterstützt.';
       case 422:
         return 'Die Daten konnten nicht verarbeitet werden.';
+      case 429:
+        return 'Zu viele Anfragen, bitte warten.';
       case 500:
       case 502:
       case 503:

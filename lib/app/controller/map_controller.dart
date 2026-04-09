@@ -15,7 +15,9 @@ import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
 class MapViewController extends ChangeNotifier {
   final MapController mapController;
 
-  MapViewController({required this.mapController});
+  MapViewController({required this.mapController}) {
+    searchFocusNode.addListener(_onFocusChanged);
+  }
 
   // ─────────────────────────────────────────────
   // STATE
@@ -27,6 +29,8 @@ class MapViewController extends ChangeNotifier {
   LatLng? _currentPosition;
   LatLng? _mapCenterBeforeSheet;
   String? _errorMessage; //TODO: errormessage einbinden
+  bool _isSearchLoading = false;
+  String? _searchErrorMessage;
 
   RangeValues _selectedRange = const RangeValues(0, 4);
   final List<String> _dayOptions = [
@@ -37,6 +41,7 @@ class MapViewController extends ChangeNotifier {
     '1 Monat',
   ];
 
+  final FocusNode _searchFocusNode = FocusNode();
   final TextEditingController _searchController = TextEditingController();
   List<LocationBaseResponse> _searchResults = [];
 
@@ -48,6 +53,10 @@ class MapViewController extends ChangeNotifier {
   LatLng get initialCenter => _initialCenter;
   LatLng? get currentPosition => _currentPosition;
   LatLng? get mapCenterBeforeSheet => _mapCenterBeforeSheet;
+  bool get isSearchLoading => _isSearchLoading;
+  String? get searchErrorMessage => _searchErrorMessage;
+  String? get errorMessage => _errorMessage;
+  FocusNode get searchFocusNode => _searchFocusNode;
 
   RangeValues get selectedRange => _selectedRange;
   List<String> get dayOptions => _dayOptions;
@@ -69,6 +78,10 @@ class MapViewController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _onFocusChanged() {
+    notifyListeners();
+  }
+
   String setDayOptionsText(double index) {
     return _dayOptions[index.round()];
   }
@@ -80,12 +93,23 @@ class MapViewController extends ChangeNotifier {
 
   void updateSearchResults(List<LocationBaseResponse> results) {
     _searchResults = results;
+    _searchErrorMessage = null;
+    _isSearchLoading = false;
     debugPrint("updateSearchResults: ${results.length}");
     notifyListeners();
   }
 
   void clearSearchResults() {
     _searchResults.clear();
+    _searchErrorMessage = null;
+    _isSearchLoading = false;
+    notifyListeners();
+  }
+
+  void clearSearchState() {
+    _searchResults.clear();
+    _searchErrorMessage = null;
+    _isSearchLoading = false;
     notifyListeners();
   }
 
@@ -110,6 +134,8 @@ class MapViewController extends ChangeNotifier {
     _searchDebounce?.cancel();
     _searchController.dispose();
     _debouncer?.cancel();
+    searchFocusNode.removeListener(_onFocusChanged);
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -204,15 +230,26 @@ class MapViewController extends ChangeNotifier {
       _searchDebounce!.cancel();
     }
 
+    final trimmed = text.trim();
+
+    if (trimmed.isEmpty) {
+      clearSearchState();
+      return;
+    }
+
     _searchDebounce = Timer(const Duration(milliseconds: 300), () async {
       if (text.length < 3) {
         clearSearchResults();
         return;
       }
 
+      _isSearchLoading = true;
+      _searchErrorMessage = null;
       notifyListeners();
       try {
-        final results = await LocationService.searchLocations(text);
+        final results = await LocationService.searchLocations(trimmed);
+
+        if (_searchController.text.trim() != trimmed) return;
 
         // nach Entfernung sortieren (falls _currentPosition != null)
         if (_currentPosition != null) {
@@ -230,17 +267,27 @@ class MapViewController extends ChangeNotifier {
             return distA.compareTo(distB);
           });
         }
-        updateSearchResults(results);
+
+        _searchResults = results;
+        _searchErrorMessage = null;
+        //updateSearchResults(results);
       } catch (e, st) {
+        if (_searchController.text.trim() != trimmed) return;
         debugPrint('Error while searching for locations in mapcontroller: $e');
         debugPrintStack(stackTrace: st);
 
-        _errorMessage = AppErrorMapper.toUserMessage(
+        _searchResults = [];
+        _searchErrorMessage = AppErrorMapper.toUserMessage(
           e,
           fallback: 'Suche fehlgeschlagen.',
         );
         //ExceptionMessage.showError(context, "Suche fehlgeschlagen");
         //debugPrint("Suche fehlgeschlagen");
+      } finally {
+        if (_searchController.text.trim() == trimmed) {
+          _isSearchLoading = false;
+          notifyListeners();
+        }
       }
     });
   }
@@ -277,6 +324,7 @@ class MapViewController extends ChangeNotifier {
 
   Future<void> fetchLocations() async {
     try {
+      _errorMessage = null; // reset vorher
       debugPrint("Start: _fetchLocationsWithinWithTime");
       final bounds = mapController.camera.visibleBounds;
       _locations = await LocationService.fetchLocationsWithinWithTime(

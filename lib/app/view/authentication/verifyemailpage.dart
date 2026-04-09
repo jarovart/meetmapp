@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
+import 'package:meetmaap/app/service/authentication_service.dart';
 
 class VerifyPage extends StatefulWidget {
   final String token;
@@ -20,7 +21,7 @@ class _VerifyPageState extends State<VerifyPage> {
   void initState() {
     super.initState();
 
-    AuthRepository.verify(widget.token)
+    AuthService.verify(widget.token)
         .then((_) {
           if (!mounted) return;
           setState(() {
@@ -29,7 +30,13 @@ class _VerifyPageState extends State<VerifyPage> {
         })
         .catchError((e) {
           if (!mounted) return;
-          setState(() => _error = e.toString());
+          debugPrint('Error while verify email: $e');
+          setState(
+            () => _error = AppErrorMapper.toUserMessage(
+              e,
+              fallback: 'Verifizierung fehlgeschlagen.',
+            ),
+          );
         });
   }
 
@@ -77,8 +84,7 @@ class _VerifyPageState extends State<VerifyPage> {
                 Text('Registrierung erfolgreich 🎉'),
                 ElevatedButton(
                   onPressed: () {
-                    context.go('/');
-                    context.push('/loginpage');
+                    context.go('/login');
                   },
                   child: Text('Jetzt einloggen'),
                 ),

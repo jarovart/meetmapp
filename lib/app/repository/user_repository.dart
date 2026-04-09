@@ -52,6 +52,22 @@ class UserRepository {
     });
   }
 
+  static Future<UserFullResponse> fetchFullUserByUserName(
+    String username,
+  ) async {
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse(
+        '${ApiConfig.baseUrl}/api/users/findByUsername',
+      ).replace(queryParameters: {'username': username});
+
+      final headers = await AuthRepository.authHeaders();
+      final response = await http.get(uri, headers: headers);
+
+      final body = ApiResponseHandler.parseJsonObject(response);
+      return UserFullResponse.fromMap(body);
+    });
+  }
+
   static Future<UserMyProfileResponse> fetchMyProfile() async {
     return ApiExceptionWrapper.guard(() async {
       final uri = Uri.parse('${ApiConfig.baseUrl}/api/users/me');

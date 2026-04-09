@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/exception/cooldownexception.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:meetmaap/app/service/authentication_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -43,22 +45,24 @@ class _RegisterPageState extends State<RegisterPage> {
           password2.isEmpty ||
           firstname.isEmpty ||
           lastname.isEmpty) {
-        throw Exception('Alle Felder müssen ausgefüllt sein');
+        throw CustomAppException('Alle Felder müssen ausgefüllt sein');
       }
 
       if (password != password2) {
-        throw Exception('Passwörter stimmen nicht überein');
+        throw CustomAppException('Passwörter stimmen nicht überein');
       }
 
       if (password.length < 8) {
-        throw Exception('Passwörter müssen mindestens 8 Zeichen lang sein');
+        throw CustomAppException(
+          'Passwörter müssen mindestens 8 Zeichen lang sein',
+        );
       }
 
       if (email.contains(' ') || !email.contains('@')) {
-        throw Exception('Ungültige E-Mail Adresse');
+        throw CustomAppException('Ungültige E-Mail Adresse');
       }
 
-      await AuthRepository.register(
+      await AuthService.register(
         username: username,
         firstname: firstname,
         lastname: lastname,
@@ -72,13 +76,18 @@ class _RegisterPageState extends State<RegisterPage> {
         const SnackBar(content: Text('Registrierung erfolgreich')),
       );
       setState(() => registeredUsername = username);*/
-    } catch (e) {
+    } catch (e, st) {
       if (e is CooldownException) {
         startCooldown(e.seconds);
-        setState(() => _error = e.message);
-      } else {
-        setState(() => _error = e.toString());
       }
+      debugPrint('Error while register user: $e');
+      debugPrintStack(stackTrace: st);
+      setState(
+        () => _error = AppErrorMapper.toUserMessage(
+          e,
+          fallback: 'Fehler beim Registrieren.',
+        ),
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -184,7 +193,10 @@ class _RegisterPageState extends State<RegisterPage> {
       }
       if (_cooldown <= 1) {
         t.cancel();
-        setState(() => _cooldown = 0);
+        setState(() {
+          _cooldown = 0;
+          _error = null;
+        });
       } else {
         setState(() => _cooldown--);
       }

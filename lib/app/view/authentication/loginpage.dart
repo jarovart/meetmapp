@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
+import 'package:meetmaap/app/service/authentication_service.dart';
 
 class LoginPage extends StatefulWidget {
   final bool returnOnSuccess;
@@ -39,11 +40,13 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      await AuthRepository.login(
+      await AuthService.login(
         username: _userCtrl.text.trim(),
         password: _passCtrl.text,
       );
-      final name = await AuthRepository.getUsername();
+      final name = await AuthService.getUsername();
+      final myProfile = await AuthService.getMyUserProfile();
+      final username = myProfile!.username;
       debugPrint('Logged in as $name');
       if (!mounted) return;
       setState(() {
@@ -52,8 +55,18 @@ class _LoginPageState extends State<LoginPage> {
       });
       TextInput.finishAutofillContext();
       if (widget.returnOnSuccess) context.pop(true);
-    } catch (e) {
-      setState(() => _error = e.toString());
+      //context.push('/profile/$username', extra: myProfile);
+      //context.pop(true);
+    } catch (e, st) {
+      debugPrint('Error while login: $e');
+      debugPrintStack(stackTrace: st);
+
+      setState(
+        () => _error = AppErrorMapper.toUserMessage(
+          e,
+          fallback: 'Fehler beim Einloggen.',
+        ),
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -66,9 +79,17 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      await AuthRepository.logout();
-    } catch (e) {
-      setState(() => _error = e.toString());
+      await AuthService.logout();
+    } catch (e, st) {
+      debugPrint('Error while log out profile: $e');
+      debugPrintStack(stackTrace: st);
+
+      setState(
+        () => _error = AppErrorMapper.toUserMessage(
+          e,
+          fallback: 'Fehler beim Ausloggen des Profils.',
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -81,8 +102,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _loadAuthState() async {
-    final loggedIn = await AuthRepository.isLoggedIn();
-    final username = loggedIn ? await AuthRepository.getUsername() : null;
+    final loggedIn = await AuthService.isLoggedIn();
+    final username = loggedIn ? await AuthService.getUsername() : null;
     if (!mounted) return;
     setState(() {
       _loggedIn = loggedIn;

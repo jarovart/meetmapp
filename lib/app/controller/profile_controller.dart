@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/userbase_response.dart';
 import 'package:meetmaap/app/model/response/userfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
-import 'package:meetmaap/app/repository/user_repository.dart';
+import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/service/location_service.dart';
+import 'package:meetmaap/app/service/user_service.dart';
 
 class UserProfileController extends ChangeNotifier {
+  final String? _username;
+
+  UserProfileController(this._username);
+
   bool _isLoading = false;
-  String? _errorMessage;
+  int? _userId;
+  UserBaseResponse? _userBaseResponse;
+  bool _requiresLogin = false;
   UserFullResponse? _userData;
-  int? _loadedUserId;
+  String? _infoMessage;
+  String? _errorMessage;
 
   List<LocationBaseResponse> _createdLocations = [];
   List<LocationBaseResponse> _joinedLocations = [];
@@ -37,7 +46,23 @@ class UserProfileController extends ChangeNotifier {
       ? _userData as UserMyProfileResponse
       : null;
 
-  bool get canEdit => _userData is UserMyProfileResponse;
+  bool get hasUserProfile => _userBaseResponse != null || _userData != null;
+
+  bool get isMyProfile =>
+      _userData != null && _userData is UserMyProfileResponse;
+
+  String get displayUsername =>
+      _userData?.username ?? _userBaseResponse?.username ?? '';
+
+  String get displayFirstName =>
+      _userData?.firstName ?? _userBaseResponse?.firstName ?? '';
+
+  String get displayLastName =>
+      _userData?.lastName ?? _userBaseResponse?.lastName ?? '';
+
+  String? get displayProfileImageUrl =>
+      _userData?.profileImage?.imageUrl ??
+      _userBaseResponse?.profileImage?.imageUrl;
 
   List<LocationBaseResponse> get createdLocations => _createdLocations;
   List<LocationBaseResponse> get joinedLocations => _joinedLocations;
@@ -47,34 +72,65 @@ class UserProfileController extends ChangeNotifier {
   bool get isLoadingJoined => _isLoadingJoined;
   bool get isLoadingLiked => _isLoadingLiked;
 
-  Future<void> load({int? userId}) async {
+  Future<void> load(UserBaseResponse? userBaseResponse) async {
     if (_isLoading) return;
-    if (userId == null) return;
 
+    if (userBaseResponse != null) _userBaseResponse = userBaseResponse;
     _isLoading = true;
+    _infoMessage = null;
     _errorMessage = null;
+    _requiresLogin = false;
     notifyListeners();
 
     try {
-      _loadedUserId = userId;
-
-      final myUserId = await AuthRepository.getUserId();
-
-      if (myUserId != null && myUserId == userId) {
-        final me = await UserRepository.fetchMyProfile();
-        _userData = me;
-      } else {
-        final other = await UserRepository.fetchFullUserById(userId);
-        _userData = other;
+      final loggedIn = await AuthService.isLoggedIn();
+      final hasUsername = _username != null && _username.isNotEmpty;
+      debugPrint("1");
+      if (!loggedIn && !hasUsername) {
+        _requiresLogin = true;
+        debugPrint("1a");
+        return;
       }
 
+      debugPrint("2");
+      if (loggedIn) {
+        final myUsername = await AuthService.getUsername();
+
+        debugPrint("3");
+
+        debugPrint("$hasUsername + $myUsername + $_username");
+        if (!hasUsername || myUsername == _username) {
+          _userData = await AuthService.fetchMyProfile();
+          debugPrint("3a");
+        }
+      }
+
+      if (_userData == null) {
+        debugPrint("4");
+        if (_userBaseResponse != null) {
+          debugPrint("5");
+          _userData = await UserService.fetchFullUserById(
+            _userBaseResponse!.id,
+          );
+        } else if (hasUsername) {
+          debugPrint("6");
+          _userData = await UserService.fetchFullUserByUserName(_username);
+        } else {
+          debugPrint("7");
+          throw Exception("userData can not be loaded.");
+        }
+      }
+
+      _userId = _userData!.id;
+
       // reset tab data when switching profile
-      _createdLocations = []; //TODO: implement logic
+      _createdLocations = [];
       _joinedLocations = [];
       _likedLocations = [];
       _createdLoaded = false;
       _joinedLoaded = false;
       _likedLoaded = false;
+      await loadCreatedLocations();
     } catch (e, st) {
       debugPrint('Error while loading profile: $e');
       debugPrintStack(stackTrace: st);
@@ -90,21 +146,19 @@ class UserProfileController extends ChangeNotifier {
   }
 
   Future<void> reload() async {
-    final userId = _loadedUserId;
-    if (userId == null) return;
-    await load(userId: userId);
+    await load(_userBaseResponse);
   }
 
   Future<void> loadCreatedLocations() async {
-    final userId = _loadedUserId;
-    if (userId == null || _isLoadingCreated || _createdLoaded) return;
+    if (_isLoadingCreated || _createdLoaded || _userId == null) return;
 
     _isLoadingCreated = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
       _createdLocations = await LocationService.getCreatedLocationsByUserId(
-        userId,
+        _userId!,
       );
       _createdLoaded = true;
     } catch (e, st) {
@@ -122,15 +176,15 @@ class UserProfileController extends ChangeNotifier {
   }
 
   Future<void> loadJoinedLocations() async {
-    final userId = _loadedUserId;
-    if (userId == null || _isLoadingJoined || _joinedLoaded) return;
+    if (_isLoadingJoined || _joinedLoaded || _userId == null) return;
 
     _isLoadingJoined = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
       _joinedLocations = await LocationService.getJoinedLocationsByUserId(
-        userId,
+        _userId!,
       );
       _joinedLoaded = true;
     } catch (e, st) {
@@ -148,14 +202,16 @@ class UserProfileController extends ChangeNotifier {
   }
 
   Future<void> loadLikedLocations() async {
-    final userId = _loadedUserId;
-    if (userId == null || _isLoadingLiked || _likedLoaded) return;
+    if (_isLoadingLiked || _likedLoaded || _userId == null) return;
 
     _isLoadingLiked = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
-      _likedLocations = await LocationService.getLikedLocationsByUserId(userId);
+      _likedLocations = await LocationService.getLikedLocationsByUserId(
+        _userId!,
+      );
       _likedLoaded = true;
     } catch (e, st) {
       debugPrint('Error while loading liked locations: $e');

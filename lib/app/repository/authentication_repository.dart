@@ -1,11 +1,13 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/exception/cooldownexception.dart';
 import 'package:meetmaap/app/config/api_config.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
+import 'package:meetmaap/app/model/util/api_exception_wrapper.dart';
 import 'package:meetmaap/app/repository/user_repository.dart';
+import 'package:meetmaap/app/repository/util/api_response_handler.dart';
 
 class AuthRepository {
   static final _storage = const FlutterSecureStorage();
@@ -40,32 +42,30 @@ class AuthRepository {
     required String username,
     required String password,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/login');
-    final res = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'password': password}),
-    );
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/login');
+      final res = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'password': password}),
+      );
 
-    if (res.statusCode != 200) {
-      throw Exception('Login fehlgeschlagen (${res.statusCode})');
-    }
+      final json = ApiResponseHandler.parseJsonObject(res);
+      final token = json['token'] as String?;
+      final loginname = json['username'] as String?;
+      final userId = json['userId'] as int;
 
-    final json = jsonDecode(res.body) as Map<String, dynamic>;
-    final token = json['token'] as String?;
-    final loginname = json['username'] as String?;
-    final userId = json['userId'] as int;
+      if (token == null || token.isEmpty) {
+        throw CustomAppException('Kein Token erhalten');
+      }
 
-    if (token == null || token.isEmpty) {
-      throw Exception('Kein Token erhalten');
-    }
+      await _storage.write(key: _tokenKey, value: token);
+      await _storage.write(key: _usernameKey, value: loginname);
+      await _storage.write(key: _userIdKey, value: userId.toString());
 
-    await _storage.write(key: _tokenKey, value: token);
-    await _storage.write(key: _usernameKey, value: loginname);
-    await _storage.write(key: _userIdKey, value: userId.toString());
-
-    final profile = await UserRepository.fetchMyProfile();
-    await saveMyProfile(profile);
+      final profile = await UserRepository.fetchMyProfile();
+      await saveMyProfile(profile);
+    });
   }
 
   static Future<void> register({
@@ -75,121 +75,84 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/register');
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/register');
 
-    final res = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'username': username,
-        'firstname': firstname,
-        'lastname': lastname,
-        'email': email,
-        'password': password,
-      }),
-    );
-
-    if (res.statusCode == 429) {
-      final body = jsonDecode(res.body);
-      final message = body['message'];
-      final seconds = body['secondsUntilNextMailAllowed'] as int;
-      throw CooldownException(message, seconds);
-    }
-
-    if (res.statusCode != 200) {
-      throw Exception(
-        'Registrierung fehlgeschlagen (${res.statusCode}): ${res.body}',
+      final res = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': username,
+          'firstname': firstname,
+          'lastname': lastname,
+          'email': email,
+          'password': password,
+        }),
       );
-    }
+
+      ApiResponseHandler.ensureSuccess(res);
+    });
   }
 
   static Future<void> verify(String token) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/verify');
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/verify');
 
-    final res = await http
-        .post(
-          uri,
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'token': token}),
-        )
-        .timeout(const Duration(seconds: 10));
+      final res = await http
+          .post(
+            uri,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'token': token}),
+          )
+          .timeout(const Duration(seconds: 10));
 
-    if (res.statusCode == 200) {
-      // ✅ alles gut
-      return;
-    }
-
-    if (res.statusCode == 410) {
-      throw Exception('Verifizierungslink ist abgelaufen');
-    }
-
-    if (res.statusCode == 400) {
-      throw Exception('Ungültiger oder bereits verwendeter Link');
-    }
-
-    throw Exception('Verifizierung fehlgeschlagen (${res.statusCode})');
+      ApiResponseHandler.ensureSuccess(res);
+    });
   }
 
   static Future<void> resendVerificationEmail({required String email}) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/resend-verification');
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse(
+        '${ApiConfig.baseUrl}/api/auth/resend-verification',
+      );
 
-    final res = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email}),
-    );
+      final res = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
 
-    if (res.statusCode == 200) {
-      return;
-    }
-
-    if (res.statusCode == 429) {
-      final body = jsonDecode(res.body);
-      final message = body['message'];
-      final seconds = body['secondsUntilNextMailAllowed'] as int;
-      throw CooldownException(message, seconds);
-    }
-
-    throw Exception(
-      res.body.isNotEmpty
-          ? res.body
-          : 'E-Mail konnte nicht erneut gesendet werden',
-    );
+      ApiResponseHandler.ensureSuccess(res);
+    });
   }
 
   static Future<void> forgotPassword({required String email}) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/forgot-password');
-    final res = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email}),
-    );
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/forgot-password');
+      final res = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
 
-    if (res.statusCode == 200) return;
-    if (res.statusCode == 429) {
-      final body = jsonDecode(res.body);
-      final message = body['message'];
-      final seconds = body['secondsUntilNextMailAllowed'] as int;
-      throw CooldownException(message, seconds);
-    }
-    throw Exception('Fehler (${res.statusCode}): ${res.body}');
+      ApiResponseHandler.ensureSuccess(res);
+    });
   }
 
   static Future<void> resetPassword({
     required String token,
     required String newPassword,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/reset-password');
-    final res = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'token': token, 'newPassword': newPassword}),
-    );
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/reset-password');
+      final res = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': token, 'newPassword': newPassword}),
+      );
 
-    if (res.statusCode == 200) return;
-    if (res.statusCode == 410) throw Exception('Link ist abgelaufen');
-    if (res.statusCode == 400) throw Exception(res.body);
-    throw Exception('Fehler (${res.statusCode}): ${res.body}');
+      ApiResponseHandler.ensureSuccess(res);
+    });
   }
 
   static Future<void> saveMyProfile(UserMyProfileResponse myProfile) async {

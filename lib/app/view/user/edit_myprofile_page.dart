@@ -10,6 +10,15 @@ class EditMyProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final editController = context.watch<EditMyProfileController>();
 
+    if (!editController.isOwnerOfProfile()) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("Profil bearbeiten")),
+        body: Center(
+          child: Text('Du hast keine Berechtigung für diese Aktion.'),
+        ),
+      );
+    }
+
     return Stack(
       children: [
         Scaffold(

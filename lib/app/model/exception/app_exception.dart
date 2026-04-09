@@ -29,6 +29,30 @@ class AppHttpException extends AppException {
   }
 }
 
+class CooldownException extends AppHttpException {
+  final int seconds;
+
+  const CooldownException({
+    required super.statusCode,
+    super.serverMessage,
+    super.errorCode,
+    super.body,
+    super.debugMessage,
+    required this.seconds,
+  });
+
+  @override
+  String toString() {
+    return 'CooldownException('
+        'statusCode: $statusCode, '
+        'errorCode: $errorCode, '
+        'serverMessage: $serverMessage, '
+        'debugMessage: $debugMessage, '
+        'seconds: $seconds'
+        ')';
+  }
+}
+
 class AppNetworkException extends AppException {
   const AppNetworkException({super.debugMessage});
 
@@ -48,4 +72,13 @@ class NotLoggedInException extends AppException {
 
   @override
   String toString() => 'NotLoggedInException(debugMessage: $debugMessage)';
+}
+
+class CustomAppException extends AppException {
+  const CustomAppException([String? debugMessage])
+    : super(debugMessage: debugMessage);
+
+  @override
+  String toString() => 'CustomAppException(debugMessage: $debugMessage)';
+  String get message => debugMessage ?? '';
 }

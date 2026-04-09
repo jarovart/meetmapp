@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/exception/cooldownexception.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 
@@ -33,20 +35,26 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     try {
       final email = _emailCtrl.text.trim();
       if (email.isEmpty || !email.contains('@') || email.contains(' ')) {
-        throw Exception('Bitte gültige E-Mail eingeben');
+        throw CustomAppException('Bitte gültige E-Mail eingeben');
       }
 
       await AuthRepository.forgotPassword(email: email);
       if (!mounted) return;
       setState(() => _sent = true);
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error while reset forgotten password: $e');
       if (!mounted) return;
       if (e is CooldownException) {
         startCooldown(e.seconds);
-        setState(() => _error = e.message);
-      } else {
-        setState(() => _error = e.toString());
       }
+      debugPrint('Error while register user: $e');
+      debugPrintStack(stackTrace: st);
+      setState(
+        () => _error = AppErrorMapper.toUserMessage(
+          e,
+          fallback: 'Fehler beim Passwort zurücksetzen.',
+        ),
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }

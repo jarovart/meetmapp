@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/model/exception/exception_message.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -35,11 +35,6 @@ class HomePageState extends State<HomePage> {
         ],
       ),
     );
-  }
-
-  Future<void> _refreshAuth() async {
-    final loggedIn = await AuthRepository.isLoggedIn();
-    setState(() => _loggedIn = loggedIn);
   }
 
   /// ---------- UI-Aufteilung ----------
@@ -110,7 +105,7 @@ class HomePageState extends State<HomePage> {
                         // handle navigation for special entries
                         if (label == 'Login') {
                           _toggleMenu();
-                          await context.push('/loginpage', extra: false);
+                          await context.push('/login', extra: false);
                           _refreshAuth();
                           return;
                         } else if (label == 'Locations') {
@@ -135,7 +130,7 @@ class HomePageState extends State<HomePage> {
                           return;
                         } else if (label == "Logout") {
                           _toggleMenu();
-                          AuthRepository.logout();
+                          AuthService.logout();
                           _refreshAuth();
                           return;
                         }
@@ -170,25 +165,19 @@ class HomePageState extends State<HomePage> {
       return Padding(
         padding: const EdgeInsets.only(right: 12.0),
         child: OutlinedButton.icon(
-          onPressed: () async {
-            await context.push('/profilepage');
-            _refreshAuth();
-          },
+          onPressed: () async => _navigateToProfile(context),
           label: const Text("Login"),
         ),
       );
     }
     return FutureBuilder<UserMyProfileResponse?>(
-      future: AuthRepository.getMyUserProfile(),
+      future: AuthService.getMyUserProfile(),
       builder: (context, snapshot) {
         final myProfile = snapshot.data;
         final initials = myProfile?.getInitials ?? "MM";
 
         return GestureDetector(
-          onTap: () async => context.push(
-            '/profilepage',
-            extra: await AuthRepository.getUserId(),
-          ),
+          onTap: () async => _navigateToProfile(context),
           child: Padding(
             padding: EdgeInsets.only(right: 12.0),
             child: CircleAvatar(
@@ -208,5 +197,40 @@ class HomePageState extends State<HomePage> {
         );
       },
     );
+  }
+
+  Future<void> _refreshAuth() async {
+    final loggedIn = await AuthService.isLoggedIn();
+    debugPrint("refreshAuth");
+    setState(() => _loggedIn = loggedIn);
+  }
+
+  void _navigateToProfile(BuildContext context) async {
+    var loggedIn = await AuthService.isLoggedIn();
+
+    if (!context.mounted) return;
+
+    if (!loggedIn) {
+      final loginOk = await context.push<bool>('/login', extra: true);
+      debugPrint("loginOk");
+      if (!context.mounted) return;
+
+      if (loginOk != true) {
+        await _refreshAuth();
+        return;
+      }
+    }
+
+    final username = await AuthService.getUsername();
+    final myProfile = await AuthService.getMyUserProfile();
+
+    if (!context.mounted || username == null) {
+      await _refreshAuth();
+      return;
+    }
+
+    await context.push('/profile/$username', extra: myProfile);
+
+    await _refreshAuth();
   }
 }

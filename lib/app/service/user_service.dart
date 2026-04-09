@@ -19,8 +19,10 @@ class UserService {
     return await UserRepository.fetchFullUserById(id);
   }
 
-  static Future<UserFullResponse> fetchFullUserByUserName(int id) async {
-    return await UserRepository.fetchFullUserById(id);
+  static Future<UserFullResponse> fetchFullUserByUserName(
+    String username,
+  ) async {
+    return await UserRepository.fetchFullUserByUserName(username);
   }
 
   static Future<UserFullResponse> fetchFullUser(UserBaseResponse user) async {

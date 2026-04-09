@@ -13,12 +13,12 @@ class UserListPage extends StatelessWidget {
     final userListController = context.watch<UserListController>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Locations"), centerTitle: true),
+      appBar: AppBar(title: const Text("Benutzer"), centerTitle: true),
       backgroundColor: Colors.grey.shade200,
       body: Stack(
         children: [
           FutureBuilder<List<UserBaseResponse>>(
-            future: userListController.futureLocations,
+            future: userListController.futureUsers,
             builder: (context, snapshot) {
               if (userListController.isLoading) {
                 return const Center(child: CircularProgressIndicator());

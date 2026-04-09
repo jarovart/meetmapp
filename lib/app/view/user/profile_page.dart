@@ -6,60 +6,38 @@ import 'package:provider/provider.dart';
 import 'package:meetmaap/app/controller/profile_controller.dart';
 import 'package:meetmaap/app/view/util/locationlisttab_widget.dart';
 
-class UserProfilePage extends StatefulWidget {
-  final int? userId;
-
-  const UserProfilePage({super.key, this.userId});
-
-  @override
-  State<UserProfilePage> createState() => _UserProfilePageState();
-}
-
-class _UserProfilePageState extends State<UserProfilePage> {
-  @override
-  void initState() {
-    super.initState();
-    if (widget.userId == null) {
-      _checkAuth();
-    }
-  }
-
-  Future<void> _checkAuth() async {
-    final loggedIn = await AuthRepository.isLoggedIn();
-
-    if (!mounted) return;
-
-    if (!loggedIn) {
-      final ok = await context.push<bool>('/loginpage');
-
-      if (ok != true) {
-        // User hat Login abgebrochen → Seite schließen
-        if (mounted) context.pop();
-        return;
-      }
-    }
-    final userId = await AuthRepository.getUserId();
-    if (!mounted) return;
-    context.read<UserProfileController>().load(userId: userId);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
+class UserProfilePage extends StatelessWidget {
+  const UserProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.watch<UserProfileController>();
+    final profileController = context.watch<UserProfileController>();
+    //final canGoBack = Navigator.of(context).canPop();
+
+    if (!profileController.hasUserProfile) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("Profil bearbeiten")),
+        body: Center(child: Text('Profil konnte nicht geladen werden.')),
+      );
+    }
 
     return DefaultTabController(
-      length: 3,
+      length: (profileController.isMyProfile) ? 3 : 2,
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Profil"),
           centerTitle: true,
+          /*leading: canGoBack
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => context.pop(),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.home),
+                  onPressed: () => context.go('/'),
+                ),*/
           actions: [
-            if (controller.canEdit)
+            if (profileController.isMyProfile)
               Padding(
                 padding: const EdgeInsets.only(right: 12.0),
                 child: OutlinedButton.icon(
@@ -68,11 +46,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     if (!context.mounted || myUserId == null) return;
 
                     final result = await context.push<bool>(
-                      "/editmyprofilepage",
-                      extra: controller.myProfile?.id,
+                      "/profile/${profileController.myProfile!.username}/edit",
+                      extra: profileController.myProfile,
                     );
                     if (result == true) {
-                      controller.reload();
+                      profileController.reload();
                     }
                   },
                   label: const Text("Edit"),
@@ -81,28 +59,31 @@ class _UserProfilePageState extends State<UserProfilePage> {
               ),
           ],
         ),
-        body: _buildBody(context, controller),
+        body: _buildBody(context, profileController),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, UserProfileController controller) {
-    if (controller.isLoading) {
+  Widget _buildBody(
+    BuildContext context,
+    UserProfileController profileController,
+  ) {
+    if (profileController.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (controller.hasError && controller.userData == null) {
+    if (profileController.hasError && profileController.userData == null) {
       return Center(
-        child: Text(controller.errorMessage ?? "Unbekannter Fehler"),
+        child: Text(profileController.errorMessage ?? "Unbekannter Fehler"),
       );
     }
 
-    final user = controller.userData;
+    final user = profileController.userData;
     if (user == null) {
       return const Center(child: Text("Kein User geladen."));
     }
 
-    final me = controller.myProfile;
+    final me = profileController.myProfile;
     final dateFormat = DateFormat("dd.MM.yyyy");
 
     return NestedScrollView(
@@ -113,6 +94,15 @@ class _UserProfilePageState extends State<UserProfilePage> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
+                  if (profileController.hasError) ...[
+                    Center(
+                      child: Text(
+                        profileController.errorMessage ?? "Fehler",
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   _buildHeader(
                     context,
                     profileUrl: user.profileImage?.imageUrl ?? '',
@@ -150,10 +140,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     c.loadLikedLocations();
                   }
                 },
-                tabs: const [
+                tabs: [
                   Tab(text: 'Erstellt'),
                   Tab(text: 'Beigetreten'),
-                  Tab(text: 'Geliked'),
+                  if (profileController.isMyProfile) Tab(text: 'Geliked'),
                 ],
               ),
             ),
@@ -164,8 +154,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
         children: [
           LocationListTab(
             title: "Erstellte Locations",
-            locations: controller.createdLocations,
-            isLoading: controller.isLoadingCreated,
+            locations: profileController.createdLocations,
+            isLoading: profileController.isLoadingCreated,
             onRetry: () =>
                 context.read<UserProfileController>().loadCreatedLocations(),
             onLoadMore: () {
@@ -179,18 +169,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
           LocationListTab(
             title: "Beigetretene Locations",
-            locations: controller.joinedLocations,
-            isLoading: controller.isLoadingJoined,
+            locations: profileController.joinedLocations,
+            isLoading: profileController.isLoadingJoined,
             onRetry: () =>
                 context.read<UserProfileController>().loadJoinedLocations(),
           ),
-          LocationListTab(
-            title: "Gelikte Locations",
-            locations: controller.likedLocations,
-            isLoading: controller.isLoadingLiked,
-            onRetry: () =>
-                context.read<UserProfileController>().loadLikedLocations(),
-          ),
+          if (profileController.isMyProfile)
+            LocationListTab(
+              title: "Gelikte Locations",
+              locations: profileController.likedLocations,
+              isLoading: profileController.isLoadingLiked,
+              onRetry: () =>
+                  context.read<UserProfileController>().loadLikedLocations(),
+            ),
         ],
       ),
     );

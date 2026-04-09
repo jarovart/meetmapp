@@ -3,19 +3,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/request/editmyprofile_request.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
-import 'package:meetmaap/app/repository/user_repository.dart';
+import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/service/user_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class EditMyProfileController extends ChangeNotifier {
+  String? _username;
+  UserMyProfileResponse? _myProfile;
+
+  EditMyProfileController(this._username);
+
   bool _isLoading = false;
   bool _uploading = false;
   String? _errorMessage;
   bool _saving = false;
-  UserMyProfileResponse? _myProfile;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _firstNameCtrl = TextEditingController();
@@ -41,30 +46,28 @@ class EditMyProfileController extends ChangeNotifier {
   bool get removeCurrentProfileImage => _removeCurrentProfileImage;
   String? get currentProfileImageUrl => _currentProfileImageUrl;
 
+  bool isOwnerOfProfile() {
+    return _myProfile != null &&
+        _username != null &&
+        _myProfile!.username == _username;
+  }
+
   void setCurrentProfileImageUrl(String? url) {
     _currentProfileImageUrl = url;
   }
 
-  Future<void> load({int? userId}) async {
+  Future<void> load() async {
     if (_isLoading) return;
-    if (userId == null) return;
-
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      if (!(await AuthRepository.isLoggedIn())) {
-        throw Exception("Not logged in");
-      }
-      final myUserId = await AuthRepository.getUserId();
+      if (!(await AuthRepository.isLoggedIn())) throw NotLoggedInException();
+      if ((await AuthService.getUsername() != _username)) return;
 
-      if (myUserId != null && myUserId == userId) {
-        _myProfile = await UserRepository.fetchMyProfile();
-        setCurrentProfileImageUrl(_myProfile?.profileImage?.imageUrl ?? '');
-      } else {
-        throw Exception("Can not edit profile of other user");
-      }
+      _myProfile = await AuthService.fetchMyProfile();
+      setCurrentProfileImageUrl(_myProfile?.profileImage?.imageUrl ?? '');
       _initEditFields();
     } catch (e, st) {
       debugPrint('load editprofile failed: $e');
@@ -177,8 +180,6 @@ class EditMyProfileController extends ChangeNotifier {
   }
 
   Future<void> _updateMyProfile() async {
-    if (_myProfile == null) throw Exception("Not my profile");
-
     final profileRequest = EditMyProfileRequest(
       firstName: firstNameCtrl.text.trim(),
       lastName: lastNameCtrl.text.trim(),
@@ -204,9 +205,9 @@ class EditMyProfileController extends ChangeNotifier {
   }
 
   void _initEditFields() {
-    _firstNameCtrl.text = _myProfile?.firstName ?? "";
-    _lastNameCtrl.text = _myProfile?.lastName ?? "";
-    _aboutMeCtrl.text = _myProfile?.aboutMe ?? "";
+    _firstNameCtrl.text = _myProfile?.firstName ?? '';
+    _lastNameCtrl.text = _myProfile?.lastName ?? '';
+    _aboutMeCtrl.text = _myProfile?.aboutMe ?? '';
   }
 
   ImageProvider? _getPreviewImageProvider() {

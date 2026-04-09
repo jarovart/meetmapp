@@ -19,8 +19,20 @@ class ApiResponseHandler {
         serverMessage = decoded['message']?.toString();
         errorCode = decoded['code']?.toString();
       }
-    } catch (_) {
+    } catch (e) {
       // absichtlich ignorieren
+    }
+
+    if (response.statusCode == 429) {
+      final seconds = body?['secondsUntilNextMailAllowed'] ?? 0;
+      throw CooldownException(
+        statusCode: response.statusCode,
+        serverMessage: serverMessage,
+        errorCode: errorCode,
+        body: body,
+        debugMessage: response.body,
+        seconds: seconds,
+      );
     }
 
     throw AppHttpException(
