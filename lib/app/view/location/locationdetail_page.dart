@@ -80,7 +80,7 @@ class _LocationDetailPageState extends State<LocationDetailPage> {
                       PageRouteBuilder(
                         opaque: false,
                         pageBuilder: (_, _, _) => ImageGalleryViewer(
-                          imageUrls: [thumbnailUrl] + imageUrls,
+                          imageUrls: imageUrls,
                           initialIndex: 0,
                         ),
                       ),

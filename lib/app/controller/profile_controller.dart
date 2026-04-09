@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
 import 'package:meetmaap/app/model/response/userfull_response.dart';
