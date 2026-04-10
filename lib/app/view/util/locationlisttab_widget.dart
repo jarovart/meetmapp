@@ -29,11 +29,18 @@ class _LocationListTabState extends State<LocationListTab> {
   bool _loadMoreTriggered = false;
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (notification.metrics.pixels >= notification.metrics.maxScrollExtent &&
-        //statt pixel & maxscrollnotification.metrics.extentAfter < 200
+    if (notification is! ScrollUpdateNotification &&
+        notification is! OverscrollNotification) {
+      return false;
+    }
+
+    final shouldLoadMore =
+        notification.metrics.extentAfter < 200 &&
         widget.hasMore &&
         !widget.isLoadingMore &&
-        !_loadMoreTriggered) {
+        !_loadMoreTriggered;
+
+    if (shouldLoadMore) {
       _loadMoreTriggered = true;
       widget.onLoadMore?.call().whenComplete(() {
         if (mounted) {
@@ -42,8 +49,7 @@ class _LocationListTabState extends State<LocationListTab> {
       });
     }
 
-    if (notification.metrics.pixels < notification.metrics.maxScrollExtent) {
-      //notification.metrics.extentAfter >= 200
+    if (notification.metrics.extentAfter >= 200) {
       _loadMoreTriggered = false;
     }
 

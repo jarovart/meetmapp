@@ -11,7 +11,6 @@ import 'package:meetmaap/app/controller/userlist_controller.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';

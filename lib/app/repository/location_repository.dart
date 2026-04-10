@@ -11,6 +11,7 @@ import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dar
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/request/createlocation_request.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
+import 'package:meetmaap/app/model/response/slicelist_response.dart';
 import 'package:meetmaap/app/model/util/api_exception_wrapper.dart';
 import 'package:meetmaap/app/repository/util/api_response_handler.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
@@ -316,6 +317,29 @@ class LocationRepository {
 
       ApiResponseHandler.ensureSuccess(response);
       return true;
+    });
+  }
+
+  static Future<SliceResponse<LocationBaseResponse>>
+  getCreatedLocationsByUserIdPaged(
+    int userId, {
+    required int page,
+    required int size,
+  }) async {
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse(
+        '${ApiConfig.baseUrl}/api/locations/users/$userId/created-locations?page=$page&size=$size',
+      );
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      final decoded = ApiResponseHandler.parseJsonMap(response);
+      return SliceResponse.fromMap(
+        decoded,
+        (item) => LocationBaseResponse.fromMap(item),
+      );
     });
   }
 }

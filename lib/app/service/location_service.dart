@@ -4,6 +4,7 @@ import 'package:meetmaap/app/model/request/createlocation_request.dart';
 import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
+import 'package:meetmaap/app/model/response/slicelist_response.dart';
 import 'package:meetmaap/app/repository/location_repository.dart';
 
 /// Ergebnis-Typ für Location-Abfragen
@@ -152,5 +153,18 @@ class LocationService {
     ];
 
     return parts.where((e) => e != null).join(', ');
+  }
+
+  static Future<SliceResponse<LocationBaseResponse>>
+  getCreatedLocationsByUserIdPaged(
+    int userId, {
+    required int page,
+    required int size,
+  }) async {
+    return await LocationRepository.getCreatedLocationsByUserIdPaged(
+      userId,
+      page: page,
+      size: size,
+    );
   }
 }

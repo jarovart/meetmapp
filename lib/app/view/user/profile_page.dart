@@ -156,16 +156,13 @@ class UserProfilePage extends StatelessWidget {
             title: "Erstellte Locations",
             locations: profileController.createdLocations,
             isLoading: profileController.isLoadingCreated,
-            onRetry: () =>
-                context.read<UserProfileController>().loadCreatedLocations(),
+            onRetry: () => profileController.loadCreatedLocations(),
             onLoadMore: () {
               debugPrint("loaded more");
-              return context
-                  .read<UserProfileController>()
-                  .loadCreatedLocations(); //context.read<UserProfileController>().loadMoreCreatedLocations(),
+              return profileController.loadMoreCreatedLocations();
             },
-            isLoadingMore: false, //controller.isLoadingMoreCreated,
-            hasMore: true, //controller.hasMoreCreated,
+            isLoadingMore: profileController.isLoadingMoreCreated,
+            hasMore: profileController.hasMoreCreated,
           ),
           LocationListTab(
             title: "Beigetretene Locations",

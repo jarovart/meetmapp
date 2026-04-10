@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/controller/debouncer.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
 import 'package:meetmaap/app/model/response/userfull_response.dart';
@@ -14,6 +15,7 @@ class UserProfileController extends ChangeNotifier {
   UserProfileController(this._username);
 
   bool _isLoading = false;
+  Debouncer? _debouncer;
   int? _userId;
   UserBaseResponse? _userBaseResponse;
   bool _requiresLogin = false;
@@ -33,12 +35,18 @@ class UserProfileController extends ChangeNotifier {
   bool _joinedLoaded = false;
   bool _likedLoaded = false;
 
+  int _createdPage = 0;
+  final int _createdPageSize = 10;
+  bool _isLoadingMoreCreated = false;
+  bool _hasMoreCreated = true;
+
   bool _saving = false;
 
   bool get isLoading => _isLoading;
   bool get isSaving => _saving;
   bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
   String? get errorMessage => _errorMessage;
+  Debouncer get debouncer => _debouncer!;
 
   UserFullResponse? get userData => _userData;
   UserMyProfileResponse? get myProfile => _userData is UserMyProfileResponse
@@ -70,6 +78,9 @@ class UserProfileController extends ChangeNotifier {
   bool get isLoadingCreated => _isLoadingCreated;
   bool get isLoadingJoined => _isLoadingJoined;
   bool get isLoadingLiked => _isLoadingLiked;
+
+  bool get isLoadingMoreCreated => _isLoadingMoreCreated;
+  bool get hasMoreCreated => _hasMoreCreated;
 
   Future<void> load(UserBaseResponse? userBaseResponse) async {
     if (_isLoading) return;
@@ -129,6 +140,12 @@ class UserProfileController extends ChangeNotifier {
       _createdLoaded = false;
       _joinedLoaded = false;
       _likedLoaded = false;
+      _debouncer ??= Debouncer(delay: const Duration(milliseconds: 1000));
+
+      _createdPage = 0;
+      _isLoadingMoreCreated = false;
+      _hasMoreCreated = true;
+
       await loadCreatedLocations();
     } catch (e, st) {
       debugPrint('Error while loading profile: $e');
@@ -144,6 +161,12 @@ class UserProfileController extends ChangeNotifier {
     }
   }
 
+  @override
+  void dispose() {
+    _debouncer?.cancel();
+    super.dispose();
+  }
+
   Future<void> reload() async {
     await load(_userBaseResponse);
   }
@@ -153,13 +176,20 @@ class UserProfileController extends ChangeNotifier {
 
     _isLoadingCreated = true;
     _errorMessage = null;
+    _createdPage = 0;
+    _hasMoreCreated = true;
     notifyListeners();
 
     try {
-      _createdLocations = await LocationService.getCreatedLocationsByUserId(
+      final result = await LocationService.getCreatedLocationsByUserIdPaged(
         _userId!,
+        page: 0,
+        size: _createdPageSize,
       );
+      _createdLocations = result.items;
       _createdLoaded = true;
+      _createdPage = 1;
+      _hasMoreCreated = result.hasMore;
     } catch (e, st) {
       debugPrint('Error while loading created locations: $e');
       debugPrintStack(stackTrace: st);
@@ -170,6 +200,41 @@ class UserProfileController extends ChangeNotifier {
       );
     } finally {
       _isLoadingCreated = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMoreCreatedLocations() async {
+    if (_isLoadingMoreCreated ||
+        _isLoadingCreated ||
+        !_hasMoreCreated ||
+        _userId == null) {
+      return;
+    }
+
+    _isLoadingMoreCreated = true;
+    notifyListeners();
+
+    try {
+      final result = await LocationService.getCreatedLocationsByUserIdPaged(
+        _userId!,
+        page: _createdPage,
+        size: _createdPageSize,
+      );
+
+      _createdLocations.addAll(result.items);
+      _createdPage++;
+      _hasMoreCreated = result.hasMore;
+    } catch (e, st) {
+      debugPrint('Error while loading more created locations: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Weitere Locations konnten nicht geladen werden.',
+      );
+    } finally {
+      _isLoadingMoreCreated = false;
       notifyListeners();
     }
   }

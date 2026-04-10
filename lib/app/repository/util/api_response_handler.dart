@@ -69,4 +69,17 @@ class ApiResponseHandler {
 
     return decoded;
   }
+
+  static Map<String, dynamic> parseJsonMap(http.Response response) {
+    ensureSuccess(response);
+
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic>) {
+      throw AppUnknownException(
+        debugMessage: 'Expected JSON Map but got: ${response.body}',
+      );
+    }
+
+    return decoded;
+  }
 }
