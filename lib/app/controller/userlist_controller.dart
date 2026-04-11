@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
-import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
 import 'package:meetmaap/app/service/user_service.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class UserListController extends ChangeNotifier {
   UserListController() {

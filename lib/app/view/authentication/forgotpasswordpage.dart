@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/exception/cooldownexception.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});

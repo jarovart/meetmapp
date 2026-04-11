@@ -4,10 +4,10 @@ import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
 import 'package:meetmaap/app/model/response/userfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/service/user_service.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class UserProfileController extends ChangeNotifier {
   final String? _username;

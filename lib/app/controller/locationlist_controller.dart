@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/app/controller/util/app_error_mapper.dart';
 import 'package:meetmaap/app/service/location_service.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class LocationListController extends ChangeNotifier {
   LocationListController() {
