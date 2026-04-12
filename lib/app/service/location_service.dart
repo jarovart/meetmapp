@@ -167,4 +167,30 @@ class LocationService {
       size: size,
     );
   }
+
+  static Future<SliceResponse<LocationBaseResponse>>
+  getJoinedLocationsByUserIdPaged(
+    int userId, {
+    required int page,
+    required int pageSize,
+  }) async {
+    return await LocationRepository.getJoinedLocationsByUserIdPaged(
+      userId,
+      page: page,
+      pageSize: pageSize,
+    );
+  }
+
+  static Future<SliceResponse<LocationBaseResponse>>
+  getLikedLocationsByUserIdPaged(
+    int userId, {
+    required int page,
+    required int pageSize,
+  }) async {
+    return await LocationRepository.getLikedLocationsByUserIdPaged(
+      userId,
+      page: page,
+      pageSize: pageSize,
+    );
+  }
 }

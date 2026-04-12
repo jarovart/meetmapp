@@ -36,9 +36,20 @@ class UserProfileController extends ChangeNotifier {
   bool _likedLoaded = false;
 
   int _createdPage = 0;
+  int _joinedPage = 0;
+  int _likedPage = 0;
+
   final int _createdPageSize = 10;
+  final int _joinedPageSize = 10;
+  final int _likedPageSize = 10;
+
   bool _isLoadingMoreCreated = false;
+  bool _isLoadingMoreJoined = false;
+  bool _isLoadingMoreLiked = false;
+
   bool _hasMoreCreated = true;
+  bool _hasMoreJoined = true;
+  bool _hasMoreLiked = true;
 
   bool _saving = false;
 
@@ -244,13 +255,20 @@ class UserProfileController extends ChangeNotifier {
 
     _isLoadingJoined = true;
     _errorMessage = null;
+    _joinedPage = 0;
+    _hasMoreJoined = true;
     notifyListeners();
 
     try {
-      _joinedLocations = await LocationService.getJoinedLocationsByUserId(
+      final result = await LocationService.getJoinedLocationsByUserIdPaged(
         _userId!,
+        page: 0,
+        pageSize: _joinedPageSize,
       );
+      _joinedLocations = result.items;
       _joinedLoaded = true;
+      _joinedPage = 1;
+      _hasMoreJoined = result.hasMore;
     } catch (e, st) {
       debugPrint('Error while loading joined locations: $e');
       debugPrintStack(stackTrace: st);
@@ -265,18 +283,60 @@ class UserProfileController extends ChangeNotifier {
     }
   }
 
+  Future<void> loadMoreJoinedLocations() async {
+    if (_isLoadingMoreJoined ||
+        _isLoadingJoined ||
+        !_hasMoreJoined ||
+        _userId == null) {
+      return;
+    }
+
+    _isLoadingMoreJoined = true;
+    notifyListeners();
+
+    try {
+      final result = await LocationService.getJoinedLocationsByUserIdPaged(
+        _userId!,
+        page: _joinedPage,
+        pageSize: _joinedPageSize,
+      );
+
+      _joinedLocations.addAll(result.items);
+      _joinedPage++;
+      _hasMoreJoined = result.hasMore;
+    } catch (e, st) {
+      debugPrint('Error while loading more joined locations: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Weitere Locations konnten nicht geladen werden.',
+      );
+    } finally {
+      _isLoadingMoreJoined = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> loadLikedLocations() async {
     if (_isLoadingLiked || _likedLoaded || _userId == null) return;
 
     _isLoadingLiked = true;
     _errorMessage = null;
+    _likedPage = 0;
+    _hasMoreLiked = true;
     notifyListeners();
 
     try {
-      _likedLocations = await LocationService.getLikedLocationsByUserId(
+      final result = await LocationService.getLikedLocationsByUserIdPaged(
         _userId!,
+        page: 0,
+        pageSize: _likedPageSize,
       );
+      _likedLocations = result.items;
       _likedLoaded = true;
+      _likedPage = 1;
+      _hasMoreLiked = result.hasMore;
     } catch (e, st) {
       debugPrint('Error while loading liked locations: $e');
       debugPrintStack(stackTrace: st);
@@ -287,6 +347,41 @@ class UserProfileController extends ChangeNotifier {
       );
     } finally {
       _isLoadingLiked = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMoreLikedLocations() async {
+    if (_isLoadingMoreLiked ||
+        _isLoadingLiked ||
+        !_hasMoreLiked ||
+        _userId == null) {
+      return;
+    }
+
+    _isLoadingMoreLiked = true;
+    notifyListeners();
+
+    try {
+      final result = await LocationService.getLikedLocationsByUserIdPaged(
+        _userId!,
+        page: _likedPage,
+        pageSize: _likedPageSize,
+      );
+
+      _likedLocations.addAll(result.items);
+      _likedPage++;
+      _hasMoreLiked = result.hasMore;
+    } catch (e, st) {
+      debugPrint('Error while loading more liked locations: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Weitere Locations konnten nicht geladen werden.',
+      );
+    } finally {
+      _isLoadingMoreLiked = false;
       notifyListeners();
     }
   }

@@ -158,7 +158,7 @@ class UserProfilePage extends StatelessWidget {
             isLoading: profileController.isLoadingCreated,
             onRetry: () => profileController.loadCreatedLocations(),
             onLoadMore: () {
-              debugPrint("loaded more");
+              debugPrint("loaded more created");
               return profileController.loadMoreCreatedLocations();
             },
             isLoadingMore: profileController.isLoadingMoreCreated,
@@ -170,6 +170,10 @@ class UserProfilePage extends StatelessWidget {
             isLoading: profileController.isLoadingJoined,
             onRetry: () =>
                 context.read<UserProfileController>().loadJoinedLocations(),
+            onLoadMore: () {
+              debugPrint("loaded more joined");
+              return profileController.loadMoreJoinedLocations();
+            },
           ),
           if (profileController.isMyProfile)
             LocationListTab(
@@ -178,6 +182,10 @@ class UserProfilePage extends StatelessWidget {
               isLoading: profileController.isLoadingLiked,
               onRetry: () =>
                   context.read<UserProfileController>().loadLikedLocations(),
+              onLoadMore: () {
+                debugPrint("loaded more liked");
+                return profileController.loadMoreLikedLocations();
+              },
             ),
         ],
       ),
