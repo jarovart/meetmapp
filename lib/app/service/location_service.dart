@@ -154,43 +154,4 @@ class LocationService {
 
     return parts.where((e) => e != null).join(', ');
   }
-
-  static Future<SliceResponse<LocationBaseResponse>>
-  getCreatedLocationsByUserIdPaged(
-    int userId, {
-    required int page,
-    required int size,
-  }) async {
-    return await LocationRepository.getCreatedLocationsByUserIdPaged(
-      userId,
-      page: page,
-      size: size,
-    );
-  }
-
-  static Future<SliceResponse<LocationBaseResponse>>
-  getJoinedLocationsByUserIdPaged(
-    int userId, {
-    required int page,
-    required int pageSize,
-  }) async {
-    return await LocationRepository.getJoinedLocationsByUserIdPaged(
-      userId,
-      page: page,
-      pageSize: pageSize,
-    );
-  }
-
-  static Future<SliceResponse<LocationBaseResponse>>
-  getLikedLocationsByUserIdPaged(
-    int userId, {
-    required int page,
-    required int pageSize,
-  }) async {
-    return await LocationRepository.getLikedLocationsByUserIdPaged(
-      userId,
-      page: page,
-      pageSize: pageSize,
-    );
-  }
 }

@@ -192,10 +192,10 @@ class UserProfileController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await LocationService.getCreatedLocationsByUserIdPaged(
+      final result = await UserService.getCreatedLocationsByUserIdPaged(
         _userId!,
         page: 0,
-        size: _createdPageSize,
+        pageSize: _createdPageSize,
       );
       _createdLocations = result.items;
       _createdLoaded = true;
@@ -227,10 +227,10 @@ class UserProfileController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await LocationService.getCreatedLocationsByUserIdPaged(
+      final result = await UserService.getCreatedLocationsByUserIdPaged(
         _userId!,
         page: _createdPage,
-        size: _createdPageSize,
+        pageSize: _createdPageSize,
       );
 
       _createdLocations.addAll(result.items);
@@ -260,7 +260,7 @@ class UserProfileController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await LocationService.getJoinedLocationsByUserIdPaged(
+      final result = await UserService.getJoinedLocationsByUserIdPaged(
         _userId!,
         page: 0,
         pageSize: _joinedPageSize,
@@ -295,7 +295,7 @@ class UserProfileController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await LocationService.getJoinedLocationsByUserIdPaged(
+      final result = await UserService.getJoinedLocationsByUserIdPaged(
         _userId!,
         page: _joinedPage,
         pageSize: _joinedPageSize,
@@ -328,7 +328,7 @@ class UserProfileController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await LocationService.getLikedLocationsByUserIdPaged(
+      final result = await UserService.getLikedLocationsByUserIdPaged(
         _userId!,
         page: 0,
         pageSize: _likedPageSize,
@@ -363,7 +363,7 @@ class UserProfileController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await LocationService.getLikedLocationsByUserIdPaged(
+      final result = await UserService.getLikedLocationsByUserIdPaged(
         _userId!,
         page: _likedPage,
         pageSize: _likedPageSize,

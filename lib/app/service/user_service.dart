@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:meetmaap/app/model/request/editmyprofile_request.dart';
+import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/slicelist_response.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
 import 'package:meetmaap/app/model/response/userfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
@@ -47,5 +49,44 @@ class UserService {
       request,
     );
     return userResponse;
+  }
+
+  static Future<SliceResponse<LocationBaseResponse>>
+  getCreatedLocationsByUserIdPaged(
+    int userId, {
+    required int page,
+    required int pageSize,
+  }) async {
+    return await UserRepository.getCreatedLocationsByUserIdPaged(
+      userId,
+      page: page,
+      pageSize: pageSize,
+    );
+  }
+
+  static Future<SliceResponse<LocationBaseResponse>>
+  getJoinedLocationsByUserIdPaged(
+    int userId, {
+    required int page,
+    required int pageSize,
+  }) async {
+    return await UserRepository.getJoinedLocationsByUserIdPaged(
+      userId,
+      page: page,
+      pageSize: pageSize,
+    );
+  }
+
+  static Future<SliceResponse<LocationBaseResponse>>
+  getLikedLocationsByUserIdPaged(
+    int userId, {
+    required int page,
+    required int pageSize,
+  }) async {
+    return await UserRepository.getLikedLocationsByUserIdPaged(
+      userId,
+      page: page,
+      pageSize: pageSize,
+    );
   }
 }
