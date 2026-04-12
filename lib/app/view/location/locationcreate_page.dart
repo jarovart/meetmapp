@@ -60,7 +60,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
     if (!mounted) return;
 
     if (!loggedIn) {
-      final ok = await context.push<bool>('/loginpage');
+      final ok = await context.push<bool>('/login');
 
       if (ok != true) {
         // User hat Login abgebrochen → Seite schließen
