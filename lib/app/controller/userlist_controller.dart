@@ -84,8 +84,12 @@ class UserListController extends ChangeNotifier {
       _isLoading = true;
       activateLoadingState();
       final query = _searchCtrl.text.trim();
-      final list = await UserService.fetchUsersByQuery(query);
-      return list;
+      final result = await UserService.fetchUsersByQuery(
+        query,
+        page: 0,
+        pageSize: 20,
+      );
+      return result.items;
     } catch (e, st) {
       debugPrint('Error while loading users: $e');
       debugPrintStack(stackTrace: st);

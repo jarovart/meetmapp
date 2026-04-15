@@ -200,28 +200,38 @@ class LocationRepository {
     });
   }
 
-  static Future<List<LocationBaseResponse>> fetchAllLocationsByFilter(
+  static Future<SliceResponse<LocationBaseResponse>> fetchAllLocationsByFilter(
     String searchText,
     LatLng position,
+    double radiusKm,
     DateTime startDate,
-    DateTime endDate,
-  ) async {
+    DateTime endDate, {
+    required int page,
+    required int pageSize,
+  }) async {
     return ApiExceptionWrapper.guard(() async {
-      final uri = Uri.parse('${ApiConfig.baseUrl}/api/locations/allByFilter')
+      final headers = await AuthRepository.authHeaders();
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/locations/findByFilter')
           .replace(
             queryParameters: {
+              'query': searchText,
               'lat': position.latitude.toString(),
-              'long': position.longitude.toString(),
-              'searchText': searchText,
+              'lng': position.longitude.toString(),
+              'radiusKm': radiusKm.toString(),
               'rangeStart': startDate.toIso8601String(),
               'rangeEnd': endDate.toIso8601String(),
+              'page': page.toString(),
+              'size': pageSize.toString(),
             },
           );
 
-      final response = await http.get(uri);
+      final response = await http.get(uri, headers: headers);
 
-      final body = ApiResponseHandler.parseJsonList(response);
-      return body.map((e) => LocationBaseResponse.fromMap(e)).toList();
+      final decoded = ApiResponseHandler.parseJsonMap(response);
+      return SliceResponse.fromMap(
+        decoded,
+        (item) => LocationBaseResponse.fromMap(item),
+      );
     });
   }
 

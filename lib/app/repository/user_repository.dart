@@ -14,29 +14,44 @@ import 'package:meetmaap/app/repository/util/api_response_handler.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 
 class UserRepository {
-  static Future<List<UserBaseResponse>> fetchUsersByQuery(String query) async {
+  static Future<SliceResponse<UserBaseResponse>> fetchUsersByQuery(
+    String query,
+    int page,
+    int pageSize,
+  ) async {
     return ApiExceptionWrapper.guard(() async {
       final uri = Uri.parse(
-        '${ApiConfig.baseUrl}/api/users/query',
+        '${ApiConfig.baseUrl}/api/users/query?page=$page&size=$pageSize',
       ).replace(queryParameters: {'query': query});
 
-      final headers = await AuthRepository.authHeaders();
+      final headers = await AuthRepository.authHeadersWithException();
       final response = await http.get(uri, headers: headers);
 
-      final body = ApiResponseHandler.parseJsonList(response);
-      return body.map((e) => UserBaseResponse.fromMap(e)).toList();
+      final decoded = ApiResponseHandler.parseJsonMap(response);
+      return SliceResponse.fromMap(
+        decoded,
+        (item) => UserBaseResponse.fromMap(item),
+      );
     });
   }
 
-  static Future<List<UserBaseResponse>> fetchAllUsers() async {
+  static Future<SliceResponse<UserBaseResponse>> fetchAllUsers(
+    int page,
+    int pageSize,
+  ) async {
     return ApiExceptionWrapper.guard(() async {
-      final uri = Uri.parse('${ApiConfig.baseUrl}/api/users/all');
+      final uri = Uri.parse(
+        '${ApiConfig.baseUrl}/api/users/all?page=$page&size=$pageSize',
+      );
 
-      final headers = await AuthRepository.authHeaders();
+      final headers = await AuthRepository.authHeadersWithException();
       final response = await http.get(uri, headers: headers);
 
-      final body = ApiResponseHandler.parseJsonList(response);
-      return body.map((e) => UserBaseResponse.fromMap(e)).toList();
+      final decoded = ApiResponseHandler.parseJsonMap(response);
+      return SliceResponse.fromMap(
+        decoded,
+        (item) => UserBaseResponse.fromMap(item),
+      );
     });
   }
 

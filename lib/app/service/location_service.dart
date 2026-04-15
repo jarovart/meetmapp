@@ -43,22 +43,26 @@ class LocationService {
     return await LocationRepository.fetchFullLocation(id);
   }
 
-  static Future<List<LocationBaseResponse>> fetchLocationsByFilterSettings(
+  static Future<SliceResponse<LocationBaseResponse>>
+  fetchLocationsByFilterSettings(
     String searchText,
     LatLng position,
     double radiusKm,
     DateTime startDateTime,
-    DateTime endDateTime,
-  ) async {
-    return await LocationRepository.fetchLocations();
-    /* TODO: API call fix
-    return LocationRepository.fetchAllLocationsByFilter(
+    DateTime endDateTime, {
+    required int page,
+    required int pageSize,
+  }) async {
+    //return await LocationRepository.fetchLocations();
+    return await LocationRepository.fetchAllLocationsByFilter(
       searchText,
       position,
       radiusKm,
       startDateTime,
       endDateTime,
-    );*/
+      page: page,
+      pageSize: pageSize,
+    );
   }
 
   static Future<String?> reverseGeocodeOSM(

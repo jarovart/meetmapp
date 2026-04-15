@@ -10,11 +10,15 @@ import 'package:meetmaap/app/repository/user_repository.dart';
 import 'package:meetmaap/app/service/image_service.dart';
 
 class UserService {
-  static Future<List<UserBaseResponse>> fetchUsersByQuery(String query) async {
+  static Future<SliceResponse<UserBaseResponse>> fetchUsersByQuery(
+    String query, {
+    required int page,
+    required int pageSize,
+  }) async {
     if (query.isNotEmpty) {
-      return await UserRepository.fetchUsersByQuery(query);
+      return await UserRepository.fetchUsersByQuery(query, page, pageSize);
     }
-    return await UserRepository.fetchAllUsers();
+    return await UserRepository.fetchAllUsers(page, pageSize);
   }
 
   static Future<UserFullResponse> fetchFullUserById(int id) async {
