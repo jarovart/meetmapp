@@ -17,66 +17,54 @@ class UserListPage extends StatelessWidget {
       backgroundColor: Colors.grey.shade200,
       body: Stack(
         children: [
-          FutureBuilder<List<UserBaseResponse>>(
-            future: userListController.futureUsers,
-            builder: (context, snapshot) {
-              if (userListController.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+          if (userListController.isLoading)
+            const Center(child: CircularProgressIndicator()),
 
-              if (userListController.hasError) {
-                return Center(
-                  child: Text('Fehler: ${userListController.errorMessage}'),
-                );
-              }
+          if (userListController.hasError)
+            Center(child: Text('Fehler: ${userListController.errorMessage}')),
 
-              final users = snapshot.data ?? [];
+          // ⬇️ Optional: wenn keine Locations vorhanden sind
+          if (userListController.users.isEmpty)
+            RefreshIndicator(
+              onRefresh: () async => userListController.reloadLocations(),
+              child: ListView(
+                children: const [
+                  SizedBox(height: 200),
+                  Center(child: Text("Keine Locations gefunden.")),
+                ],
+              ),
+            ),
 
-              // ⬇️ Optional: wenn keine Locations vorhanden sind
-              if (users.isEmpty) {
-                return RefreshIndicator(
-                  onRefresh: () async => userListController.reloadLocations(),
-                  child: ListView(
-                    children: const [
-                      SizedBox(height: 200),
-                      Center(child: Text("Keine Locations gefunden.")),
-                    ],
-                  ),
-                );
-              }
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const double headerHeight = 60;
+              int crossAxisCount = max(1, constraints.maxWidth ~/ 400);
 
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  const double headerHeight = 60;
-                  int crossAxisCount = max(1, constraints.maxWidth ~/ 400);
+              final grid = GridView.builder(
+                padding: const EdgeInsets.fromLTRB(
+                  16,
+                  16 + headerHeight, // ✅ startet unter der Suchleiste
+                  16,
+                  16,
+                ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  //childAspectRatio: 4 / 3,
+                  mainAxisExtent: 300,
+                ),
+                itemCount: userListController.users.length,
+                itemBuilder: (context, index) =>
+                    UserCard(userbase: userListController.users[index]),
+              );
 
-                  final grid = GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(
-                      16,
-                      16 + headerHeight, // ✅ startet unter der Suchleiste
-                      16,
-                      16,
-                    ),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      //childAspectRatio: 4 / 3,
-                      mainAxisExtent: 300,
-                    ),
-                    itemCount: users.length,
-                    itemBuilder: (context, index) =>
-                        UserCard(userbase: users[index]),
-                  );
-
-                  // ⬇️ Pull-to-refresh, damit du manuell neu laden kannst
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      userListController.reloadLocations();
-                    },
-                    child: grid,
-                  );
+              // ⬇️ Pull-to-refresh, damit du manuell neu laden kannst
+              return RefreshIndicator(
+                onRefresh: () async {
+                  userListController.reloadLocations();
                 },
+                child: grid,
               );
             },
           ),

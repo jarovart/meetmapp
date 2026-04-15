@@ -10,7 +10,7 @@ import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class LocationListController extends ChangeNotifier {
   LocationListController() {
-    _futureLocations = Future.value([]);
+    _locations = [];
     loadData();
   }
 
@@ -22,7 +22,7 @@ class LocationListController extends ChangeNotifier {
   String? _errorMessage;
 
   final TextEditingController _searchCtrl = TextEditingController();
-  late Future<List<LocationBaseResponse>> _futureLocations;
+  List<LocationBaseResponse> _locations = [];
   LatLng? _currentLocation;
   LatLng? _filterCenter;
   String? _filterPlaceText; // z.B. "Bremen"
@@ -35,14 +35,13 @@ class LocationListController extends ChangeNotifier {
   final int _pageSize = 20;
   bool _isLoadingMore = false;
   bool _hasMore = true;
-  List<LocationBaseResponse> _locations = [];
 
   DateTime _resetStart = DateTime.now();
   DateTime _resetEnd = DateTime.now().add(const Duration(days: 1));
 
   Timer? _searchDebounce;
 
-  Future<List<LocationBaseResponse>> get futureLocations => _futureLocations;
+  List<LocationBaseResponse> get locations => _locations;
   TextEditingController get searchCtrl => _searchCtrl;
   DateTime? get filterStart => _filterStart;
   DateTime? get filterEnd => _filterEnd;
@@ -56,7 +55,6 @@ class LocationListController extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
 
-  List<LocationBaseResponse> get locations => _locations;
   bool get isLoadingMore => _isLoadingMore;
   bool get hasMore => _hasMore;
 
@@ -95,14 +93,14 @@ class LocationListController extends ChangeNotifier {
     super.dispose();
   }
 
-  void reloadLocations() {
+  void reloadLocations() async {
     _errorMessage = null;
-    _futureLocations = _fetchLocationsByFilterSettings();
+    _locations = await _fetchLocationsByFilterSettings();
   }
 
   void clearSearchResults() {
     _searchCtrl.clear();
-    _futureLocations = Future.value([]);
+    _locations = [];
     notifyListeners();
   }
 
@@ -112,7 +110,7 @@ class LocationListController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void onSearchChanged(String text) {
+  void onSearchChanged(String text) async {
     if (_searchDebounce?.isActive ?? false) {
       _searchDebounce!.cancel();
     }
@@ -123,7 +121,7 @@ class LocationListController extends ChangeNotifier {
         return;
       }
 
-      _futureLocations = _fetchLocationsByFilterSettings();
+      _locations = await _fetchLocationsByFilterSettings();
     });
   }
 
@@ -145,7 +143,7 @@ class LocationListController extends ChangeNotifier {
         debugPrint("Fehler: $message");
     }
 
-    _futureLocations = _fetchLocationsByFilterSettings();
+    _locations = await _fetchLocationsByFilterSettings();
   }
 
   Future<List<LocationBaseResponse>> _fetchLocationsByFilterSettings() async {

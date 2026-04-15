@@ -14,79 +14,70 @@ class LocationsListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locationListController = context.watch<LocationListController>();
+    final locations = locationListController.locations;
 
     return Scaffold(
       appBar: AppBar(title: const Text("Locations"), centerTitle: true),
       backgroundColor: Colors.grey.shade200,
       body: Stack(
         children: [
-          FutureBuilder<List<LocationBaseResponse>>(
-            future: locationListController.futureLocations,
-            builder: (context, snapshot) {
-              if (locationListController.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+          if (locationListController.isLoading)
+            const Center(child: CircularProgressIndicator()),
 
-              if (locationListController.hasError) {
-                return Center(
-                  child: Text('Fehler: ${locationListController.errorMessage}'),
-                );
-              }
+          if (locationListController.hasError)
+            Center(
+              child: Text('Fehler: ${locationListController.errorMessage}'),
+            ),
 
-              final locations = snapshot.data ?? [];
+          // ⬇️ Optional: wenn keine Locations vorhanden sind
+          if (locations.isEmpty)
+            RefreshIndicator(
+              onRefresh: () async => locationListController.reloadLocations(),
+              child: ListView(
+                children: const [
+                  SizedBox(height: 200),
+                  Center(child: Text("Keine Locations gefunden.")),
+                ],
+              ),
+            ),
 
-              // ⬇️ Optional: wenn keine Locations vorhanden sind
-              if (locations.isEmpty) {
-                return RefreshIndicator(
-                  onRefresh: () async =>
-                      locationListController.reloadLocations(),
-                  child: ListView(
-                    children: const [
-                      SizedBox(height: 200),
-                      Center(child: Text("Keine Locations gefunden.")),
-                    ],
+          if (locations.isNotEmpty)
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const double headerHeight = 60;
+                int crossAxisCount = max(1, constraints.maxWidth ~/ 400);
+
+                final grid = GridView.builder(
+                  padding: const EdgeInsets.fromLTRB(
+                    16,
+                    16 + headerHeight, // ✅ startet unter der Suchleiste
+                    16,
+                    16,
                   ),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    //childAspectRatio: 4 / 3,
+                    mainAxisExtent: 300,
+                  ),
+                  itemCount: locations.length,
+                  itemBuilder: (context, index) {
+                    final loc = locations[index];
+
+                    return LocationCard(locationbase: loc);
+                  },
                 );
-              }
 
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  const double headerHeight = 60;
-                  int crossAxisCount = max(1, constraints.maxWidth ~/ 400);
-
-                  final grid = GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(
-                      16,
-                      16 + headerHeight, // ✅ startet unter der Suchleiste
-                      16,
-                      16,
-                    ),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      //childAspectRatio: 4 / 3,
-                      mainAxisExtent: 300,
-                    ),
-                    itemCount: locations.length,
-                    itemBuilder: (context, index) {
-                      final loc = locations[index];
-
-                      return LocationCard(locationbase: loc);
-                    },
-                  );
-
-                  // ⬇️ Pull-to-refresh, damit du manuell neu laden kannst
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      locationListController.reloadLocations();
-                    },
-                    child: grid,
-                  );
-                },
-              );
-            },
-          ),
+                // ⬇️ Pull-to-refresh, damit du manuell neu laden kannst
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    locationListController.reloadLocations();
+                  },
+                  child: grid,
+                );
+              },
+            ),
           _buildSearchAndFilterBar(context, locationListController),
         ],
       ),
