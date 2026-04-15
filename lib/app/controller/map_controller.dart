@@ -351,7 +351,11 @@ class MapViewController extends ChangeNotifier {
   // REDIRECT CALL BEHAVIOR
   // ─────────────────────────────────────────────
 
-  void createLocation(BuildContext context, LatLng tapPosition) async {
+  void createLocation(
+    BuildContext context,
+    LatLng tapPosition,
+    Future<void> Function()? refreshAuth,
+  ) async {
     final router = GoRouter.of(context);
 
     final geoAddress = await LocationService.reverseGeocodeOSM(
@@ -371,7 +375,7 @@ class MapViewController extends ChangeNotifier {
     if (createdLocation != null) {
       _locations.add(createdLocation);
       _selectedLocation = createdLocation;
-
+      await refreshAuth?.call();
       notifyListeners();
       mapController.move(createdLocation.position, mapController.camera.zoom);
     }

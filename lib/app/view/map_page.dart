@@ -16,8 +16,9 @@ import 'package:provider/provider.dart';
 
 class MapPage extends StatelessWidget {
   final LocationFullResponse? locationToCheck;
+  final Future<void> Function()? refreshAuth;
 
-  const MapPage({super.key, this.locationToCheck});
+  const MapPage(this.refreshAuth, {super.key, this.locationToCheck});
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +62,7 @@ class MapPage extends StatelessWidget {
                       mapViewController.createLocation(
                         context,
                         event.tapPosition,
+                        refreshAuth,
                       );
                     } else if (event is MapEventMoveEnd ||
                         event is MapEventDoubleTapZoomEnd) {

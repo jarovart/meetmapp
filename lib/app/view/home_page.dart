@@ -29,7 +29,7 @@ class HomePageState extends State<HomePage> {
       appBar: _buildAppBar(),
       body: Stack(
         children: [
-          MapPage(),
+          MapPage(() async => await _refreshAuth()),
           if (_isMenuOpen) _buildMenuScrim(),
           _buildSlidingMenu(),
         ],

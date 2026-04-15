@@ -86,7 +86,7 @@ class MainApplication extends StatelessWidget {
                   c.selectLocation(loc);
                   return c;
                 },
-                child: MapPage(locationToCheck: loc),
+                child: MapPage(null, locationToCheck: loc),
               );
             },
           ),
