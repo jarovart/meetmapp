@@ -41,7 +41,7 @@ class HomePageState extends State<HomePage> {
 
   AppBar _buildAppBar() {
     return AppBar(
-      title: const Text("Meetmaap"),
+      title: const Text("Meetmapp"),
       leading: IconButton(
         icon: Icon(_isMenuOpen ? Icons.close : Icons.menu),
         onPressed: _toggleMenu,

@@ -59,6 +59,7 @@ class MapPage extends StatelessWidget {
                     if (event is MapEventTap) {
                       mapViewController.selectLocation(null);
                     } else if (event is MapEventLongPress) {
+                      mapViewController.selectLocation(null);
                       mapViewController.createLocation(
                         context,
                         event.tapPosition,

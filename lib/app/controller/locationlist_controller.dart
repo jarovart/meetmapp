@@ -14,26 +14,23 @@ class LocationListController extends ChangeNotifier {
     loadData();
   }
 
-  // ─────────────────────────────────────────────
-  // STATE
-  // ─────────────────────────────────────────────
-  bool _isLoaded = false;
+  bool _isInitialized = false;
   bool _isLoading = false;
+  bool _isLoadingMore = false;
   String? _errorMessage;
 
   final TextEditingController _searchCtrl = TextEditingController();
   List<LocationBaseResponse> _locations = [];
+
   LatLng? _currentLocation;
   LatLng? _filterCenter;
-  String? _filterPlaceText; // z.B. "Bremen"
+  String? _filterPlaceText;
   double _filterRadiusKm = 10;
   DateTime? _filterStart;
   DateTime? _filterEnd;
 
-  bool _loaded = false;
   int _page = 0;
-  final int _pageSize = 20;
-  bool _isLoadingMore = false;
+  final int _pageSize = 10;
   bool _hasMore = true;
 
   DateTime _resetStart = DateTime.now();
@@ -41,11 +38,12 @@ class LocationListController extends ChangeNotifier {
 
   Timer? _searchDebounce;
 
-  List<LocationBaseResponse> get locations => _locations;
   TextEditingController get searchCtrl => _searchCtrl;
+  List<LocationBaseResponse> get locations => _locations;
+  String? get filterPlaceText => _filterPlaceText;
+  LatLng? get filterCenter => _filterCenter;
   DateTime? get filterStart => _filterStart;
   DateTime? get filterEnd => _filterEnd;
-  String? get filterPlaceText => _filterPlaceText;
   double get filterRadiusKm => _filterRadiusKm;
 
   DateTime get resetStart => _resetStart;
@@ -54,36 +52,15 @@ class LocationListController extends ChangeNotifier {
   bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
-
   bool get isLoadingMore => _isLoadingMore;
   bool get hasMore => _hasMore;
 
-  // ─────────────────────────────────────────────
-  // STATE MUTATION
-  // ─────────────────────────────────────────────
-
-  void setFilterSettings(
-    DateTime? filterStart,
-    DateTime? filterEnd,
-    String? filterPlaceText,
-    double filterRadiusKm,
-  ) {
-    _filterStart = filterStart;
-    _filterEnd = filterEnd;
-    _filterPlaceText = filterPlaceText;
-    _filterRadiusKm = filterRadiusKm;
-    notifyListeners();
-  }
-
-  // ─────────────────────────────────────────────
-  // DATA
-  // ─────────────────────────────────────────────
-
   Future<void> loadData() async {
-    if (_isLoaded) return;
-    _isLoaded = true;
+    if (_isInitialized) return;
+    _isInitialized = true;
 
-    determinePosition();
+    await determinePosition();
+    await loadLocationsByQuery();
   }
 
   @override
@@ -93,41 +70,20 @@ class LocationListController extends ChangeNotifier {
     super.dispose();
   }
 
-  void reloadLocations() async {
-    _errorMessage = null;
-    _locations = await _fetchLocationsByFilterSettings();
-  }
-
-  void clearSearchResults() {
-    _searchCtrl.clear();
-    _locations = [];
+  void setFilterSettings(
+    DateTime? filterStart,
+    DateTime? filterEnd,
+    LatLng? filterCenter,
+    String? filterPlaceText,
+    double filterRadiusKm,
+  ) {
+    _filterStart = filterStart;
+    _filterEnd = filterEnd;
+    _filterCenter = filterCenter;
+    _filterPlaceText = filterPlaceText;
+    _filterRadiusKm = filterRadiusKm;
     notifyListeners();
   }
-
-  void resetViewSettings() {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-  }
-
-  void onSearchChanged(String text) async {
-    if (_searchDebounce?.isActive ?? false) {
-      _searchDebounce!.cancel();
-    }
-
-    _searchDebounce = Timer(const Duration(milliseconds: 1000), () async {
-      if (text.isNotEmpty && text.length < 3) {
-        //clearSearchResults(); //TODO: check bug here
-        return;
-      }
-
-      _locations = await _fetchLocationsByFilterSettings();
-    });
-  }
-
-  // ─────────────────────────────────────────────
-  // API CALL BEHAVIOR
-  // ─────────────────────────────────────────────
 
   Future<void> determinePosition() async {
     final result = await LocationService.getCurrentLocation();
@@ -142,50 +98,39 @@ class LocationListController extends ChangeNotifier {
       case LocationError(:final message):
         debugPrint("Fehler: $message");
     }
-
-    _locations = await _fetchLocationsByFilterSettings();
   }
 
-  Future<List<LocationBaseResponse>> _fetchLocationsByFilterSettings() async {
-    debugPrint("_fetchLocationsByFilterSettings called");
-    resetViewSettings();
-    try {
-      if (_currentLocation == null && _filterCenter == null) {
-        throw Exception("No gps and no filter location available");
-      }
-      final query = _searchCtrl.text.trim();
-      final list = await LocationService.fetchLocationsByFilterSettings(
-        query,
-        _filterCenter ?? _currentLocation!,
-        _filterRadiusKm,
-        _filterStart ?? _resetStart,
-        _filterEnd ?? _resetEnd,
-        page: 0,
-        pageSize: 10,
-      );
-      _errorMessage = null;
-      return list.items;
-    } catch (e, st) {
-      debugPrint('Error while fetching locations: $e');
-      debugPrintStack(stackTrace: st);
+  Future<void> reloadLocations() async {
+    await loadLocationsByQuery();
+  }
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Abrufen der Locations.',
-      );
-      return [];
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+  void clearSearchResults() {
+    _searchCtrl.clear();
+    loadLocationsByQuery();
+  }
+
+  void onSearchChanged(String text) {
+    _searchDebounce?.cancel();
+
+    _searchDebounce = Timer(const Duration(milliseconds: 700), () async {
+      if (text.isNotEmpty && text.length < 3) {
+        return;
+      }
+      await loadLocationsByQuery();
+    });
+
+    notifyListeners();
   }
 
   Future<void> loadLocationsByQuery() async {
-    if (_isLoading || _loaded) return;
+    if (_isLoading) return;
+    debugPrint("loadlocations");
+
     try {
       if (_currentLocation == null && _filterCenter == null) {
         throw CustomAppException("No gps and no filter location available");
       }
+
       _isLoading = true;
       _errorMessage = null;
       _page = 0;
@@ -204,7 +149,6 @@ class LocationListController extends ChangeNotifier {
       );
 
       _locations = result.items;
-      _loaded = true;
       _page = 1;
       _hasMore = result.hasMore;
     } catch (e, st) {
@@ -215,6 +159,7 @@ class LocationListController extends ChangeNotifier {
         e,
         fallback: 'Fehler beim Abrufen der Locations.',
       );
+      _locations = [];
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -222,15 +167,19 @@ class LocationListController extends ChangeNotifier {
   }
 
   Future<void> loadMoreLocationsByQuery() async {
-    if (_isLoadingMore || _isLoading || !_hasMore) {
-      return;
-    }
-
-    _isLoadingMore = true;
-    notifyListeners();
+    if (_isLoading || _isLoadingMore || !_hasMore) return;
+    debugPrint("loadlocations more");
 
     try {
+      if (_currentLocation == null && _filterCenter == null) {
+        throw CustomAppException("No gps and no filter location available");
+      }
+
+      _isLoadingMore = true;
+      notifyListeners();
+
       final query = _searchCtrl.text.trim();
+      debugPrint("loadmore1");
       final result = await LocationService.fetchLocationsByFilterSettings(
         query,
         _filterCenter ?? _currentLocation!,

@@ -1,15 +1,57 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/locationlist_controller.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/place_response.dart';
+import 'package:meetmaap/app/service/place_service.dart';
 import 'package:meetmaap/app/view/util/filterbutton_widget.dart';
 import 'package:meetmaap/app/view/util/locationcard_widget.dart';
 import 'package:provider/provider.dart';
 
-class LocationsListPage extends StatelessWidget {
+class LocationsListPage extends StatefulWidget {
   const LocationsListPage({super.key});
+
+  @override
+  State<LocationsListPage> createState() => _LocationsListPageState();
+}
+
+class _LocationsListPageState extends State<LocationsListPage> {
+  bool _loadMoreTriggered = false;
+
+  bool _handleScrollNotification(
+    ScrollNotification notification,
+    LocationListController controller,
+  ) {
+    if (notification is! ScrollUpdateNotification &&
+        notification is! OverscrollNotification) {
+      return false;
+    }
+
+    final shouldLoadMore =
+        notification.metrics.extentAfter < 300 &&
+        controller.hasMore &&
+        !controller.isLoading &&
+        !controller.isLoadingMore &&
+        !_loadMoreTriggered;
+
+    if (shouldLoadMore) {
+      _loadMoreTriggered = true;
+      controller.loadMoreLocationsByQuery().whenComplete(() {
+        if (mounted) {
+          _loadMoreTriggered = false;
+        }
+      });
+    }
+
+    if (notification.metrics.extentAfter >= 300) {
+      _loadMoreTriggered = false;
+    }
+
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,15 +66,15 @@ class LocationsListPage extends StatelessWidget {
           if (locationListController.isLoading)
             const Center(child: CircularProgressIndicator()),
 
-          if (locationListController.hasError)
+          if (!locationListController.isLoading &&
+              locationListController.hasError)
             Center(
               child: Text('Fehler: ${locationListController.errorMessage}'),
             ),
 
-          // ⬇️ Optional: wenn keine Locations vorhanden sind
-          if (locations.isEmpty)
+          if (!locationListController.isLoading && locations.isEmpty)
             RefreshIndicator(
-              onRefresh: () async => locationListController.reloadLocations(),
+              onRefresh: () => locationListController.reloadLocations(),
               child: ListView(
                 children: const [
                   SizedBox(height: 200),
@@ -41,43 +83,54 @@ class LocationsListPage extends StatelessWidget {
               ),
             ),
 
-          if (locations.isNotEmpty)
+          if (!locationListController.isLoading && locations.isNotEmpty)
             LayoutBuilder(
               builder: (context, constraints) {
                 const double headerHeight = 60;
-                int crossAxisCount = max(1, constraints.maxWidth ~/ 400);
+                final int crossAxisCount = max(1, constraints.maxWidth ~/ 400);
 
-                final grid = GridView.builder(
-                  padding: const EdgeInsets.fromLTRB(
-                    16,
-                    16 + headerHeight, // ✅ startet unter der Suchleiste
-                    16,
-                    16,
-                  ),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    //childAspectRatio: 4 / 3,
-                    mainAxisExtent: 300,
-                  ),
-                  itemCount: locations.length,
-                  itemBuilder: (context, index) {
-                    final loc = locations[index];
-
-                    return LocationCard(locationbase: loc);
-                  },
-                );
-
-                // ⬇️ Pull-to-refresh, damit du manuell neu laden kannst
                 return RefreshIndicator(
-                  onRefresh: () async {
-                    locationListController.reloadLocations();
-                  },
-                  child: grid,
+                  onRefresh: () => locationListController.reloadLocations(),
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) => _handleScrollNotification(
+                      notification,
+                      locationListController,
+                    ),
+                    child: GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(
+                        16,
+                        16 + headerHeight,
+                        16,
+                        16,
+                      ),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        mainAxisExtent: 300,
+                      ),
+                      itemCount:
+                          locations.length +
+                          (locationListController.isLoadingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index >= locations.length) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+
+                        final loc = locations[index];
+                        return LocationCard(locationbase: loc);
+                      },
+                    ),
+                  ),
                 );
               },
             ),
+
           _buildSearchAndFilterBar(context, locationListController),
         ],
       ),
@@ -99,8 +152,7 @@ class LocationsListPage extends StatelessWidget {
                 controller: locationListController.searchCtrl,
                 onChanged: locationListController.onSearchChanged,
                 textInputAction: TextInputAction.search,
-                onSubmitted: (_) => locationListController
-                    .reloadLocations(), //gibt es nicht bei mappage
+                onSubmitted: (_) => locationListController.reloadLocations(),
                 decoration: InputDecoration(
                   hintText: "Suchen...",
                   prefixIcon: const Icon(Icons.search),
@@ -157,12 +209,20 @@ class LocationsListPage extends StatelessWidget {
     DateTime? tempStart = locationListController.filterStart;
     DateTime? tempEnd = locationListController.filterEnd;
     String tempPlace = locationListController.filterPlaceText ?? '';
+    LatLng? tempFilterCenter = locationListController.filterCenter;
     double tempRadius = locationListController.filterRadiusKm;
+
     final dateTimeformatter = DateFormat('dd.MM.yyyy HH:mm');
+    final placeController = TextEditingController(text: tempPlace);
+
+    List<PlaceResponse> suggestions = [];
+    bool isLoadingSuggestions = false;
+    String? suggestionsError;
+    Timer? debounce;
 
     await showDialog(
       context: context,
-      barrierDismissible: true, // ✅ klick außerhalb schließt
+      barrierDismissible: true,
       builder: (dialogCtx) {
         return Dialog(
           insetPadding: const EdgeInsets.symmetric(
@@ -186,6 +246,51 @@ class LocationsListPage extends StatelessWidget {
                 setLocalState(() => tempEnd = picked);
               }
 
+              Future<void> loadSuggestions(String value) async {
+                debounce?.cancel();
+
+                final trimmed = value.trim();
+
+                if (trimmed.length < 3) {
+                  setLocalState(() {
+                    suggestions = [];
+                    suggestionsError = null;
+                    isLoadingSuggestions = false;
+                    tempFilterCenter = null;
+                  });
+                  return;
+                }
+
+                debounce = Timer(const Duration(milliseconds: 400), () async {
+                  setLocalState(() {
+                    isLoadingSuggestions = true;
+                    suggestionsError = null;
+                  });
+
+                  try {
+                    final result = await PlaceService.suggestPlaces(trimmed);
+                    if (!ctx.mounted) return;
+
+                    setLocalState(() {
+                      suggestions = result;
+                    });
+                  } catch (e) {
+                    if (!ctx.mounted) return;
+
+                    setLocalState(() {
+                      suggestions = [];
+                      suggestionsError = 'Orte konnten nicht geladen werden.';
+                    });
+                  } finally {
+                    if (!ctx.mounted) return;
+
+                    setLocalState(() {
+                      isLoadingSuggestions = false;
+                    });
+                  }
+                });
+              }
+
               return ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 520),
                 child: Padding(
@@ -193,7 +298,6 @@ class LocationsListPage extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Header mit Titel + X
                       Row(
                         children: [
                           Expanded(
@@ -204,21 +308,20 @@ class LocationsListPage extends StatelessWidget {
                           ),
                           IconButton(
                             tooltip: "Schließen",
-                            onPressed: () => Navigator.of(dialogCtx).pop(),
+                            onPressed: () {
+                              debounce?.cancel();
+                              Navigator.of(dialogCtx).pop();
+                            },
                             icon: const Icon(Icons.close),
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 12),
-
-                      // Inhalt scrollbar (falls klein)
                       Flexible(
                         child: SingleChildScrollView(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Start / Ende
                               Row(
                                 children: [
                                   Expanded(
@@ -244,24 +347,102 @@ class LocationsListPage extends StatelessWidget {
                                   ),
                                 ],
                               ),
-
                               const SizedBox(height: 16),
 
-                              // Ort
                               TextField(
-                                controller: TextEditingController(
-                                  text: tempPlace,
+                                controller: placeController,
+                                decoration: InputDecoration(
+                                  labelText: "Ort (z.B. Hamburg)",
+                                  border: const OutlineInputBorder(),
+                                  suffixIcon: isLoadingSuggestions
+                                      ? const Padding(
+                                          padding: EdgeInsets.all(12),
+                                          child: SizedBox(
+                                            width: 18,
+                                            height: 18,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                        )
+                                      : placeController.text.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.close),
+                                          onPressed: () {
+                                            setLocalState(() {
+                                              placeController.clear();
+                                              tempPlace = '';
+                                              tempFilterCenter = null;
+                                              suggestions = [];
+                                              suggestionsError = null;
+                                            });
+                                          },
+                                        )
+                                      : null,
                                 ),
-                                decoration: const InputDecoration(
-                                  labelText: "Ort (z.B. Bremen)",
-                                  border: OutlineInputBorder(),
-                                ),
-                                onChanged: (v) => tempPlace = v,
+                                onChanged: (v) {
+                                  setLocalState(() {
+                                    tempPlace = v;
+                                    tempFilterCenter = null;
+                                  });
+                                  loadSuggestions(v);
+                                },
                               ),
 
+                              if (suggestionsError != null) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  suggestionsError!,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ],
+
+                              if (suggestions.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: ListView.separated(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: suggestions.length,
+                                    separatorBuilder: (_, _) =>
+                                        const Divider(height: 1),
+                                    itemBuilder: (context, index) {
+                                      final suggestion = suggestions[index];
+
+                                      return ListTile(
+                                        leading: Icon(
+                                          suggestion.existedPlace
+                                              ? Icons.location_city
+                                              : Icons.public,
+                                        ),
+                                        title: Text(suggestion.name),
+                                        onTap: () {
+                                          setLocalState(() {
+                                            tempPlace = suggestion.name;
+                                            tempFilterCenter =
+                                                suggestion.position;
+                                            placeController.text =
+                                                suggestion.name;
+                                            suggestions = [];
+                                            suggestionsError = null;
+                                          });
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+
                               const SizedBox(height: 16),
 
-                              // Radius
                               Text(
                                 "Radius: ${tempRadius.toStringAsFixed(0)} km",
                               ),
@@ -278,10 +459,7 @@ class LocationsListPage extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 12),
-
-                      // Buttons unten
                       Row(
                         children: [
                           TextButton(
@@ -290,24 +468,33 @@ class LocationsListPage extends StatelessWidget {
                                 tempStart = locationListController.resetStart;
                                 tempEnd = locationListController.resetEnd;
                                 tempPlace = '';
+                                tempFilterCenter = null;
                                 tempRadius = 10;
+                                suggestions = [];
+                                suggestionsError = null;
+                                placeController.clear();
                               });
                             },
                             child: const Text("Zurücksetzen"),
                           ),
                           const Spacer(),
                           ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               locationListController.setFilterSettings(
                                 tempStart,
                                 tempEnd,
                                 tempPlace.trim().isEmpty
                                     ? null
+                                    : tempFilterCenter,
+                                tempPlace.trim().isEmpty
+                                    ? null
                                     : tempPlace.trim(),
                                 tempRadius,
                               );
+
+                              debounce?.cancel();
                               Navigator.of(dialogCtx).pop();
-                              locationListController.reloadLocations();
+                              await locationListController.reloadLocations();
                             },
                             child: const Text("Anwenden"),
                           ),
@@ -329,6 +516,7 @@ class LocationsListPage extends StatelessWidget {
     DateTime? initial,
   }) async {
     final now = DateTime.now();
+
     final date = await showDatePicker(
       context: context,
       initialDate: initial ?? now,
