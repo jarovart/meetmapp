@@ -34,8 +34,14 @@ class _LocationListTabState extends State<LocationListTab> {
       return false;
     }
 
+    final metrics = notification.metrics;
+
+    final isScrollable = metrics.maxScrollExtent > 0;
+    final isNearBottom = metrics.extentAfter < 200;
+
     final shouldLoadMore =
-        notification.metrics.extentAfter < 200 &&
+        isScrollable &&
+        isNearBottom &&
         widget.hasMore &&
         !widget.isLoadingMore &&
         !_loadMoreTriggered;
@@ -49,7 +55,7 @@ class _LocationListTabState extends State<LocationListTab> {
       });
     }
 
-    if (notification.metrics.extentAfter >= 200) {
+    if (metrics.extentAfter >= 200) {
       _loadMoreTriggered = false;
     }
 
