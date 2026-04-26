@@ -5,7 +5,6 @@ import 'package:meetmaap/app/model/response/userbase_response.dart';
 import 'package:meetmaap/app/model/response/userfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
-import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/service/user_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
@@ -18,9 +17,7 @@ class UserProfileController extends ChangeNotifier {
   Debouncer? _debouncer;
   int? _userId;
   UserBaseResponse? _userBaseResponse;
-  bool _requiresLogin = false;
   UserFullResponse? _userData;
-  String? _infoMessage;
   String? _errorMessage;
 
   List<LocationBaseResponse> _createdLocations = [];
@@ -98,9 +95,7 @@ class UserProfileController extends ChangeNotifier {
 
     if (userBaseResponse != null) _userBaseResponse = userBaseResponse;
     _isLoading = true;
-    _infoMessage = null;
     _errorMessage = null;
-    _requiresLogin = false;
     notifyListeners();
 
     try {
@@ -108,7 +103,6 @@ class UserProfileController extends ChangeNotifier {
       final hasUsername = _username != null && _username.isNotEmpty;
       debugPrint("1");
       if (!loggedIn && !hasUsername) {
-        _requiresLogin = true;
         debugPrint("1a");
         return;
       }
@@ -120,7 +114,7 @@ class UserProfileController extends ChangeNotifier {
         debugPrint("3");
 
         debugPrint("$hasUsername + $myUsername + $_username");
-        if (!hasUsername || myUsername == _username) {
+        if (!hasUsername || myUsername == _username || _username == "me") {
           _userData = await AuthService.fetchMyProfile();
           debugPrint("3a");
         }

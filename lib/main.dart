@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetmaap/app/config/app_config.dart';
+import 'package:meetmaap/app/config/route_config.dart';
+import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/controller/editmyprofile_controller.dart';
+import 'package:meetmaap/app/controller/home_controller.dart';
+import 'package:meetmaap/app/controller/locationcreate_controller.dart';
 import 'package:meetmaap/app/controller/locationlist_controller.dart';
+import 'package:meetmaap/app/controller/login_controller.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
 import 'package:meetmaap/app/controller/profile_controller.dart';
 import 'package:meetmaap/app/controller/setting_controller.dart';
@@ -18,13 +24,13 @@ import 'package:meetmaap/app/view/authentication/registercheckemailpage.dart';
 import 'package:meetmaap/app/view/authentication/registerpage.dart';
 import 'package:meetmaap/app/view/authentication/resetpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
+import 'package:meetmaap/app/view/location/locationdetail_page.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 import 'package:meetmaap/app/view/setting/setting_page.dart';
 import 'package:meetmaap/app/view/user/edit_myprofile_page.dart';
 import 'package:meetmaap/app/view/user/userlist_page.dart';
 import 'package:meetmaap/testexample/testshowmodal.dart';
 import 'package:meetmaap/testexample/testslidergps.dart';
-import 'package:meetmaap/app/view/location/locationdetail_page.dart';
 import 'package:meetmaap/app/view/location/locationlist_page.dart';
 import 'package:meetmaap/app/view/location/locationcreate_page.dart';
 import 'package:meetmaap/app/view/user/profile_page.dart';
@@ -34,8 +40,20 @@ import 'package:provider/provider.dart';
 void main() {
   usePathUrlStrategy();
   runApp(
+    //create: (context) =>
+    //          HomeController(authController: context.read<AuthController>()),
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthController()),
+
+        ChangeNotifierProxyProvider<AuthController, HomeController>(
+          create: (context) => HomeController(),
+          update: (_, authController, homeController) {
+            homeController ??= HomeController();
+            homeController.updateMyProfile(authController.myProfile);
+            return homeController;
+          },
+        ),
         ChangeNotifierProvider(
           create: (_) => MapViewController(mapController: MapController()),
         ),
@@ -52,166 +70,221 @@ class MainApplication extends StatelessWidget {
   MainApplication({super.key});
 
   final GoRouter router = GoRouter(
-    //initialLocation:
-    //   Uri.base.path + (Uri.base.hasQuery ? '?${Uri.base.query}' : ''),
     routes: [
-      /// Home (Startseite)
+      // ─────────────────────────────────────────────
+      // HomePage Section
+      // ─────────────────────────────────────────────
       GoRoute(
-        path: '/',
-        builder: (context, state) => const HomePage(),
+        path: RouteConfig.homePageUrl,
+        builder: (context, state) => Consumer2<HomeController, AuthController>(
+          builder: (context, homeController, authController, _) {
+            return HomePage(
+              homeController: homeController,
+              authController: authController,
+            );
+          },
+        ),
+      ),
+
+      GoRoute(
+        path: RouteConfig.mapUrl,
+        builder: (context, state) {
+          final loc = state.extra as LocationFullResponse;
+          return ChangeNotifierProvider<MapViewController>(
+            create: (_) {
+              final c = MapViewController(mapController: MapController());
+              c.selectLocation(loc);
+              return c;
+            },
+            child: MapPage(locationToCheck: loc),
+          );
+        },
+      ),
+
+      // ─────────────────────────────────────────────
+      // Location Section
+      // ─────────────────────────────────────────────
+      GoRoute(
+        path: RouteConfig.locationListUrl,
+        builder: (context, state) => const LocationsListPage(),
+      ),
+
+      GoRoute(
+        path: RouteConfig.locationDetailUrl,
+        builder: (context, state) {
+          final locationbase =
+              state.extra as LocationBaseResponse; // oder LocationBase
+          return LocationDetailPage(locationbase: locationbase);
+        },
+      ),
+
+      GoRoute(
+        path: RouteConfig.locationCreateUrl,
+        redirect: (context, state) async {
+          final authController = context.read<AuthController>();
+          await authController.refreshIfStale();
+
+          if (!authController.isLoggedIn) {
+            debugPrint('Received locationCreate: ${state.uri.toString()}');
+            return RouteConfig.getLoginUrlWithRedirect(state.uri.toString());
+          }
+          return null;
+        },
+        builder: (context, state) {
+          final lat = double.tryParse(state.uri.queryParameters['lat'] ?? '0');
+          final lng = double.tryParse(state.uri.queryParameters['lng'] ?? '0');
+          final geoAddressRaw = state.uri.queryParameters['geoaddress'] ?? '';
+
+          return ChangeNotifierProvider<LocationCreateController>(
+            create: (_) {
+              final c = LocationCreateController(
+                point: LatLng(lat!, lng!),
+                geoAddress: geoAddressRaw,
+              );
+              return c;
+            },
+            child: Consumer2<LocationCreateController, AuthController>(
+              builder: (context, locationCreateController, authController, _) {
+                return LocationCreatePage(
+                  locationCreateController: locationCreateController
+                    ..myProfile = authController.myProfile,
+                  authController: authController,
+                );
+              },
+            ),
+          );
+        },
+      ),
+
+      // ─────────────────────────────────────────────
+      // User Section
+      // ─────────────────────────────────────────────
+      GoRoute(
+        path: RouteConfig.userListUrl,
+        builder: (context, state) => const UserListPage(),
+      ),
+
+      GoRoute(
+        path: RouteConfig.profileUrl,
+        builder: (context, state) {
+          final username = state.pathParameters['username'];
+          final userBaseResponse = state.extra as UserBaseResponse?;
+
+          return ChangeNotifierProvider(
+            create: (_) =>
+                UserProfileController(username)..load(userBaseResponse),
+            child: const UserProfilePage(),
+          );
+        },
         routes: [
-          /// Location Listen-Seite
           GoRoute(
-            path: '/locationlist',
-            builder: (context, state) => const LocationsListPage(),
-          ),
-
-          /// Location-Seite
-          GoRoute(
-            path: '/locationdetail',
-            builder: (context, state) {
-              final locationbase =
-                  state.extra as LocationBaseResponse; // oder LocationBase
-              return LocationDetailPage(locationbase: locationbase);
-            },
-          ),
-
-          GoRoute(
-            path: '/map',
-            builder: (context, state) {
-              final loc = state.extra as LocationFullResponse;
-              return ChangeNotifierProvider<MapViewController>(
-                create: (_) {
-                  final c = MapViewController(mapController: MapController());
-                  c.selectLocation(loc);
-                  return c;
-                },
-                child: MapPage(null, locationToCheck: loc),
-              );
-            },
-          ),
-
-          /// Location-Seite mit Parameter
-          GoRoute(
-            path: '/locationcreate',
-            builder: (context, state) {
-              final data = state.extra! as Map<String, dynamic>;
-              return LocationCreatePage(
-                point: LatLng(data['lat'], data['lng']),
-                geoAddress: data['geoAddress'],
-              );
-            },
-          ),
-          GoRoute(
-            path: 'profile/:username',
+            path: RouteConfig.profileEditUrl,
             builder: (context, state) {
               final username = state.pathParameters['username'];
-              final userBaseResponse = state.extra as UserBaseResponse?;
-
               return ChangeNotifierProvider(
-                create: (_) =>
-                    UserProfileController(username)..load(userBaseResponse),
-                child: const UserProfilePage(),
+                create: (_) => EditMyProfileController(username)..load(),
+                child: EditMyProfilePage(),
               );
-            },
-            routes: [
-              GoRoute(
-                path: 'edit',
-                builder: (context, state) {
-                  final username = state.pathParameters['username'];
-                  return ChangeNotifierProvider(
-                    create: (_) => EditMyProfileController(username)..load(),
-                    child: EditMyProfilePage(),
-                  );
-                },
-              ),
-            ],
-          ),
-          GoRoute(
-            path: '/login',
-            builder: (context, state) {
-              final returnOnSuccess = state.extra as bool? ?? true;
-              return LoginPage(returnOnSuccess: returnOnSuccess);
-            },
-          ),
-          GoRoute(
-            path: '/registerpage',
-            builder: (context, state) {
-              return RegisterPage();
-            },
-          ),
-          GoRoute(
-            path: '/registercheckemail',
-            builder: (context, state) {
-              final email = state.extra as String;
-              return RegisterCheckEmailPage(email: email);
-            },
-          ),
-          GoRoute(
-            path: '/verifyemail',
-            builder: (context, state) {
-              final token = state.uri.queryParameters['token'];
-
-              if (token == null || token.isEmpty) {
-                return const Scaffold(
-                  body: Center(child: Text('Ungültiger Verifizierungslink')),
-                );
-              }
-
-              return VerifyPage(token: token);
-            },
-          ),
-          GoRoute(
-            path: '/forgot-password',
-            builder: (context, state) => const ForgotPasswordPage(),
-          ),
-          GoRoute(
-            path: 'reset-password',
-            builder: (context, state) {
-              final token = state.uri.queryParameters['token'];
-              if (token == null || token.isEmpty) {
-                return const Scaffold(
-                  body: Center(child: Text('Ungültiger Link')),
-                );
-              }
-              return ResetPasswordPage(token: token);
-            },
-          ),
-          GoRoute(
-            path: '/settingspage',
-            builder: (context, state) => const SettingsPage(),
-          ),
-
-          /// User Listen-Seite
-          GoRoute(
-            path: '/userlist',
-            builder: (context, state) => const UserListPage(),
-          ),
-
-          /*GoRoute( TODO: check if needed. new userprofilepage
-          path: '/userdetail',
-          builder: (context, state) {
-            final userBase = state.extra as UserBaseResponse;
-            return UserDetailPage(userBase: userBase);
-          },
-        ),*/
-
-          /// Test ShowModal-Seite
-          GoRoute(
-            path: '/test-showmodal',
-            builder: (context, state) {
-              return TestShowModal();
-            },
-          ),
-
-          /// Test Slider/GPS-Seite
-          GoRoute(
-            path: '/test-slidergps',
-            builder: (context, state) {
-              return TestSliderGps();
             },
           ),
         ],
+      ),
+
+      // ─────────────────────────────────────────────
+      // Authentication Section
+      // ─────────────────────────────────────────────
+      GoRoute(
+        path: RouteConfig.loginUrl,
+        builder: (context, state) {
+          final redirectionUrl = state.uri.queryParameters['redirect'];
+
+          return ChangeNotifierProxyProvider<AuthController, LoginController>(
+            create: (_) => LoginController(),
+            update: (_, authController, loginController) {
+              loginController ??= LoginController();
+              loginController.updateMyProfile(authController.myProfile);
+              return loginController;
+            },
+            child: Consumer2<LoginController, AuthController>(
+              builder: (context, loginController, authController, _) {
+                return LoginPage(
+                  redirectionUrl: redirectionUrl,
+                  loginController: loginController,
+                  authController: authController,
+                );
+              },
+            ),
+          );
+        },
+      ),
+
+      GoRoute(
+        path: RouteConfig.registerUrl,
+        builder: (context, state) {
+          return RegisterPage();
+        },
+      ),
+      GoRoute(
+        path: RouteConfig.sendRegisterEmailUrl,
+        builder: (context, state) {
+          final email = state.extra as String;
+          return RegisterCheckEmailPage(email: email);
+        },
+      ),
+      GoRoute(
+        path: RouteConfig.verifyRegisterEmailUrl,
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'];
+
+          if (token == null || token.isEmpty) {
+            return const Scaffold(
+              body: Center(child: Text('Ungültiger Verifizierungslink')),
+            );
+          }
+
+          return VerifyPage(token: token);
+        },
+      ),
+
+      GoRoute(
+        path: RouteConfig.forgotPasswordUrl,
+        builder: (context, state) => const ForgotPasswordPage(),
+      ),
+
+      GoRoute(
+        path: RouteConfig.resetPasswordUrl,
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'];
+          if (token == null || token.isEmpty) {
+            return const Scaffold(body: Center(child: Text('Ungültiger Link')));
+          }
+          return ResetPasswordPage(token: token);
+        },
+      ),
+
+      // ─────────────────────────────────────────────
+      // Settings Section
+      // ─────────────────────────────────────────────
+      GoRoute(
+        path: RouteConfig.settingsUrl,
+        builder: (context, state) => const SettingsPage(),
+      ),
+
+      // ─────────────────────────────────────────────
+      // Testing Section
+      // ─────────────────────────────────────────────
+      GoRoute(
+        path: RouteConfig.testShowModalUrl,
+        builder: (context, state) {
+          return TestShowModal();
+        },
+      ),
+
+      GoRoute(
+        path: RouteConfig.testSliderGps,
+        builder: (context, state) {
+          return TestSliderGps();
+        },
       ),
     ],
   );
@@ -219,7 +292,7 @@ class MainApplication extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Meetmapp',
+      title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.green),
       routerConfig: router,

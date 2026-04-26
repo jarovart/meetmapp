@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/debouncer.dart';
 import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
@@ -111,6 +113,12 @@ class MapViewController extends ChangeNotifier {
     _searchErrorMessage = null;
     _isSearchLoading = false;
     notifyListeners();
+  }
+
+  void updateMyProfile(UserMyProfileResponse? profile) {
+    debugPrint("funktioniert");
+    /*  _myProfile = profile;
+    notifyListeners();*/
   }
 
   // ─────────────────────────────────────────────
@@ -351,11 +359,7 @@ class MapViewController extends ChangeNotifier {
   // REDIRECT CALL BEHAVIOR
   // ─────────────────────────────────────────────
 
-  void createLocation(
-    BuildContext context,
-    LatLng tapPosition,
-    Future<void> Function()? refreshAuth,
-  ) async {
+  void createLocation(BuildContext context, LatLng tapPosition) async {
     final router = GoRouter.of(context);
 
     final geoAddress = await LocationService.reverseGeocodeOSM(
@@ -364,18 +368,16 @@ class MapViewController extends ChangeNotifier {
     );
 
     final createdLocation = await router.push<LocationBaseResponse>(
-      "/locationcreate",
-      extra: {
-        'lat': tapPosition.latitude,
-        'lng': tapPosition.longitude,
-        'geoAddress': geoAddress,
-      },
+      RouteConfig.getLocationCreateUrl(
+        lat: tapPosition.latitude,
+        lng: tapPosition.longitude,
+        geoAddress: geoAddress,
+      ),
     );
 
     if (createdLocation != null) {
       _locations.add(createdLocation);
       _selectedLocation = createdLocation;
-      await refreshAuth?.call();
       notifyListeners();
       mapController.move(createdLocation.position, mapController.camera.zoom);
     }

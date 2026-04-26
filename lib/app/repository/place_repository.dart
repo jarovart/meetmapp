@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:meetmaap/app/config/api_config.dart';
 import 'package:meetmaap/app/model/response/place_response.dart';

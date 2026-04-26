@@ -1,70 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetmaap/app/config/app_config.dart';
+import 'package:meetmaap/app/config/route_config.dart';
+import 'package:meetmaap/app/controller/auth_controller.dart';
+import 'package:meetmaap/app/controller/home_controller.dart';
 import 'package:meetmaap/app/model/exception/exception_message.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomePage extends StatelessWidget {
+  final HomeController homeController;
+  final AuthController authController;
 
-  @override
-  State<HomePage> createState() => HomePageState();
-}
-
-class HomePageState extends State<HomePage> {
-  bool _loggedIn = false;
-  bool _isMenuOpen = false;
-  static const double _menuWidth = 260;
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshAuth();
-  }
+  const HomePage({
+    super.key,
+    required this.homeController,
+    required this.authController,
+  });
 
   @override
   Widget build(BuildContext context) {
+    authController.refreshIfStale();
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(context),
       body: Stack(
         children: [
-          MapPage(() async => await _refreshAuth()),
-          if (_isMenuOpen) _buildMenuScrim(),
+          MapPage(),
+          if (homeController.isMenuOpen) _buildMenuScrim(),
           _buildSlidingMenu(),
         ],
       ),
     );
   }
 
-  /// ---------- UI-Aufteilung ----------
-
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text("Meetmapp"),
+      title: const Text(AppConfig.appName),
       leading: IconButton(
-        icon: Icon(_isMenuOpen ? Icons.close : Icons.menu),
-        onPressed: _toggleMenu,
+        icon: Icon(homeController.isMenuOpen ? Icons.close : Icons.menu),
+        onPressed: homeController.toggleMenu,
       ),
-      actions: [_buildProfileAvatar()],
+      actions: [_buildProfileAvatar(context)],
     );
   }
 
-  void _toggleMenu() {
-    setState(() => _isMenuOpen = !_isMenuOpen);
-  }
-
   Widget _buildSlidingMenu() {
+    final loggedIn = homeController.loggedIn;
     final items = [
-      if (!_loggedIn) "Login",
+      if (!loggedIn) "Login",
       "Locations",
-      if (_loggedIn) "Benutzer",
+      if (loggedIn) "Benutzer",
       "Freunde",
       "Favoriten",
       "Test-ShowModal",
       "Test-SliderGPS",
       "Einstellungen",
-      if (_loggedIn) "Logout",
+      if (loggedIn) "Logout",
     ];
 
     return _buildMenuWithItems(items);
@@ -76,8 +66,8 @@ class HomePageState extends State<HomePage> {
       curve: Curves.easeInOut,
       top: 0,
       bottom: 0,
-      left: _isMenuOpen ? 0 : -_menuWidth,
-      width: _menuWidth,
+      left: homeController.isMenuOpen ? 0 : -HomeController.menuWidth,
+      width: HomeController.menuWidth,
       child: Material(
         elevation: 8,
         color: Colors.white,
@@ -104,34 +94,32 @@ class HomePageState extends State<HomePage> {
                       onTap: () async {
                         // handle navigation for special entries
                         if (label == 'Login') {
-                          _toggleMenu();
-                          await context.push('/login', extra: false);
-                          _refreshAuth();
+                          homeController.toggleMenu();
+                          await context.push(RouteConfig.loginUrl);
                           return;
                         } else if (label == 'Locations') {
-                          _toggleMenu();
-                          context.push('/locationlist');
+                          homeController.toggleMenu();
+                          context.push(RouteConfig.locationListUrl);
                           return;
                         } else if (label == 'Benutzer') {
-                          _toggleMenu();
-                          context.push('/userlist');
+                          homeController.toggleMenu();
+                          context.push(RouteConfig.userListUrl);
                           return;
                         } else if (label == "Test-ShowModal") {
-                          _toggleMenu();
-                          context.push('/test-showmodal');
+                          homeController.toggleMenu();
+                          context.push(RouteConfig.testShowModalUrl);
                           return;
                         } else if (label == "Test-SliderGPS") {
-                          _toggleMenu();
-                          context.push('/test-slidergps');
+                          homeController.toggleMenu();
+                          context.push(RouteConfig.testSliderGps);
                           return;
                         } else if (label == "Einstellungen") {
-                          _toggleMenu();
-                          context.push('/settingspage');
+                          homeController.toggleMenu();
+                          context.push(RouteConfig.settingsUrl);
                           return;
                         } else if (label == "Logout") {
-                          _toggleMenu();
-                          AuthService.logout();
-                          _refreshAuth();
+                          homeController.toggleMenu();
+                          authController.logout();
                           return;
                         }
                         ExceptionMessage.showError(
@@ -152,16 +140,18 @@ class HomePageState extends State<HomePage> {
 
   Widget _buildMenuScrim() {
     return Positioned.fill(
-      left: _menuWidth,
+      left: HomeController.menuWidth,
       child: GestureDetector(
-        onTap: _toggleMenu,
+        onTap: homeController.toggleMenu,
         child: Container(color: Colors.black26),
       ),
     );
   }
 
-  Widget _buildProfileAvatar() {
-    if (!_loggedIn) {
+  Widget _buildProfileAvatar(BuildContext context) {
+    final myProfile = authController.myProfile;
+
+    if (!homeController.loggedIn) {
       return Padding(
         padding: const EdgeInsets.only(right: 12.0),
         child: OutlinedButton.icon(
@@ -170,67 +160,37 @@ class HomePageState extends State<HomePage> {
         ),
       );
     }
-    return FutureBuilder<UserMyProfileResponse?>(
-      future: AuthService.getMyUserProfile(),
-      builder: (context, snapshot) {
-        final myProfile = snapshot.data;
-        final initials = myProfile?.getInitials ?? "MM";
-
-        return GestureDetector(
-          onTap: () async => _navigateToProfile(context),
-          child: Padding(
-            padding: EdgeInsets.only(right: 12.0),
-            child: CircleAvatar(
-              radius: 25,
-              backgroundImage:
-                  myProfile?.profileImage != null &&
-                      myProfile!.profileImage!.imageUrl.isNotEmpty
-                  ? NetworkImage(myProfile.profileImage!.imageUrl)
-                  : null,
-              child:
-                  (myProfile?.profileImage?.imageUrl == null ||
-                      myProfile!.profileImage!.imageUrl.isEmpty)
-                  ? Text(initials, style: const TextStyle(fontSize: 24))
-                  : null,
-            ),
-          ),
-        );
-      },
+    final initials = myProfile?.getInitials ?? "MM";
+    return GestureDetector(
+      onTap: () async => _navigateToProfile(context),
+      child: Padding(
+        padding: EdgeInsets.only(right: 12.0),
+        child: CircleAvatar(
+          radius: 25,
+          backgroundImage:
+              myProfile?.profileImage != null &&
+                  myProfile!.profileImage!.imageUrl.isNotEmpty
+              ? NetworkImage(myProfile.profileImage!.imageUrl)
+              : null,
+          child:
+              (myProfile?.profileImage?.imageUrl == null ||
+                  myProfile!.profileImage!.imageUrl.isEmpty)
+              ? Text(initials, style: const TextStyle(fontSize: 24))
+              : null,
+        ),
+      ),
     );
   }
 
-  Future<void> _refreshAuth() async {
-    final loggedIn = await AuthService.isLoggedIn();
-    debugPrint("refreshAuth");
-    setState(() => _loggedIn = loggedIn);
-  }
-
   void _navigateToProfile(BuildContext context) async {
-    var loggedIn = await AuthService.isLoggedIn();
+    authController.refreshIfStale();
 
-    if (!context.mounted) return;
-
-    if (!loggedIn) {
-      final loginOk = await context.push<bool>('/login', extra: true);
-      debugPrint("loginOk");
-      if (!context.mounted) return;
-
-      if (loginOk != true) {
-        await _refreshAuth();
-        return;
-      }
+    if (homeController.loggedIn) {
+      context.push(RouteConfig.myProfileUrl, extra: homeController.myProfile);
+    } else {
+      context.push(
+        RouteConfig.getLoginUrlWithRedirect(RouteConfig.myProfileUrl),
+      );
     }
-
-    final username = await AuthService.getUsername();
-    final myProfile = await AuthService.getMyUserProfile();
-
-    if (!context.mounted || username == null) {
-      await _refreshAuth();
-      return;
-    }
-
-    await context.push('/profile/$username', extra: myProfile);
-
-    await _refreshAuth();
   }
 }

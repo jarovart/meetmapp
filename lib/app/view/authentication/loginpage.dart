@@ -1,119 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/service/authentication_service.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:meetmaap/app/config/route_config.dart';
+import 'package:meetmaap/app/controller/auth_controller.dart';
+import 'package:meetmaap/app/controller/login_controller.dart';
 
-class LoginPage extends StatefulWidget {
-  final bool returnOnSuccess;
-  const LoginPage({super.key, this.returnOnSuccess = true});
+class LoginPage extends StatelessWidget {
+  final String? redirectionUrl;
+  final LoginController loginController;
+  final AuthController authController;
 
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final _userCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
-  bool? _loggedIn;
-  String? _username;
-  bool _loading = false;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadAuthState();
-  }
-
-  @override
-  void dispose() {
-    _userCtrl.dispose();
-    _passCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-
-    try {
-      await AuthService.login(
-        username: _userCtrl.text.trim(),
-        password: _passCtrl.text,
-      );
-      final name = await AuthService.getUsername();
-      final myProfile = await AuthService.getMyUserProfile();
-      final username = myProfile!.username;
-      debugPrint('Logged in as $name');
-      if (!mounted) return;
-      setState(() {
-        _loggedIn = true;
-        _username = name;
-      });
-      TextInput.finishAutofillContext();
-      if (widget.returnOnSuccess) context.pop(true);
-      //context.push('/profile/$username', extra: myProfile);
-      //context.pop(true);
-    } catch (e, st) {
-      debugPrint('Error while login: $e');
-      debugPrintStack(stackTrace: st);
-
-      setState(
-        () => _error = AppErrorMapper.toUserMessage(
-          e,
-          fallback: 'Fehler beim Einloggen.',
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _submitLogout() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-
-    try {
-      await AuthService.logout();
-    } catch (e, st) {
-      debugPrint('Error while log out profile: $e');
-      debugPrintStack(stackTrace: st);
-
-      setState(
-        () => _error = AppErrorMapper.toUserMessage(
-          e,
-          fallback: 'Fehler beim Ausloggen des Profils.',
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _loggedIn = false;
-          _username = null;
-        });
-      }
-    }
-  }
-
-  Future<void> _loadAuthState() async {
-    final loggedIn = await AuthService.isLoggedIn();
-    final username = loggedIn ? await AuthService.getUsername() : null;
-    if (!mounted) return;
-    setState(() {
-      _loggedIn = loggedIn;
-      _username = username;
-    });
-  }
+  LoginPage({
+    super.key,
+    required this.loginController,
+    required this.authController,
+    this.redirectionUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (_loggedIn == null) {
+    if (loginController.loading) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -127,7 +32,9 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: _loggedIn! ? logoutWidgets() : loginWidgets(),
+                children: loginController.loggedIn
+                    ? logoutWidgets(context)
+                    : loginWidgets(context),
               ),
             ),
           ),
@@ -136,17 +43,19 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  List<Widget> logoutWidgets() {
+  List<Widget> logoutWidgets(BuildContext context) {
     return [
       Text('Logout', style: Theme.of(context).textTheme.headlineMedium),
       const SizedBox(height: 16),
-      Text('Eingeloggt als $_username'),
+      Text('Eingeloggt als ${loginController.myUserName}'),
       const SizedBox(height: 12),
       SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: _loading ? null : _submitLogout,
-          child: _loading
+          onPressed: loginController.loading
+              ? null
+              : () => loginController.submitLogout(authController),
+          child: loginController.loading
               ? const SizedBox(
                   height: 18,
                   width: 18,
@@ -158,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
     ];
   }
 
-  List<Widget> loginWidgets() {
+  List<Widget> loginWidgets(BuildContext context) {
     return [
       Text('Login', style: Theme.of(context).textTheme.headlineMedium),
       const SizedBox(height: 16),
@@ -167,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           children: [
             TextField(
-              controller: _userCtrl,
+              controller: loginController.userCtrl,
               decoration: const InputDecoration(labelText: 'Username'),
               autofillHints: const [AutofillHints.username],
               textInputAction: TextInputAction.next,
@@ -175,33 +84,36 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 12),
 
             TextField(
-              controller: _passCtrl,
+              controller: loginController.passCtrl,
               decoration: const InputDecoration(labelText: 'Passwort'),
               autofillHints: const [AutofillHints.password],
               obscureText: true,
-              onSubmitted: (_) => _submit(),
+              onSubmitted: (_) => _submit(context),
             ),
           ],
         ),
       ),
 
       TextButton(
-        onPressed: () => context.push('/forgot-password'),
+        onPressed: () => context.push(RouteConfig.forgotPasswordUrl),
         child: const Text('Passwort vergessen?'),
       ),
 
       const SizedBox(height: 16),
-      if (_error != null)
+      if (loginController.hasErrors)
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: Text(_error!, style: const TextStyle(color: Colors.red)),
+          child: Text(
+            loginController.errorMessage,
+            style: const TextStyle(color: Colors.red),
+          ),
         ),
 
       SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: _loading ? null : _submit,
-          child: _loading
+          onPressed: loginController.loading ? null : () => _submit(context),
+          child: loginController.loading
               ? const SizedBox(
                   height: 18,
                   width: 18,
@@ -217,12 +129,28 @@ class _LoginPageState extends State<LoginPage> {
           Text("Noch keinen Account?"),
           TextButton(
             onPressed: () {
-              context.push('/registerpage');
+              context.push(RouteConfig.registerUrl);
             },
             child: const Text('Registrieren'),
           ),
         ],
       ),
     ];
+  }
+
+  void _submit(BuildContext context) async {
+    debugPrint("Redirection URL: $redirectionUrl");
+
+    await loginController.submit(authController);
+
+    if (!context.mounted) return;
+    if (loginController.hasErrors) return;
+    if (redirectionUrl == null) {
+      context.pop(true);
+      return;
+    }
+
+    final returnedValue = await context.push(redirectionUrl!);
+    if (context.mounted) context.pop(returnedValue);
   }
 }

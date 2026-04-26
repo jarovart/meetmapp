@@ -98,9 +98,9 @@ class _UserDetailPageState extends State<UserDetailPage> {
                             user.username,
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
-                          if ((user.firstName?.isNotEmpty ?? false))
+                          if ((user.firstName.isNotEmpty))
                             Text(
-                              user.firstName!,
+                              user.firstName,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                         ],
@@ -110,13 +110,13 @@ class _UserDetailPageState extends State<UserDetailPage> {
                 ),
                 const SizedBox(height: 16),
 
-                if ((user.aboutMe?.isNotEmpty ?? false)) ...[
+                if ((user.aboutMe.isNotEmpty)) ...[
                   Text(
                     "Über mich",
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 6),
-                  Text(user.aboutMe!),
+                  Text(user.aboutMe),
                   const SizedBox(height: 16),
                 ],
 

@@ -1,174 +1,23 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/model/response/image_response.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
-import 'package:meetmaap/app/service/image_service.dart';
-import 'package:meetmaap/app/service/location_service.dart';
+import 'package:meetmaap/app/controller/auth_controller.dart';
+import 'package:meetmaap/app/controller/locationcreate_controller.dart';
 import 'package:meetmaap/app/model/exception/exception_message.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/app/model/request/createlocation_request.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as img;
 
-class LocationCreatePage extends StatefulWidget {
-  final LatLng point;
-  final String? geoAddress;
+class LocationCreatePage extends StatelessWidget {
+  final LocationCreateController locationCreateController;
+  final AuthController authController;
 
-  const LocationCreatePage({super.key, required this.point, this.geoAddress});
-
-  @override
-  State<LocationCreatePage> createState() => _LocationCreatePageState();
-}
-
-class _LocationCreatePageState extends State<LocationCreatePage> {
-  final _formKey = GlobalKey<FormState>();
-  bool _checkingAuth = true;
-
-  // Controllers
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController addressController = TextEditingController();
-  final TextEditingController thumbnailController = TextEditingController();
-  final TextEditingController imageController = TextEditingController();
-  final TextEditingController userController = TextEditingController();
-  final picker = ImagePicker();
-  final List<Uint8List> _images = [];
-  bool _uploading = false;
-  DateTime? selectedStartDateTime;
-  DateTime? selectedEndDateTime;
-  String? _userName;
-  String? _initialAddress;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkAuth();
-    _initialAddress = widget.geoAddress ?? '';
-    addressController.text = _initialAddress!;
-  }
-
-  Future<void> _checkAuth() async {
-    final loggedIn = await AuthRepository.isLoggedIn();
-
-    if (!mounted) return;
-
-    if (!loggedIn) {
-      final ok = await context.push<bool>('/login');
-
-      if (ok != true) {
-        // User hat Login abgebrochen → Seite schließen
-        if (mounted) context.pop();
-        return;
-      }
-    }
-    final userName = await AuthRepository.getUsername();
-    // User ist jetzt sicher eingeloggt
-    setState(() => _checkingAuth = false);
-    setState(() => _userName = userName);
-  }
-
-  // DATE PICKER
-  Future<void> _pickDateTime({
-    required DateTime? initial,
-    required ValueChanged<DateTime> onSelected,
-  }) async {
-    final now = DateTime.now();
-    final date = await showDatePicker(
-      context: context,
-      initialDate: initial ?? now,
-      firstDate: DateTime(now.year - 2),
-      lastDate: DateTime(now.year + 5),
-    );
-
-    if (date == null || !mounted) return;
-
-    // 2️⃣ Uhrzeit wählen
-    final time = await showTimePicker(
-      context: context,
-      initialTime: initial != null
-          ? TimeOfDay.fromDateTime(initial)
-          : TimeOfDay.fromDateTime(now),
-    );
-
-    if (time == null) return;
-    onSelected(
-      DateTime(date.year, date.month, date.day, time.hour, time.minute),
-    );
-  }
-
-  // SAVE LOCATION
-  void _save() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (selectedStartDateTime == null ||
-        selectedEndDateTime == null ||
-        selectedEndDateTime!.isBefore(selectedStartDateTime!)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Bitte ein Start- und ein Enddatum auswählen und Enddatum darf nicht vor Startdatum sein.",
-          ),
-        ),
-      );
-      return;
-    }
-
-    setState(() => _uploading = true);
-    // Rückgabe an vorherige Seite
-    try {
-      // 👇 HIER erstellst du das Objekt (LocationFull)
-      final createdLocation = CreateLocationRequest(
-        title: titleController.text.trim(),
-        description: descriptionController.text.trim(),
-        address: addressController.text.trim(),
-        creationDateTime: DateTime.now(),
-        startDateTime: selectedStartDateTime!,
-        endDateTime: selectedEndDateTime!,
-        position: LatLng(widget.point.latitude, widget.point.longitude),
-        createdUsername: _userName!,
-      );
-
-      LocationBaseResponse locationBase = await LocationService.uploadLocation(
-        createdLocation,
-      );
-
-      List<ImageResponse> imageResponses = [];
-
-      if (_images.isNotEmpty) {
-        imageResponses = await ImageService.uploadImages(
-          _images.toList(),
-          locationBase.id,
-        );
-        ImageResponse thumbnail = imageResponses.first;
-        locationBase = await ImageService.patchLocationThumbnail(
-          locationBase.id,
-          thumbnail.id,
-        );
-      }
-
-      if (!mounted) return;
-      context.pop(locationBase);
-    } catch (e) {
-      debugPrint("Fehler beim Hochladen der Location: $e");
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Fehler beim Hochladen der Location: $e")),
-      );
-    } finally {
-      if (mounted) setState(() => _uploading = false);
-    }
-  }
+  const LocationCreatePage({
+    super.key,
+    required this.locationCreateController,
+    required this.authController,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (_checkingAuth) {
+    if (!locationCreateController.loggedIn) {
       return Scaffold(
         appBar: AppBar(title: const Text("Location erstellen")),
         body: Center(child: CircularProgressIndicator()),
@@ -178,19 +27,23 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
     return Stack(
       children: [
         Scaffold(
-          appBar: AppBar(title: Text("Location erstellen als $_userName")),
+          appBar: AppBar(
+            title: Text(
+              "Location erstellen als ${locationCreateController.myProfile!.username}",
+            ),
+          ),
 
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Form(
-              key: _formKey,
+              key: locationCreateController.formKey,
 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // --- TITLE ---
                   TextFormField(
-                    controller: titleController,
+                    controller: locationCreateController.titleController,
                     decoration: const InputDecoration(
                       labelText: "Titel eingeben",
                       border: OutlineInputBorder(),
@@ -203,7 +56,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
 
                   // --- DESCRIPTION ---
                   TextFormField(
-                    controller: descriptionController,
+                    controller: locationCreateController.descriptionController,
                     decoration: const InputDecoration(
                       labelText: "Beschreibung eingeben",
                       border: OutlineInputBorder(),
@@ -215,16 +68,16 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
 
                   // --- ADDRESS ---
                   TextFormField(
-                    controller: addressController,
+                    controller: locationCreateController.addressController,
                     decoration: InputDecoration(
                       labelText: "Adresse eingeben",
                       border: OutlineInputBorder(),
                       suffixIcon: IconButton(
                         tooltip: "Adresse zurücksetzen",
                         icon: const Icon(Icons.undo),
-                        onPressed: () {
-                          addressController.text = _initialAddress!;
-                        },
+                        onPressed: () =>
+                            locationCreateController.addressController.text =
+                                locationCreateController.initialAddress!,
                       ),
                     ),
                     validator: (v) =>
@@ -237,18 +90,22 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                     children: [
                       Expanded(
                         child: Text(
-                          selectedStartDateTime == null
+                          locationCreateController.selectedStartDateTime == null
                               ? "Kein Startdatum gewählt"
-                              : "Datum: ${selectedStartDateTime!.day}.${selectedStartDateTime!.month}.${selectedStartDateTime!.year} ${selectedStartDateTime!.hour}:${selectedStartDateTime!.minute}",
+                              : locationCreateController.getDatumAsString(
+                                  locationCreateController
+                                      .selectedStartDateTime!,
+                                ),
                           style: const TextStyle(fontSize: 16),
                         ),
                       ),
                       ElevatedButton(
                         onPressed: () => _pickDateTime(
-                          initial: selectedStartDateTime,
-                          onSelected: (dt) {
-                            setState(() => selectedStartDateTime = dt);
-                          },
+                          locationCreateController.selectedStartDateTime,
+                          (dt) =>
+                              locationCreateController.selectedStartDateTime =
+                                  dt,
+                          context,
                         ),
                         child: const Text("Startdatum wählen"),
                       ),
@@ -261,18 +118,20 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                     children: [
                       Expanded(
                         child: Text(
-                          selectedEndDateTime == null
+                          locationCreateController.selectedEndDateTime == null
                               ? "Kein Enddatum gewählt"
-                              : "Datum: ${selectedEndDateTime!.day}.${selectedEndDateTime!.month}.${selectedEndDateTime!.year} ${selectedEndDateTime!.hour}:${selectedEndDateTime!.minute}",
+                              : locationCreateController.getDatumAsString(
+                                  locationCreateController.selectedEndDateTime!,
+                                ),
                           style: const TextStyle(fontSize: 16),
                         ),
                       ),
                       ElevatedButton(
                         onPressed: () => _pickDateTime(
-                          initial: selectedEndDateTime,
-                          onSelected: (dt) {
-                            setState(() => selectedEndDateTime = dt);
-                          },
+                          locationCreateController.selectedEndDateTime,
+                          (dt) =>
+                              locationCreateController.selectedEndDateTime = dt,
+                          context,
                         ),
                         child: const Text("Enddatum wählen"),
                       ),
@@ -280,6 +139,13 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                   ),
                   const SizedBox(height: 16),
 
+                  if (locationCreateController.hasError)
+                    Center(
+                      child: Text(
+                        locationCreateController.error,
+                        style: const TextStyle(color: Colors.red, fontSize: 16),
+                      ),
+                    ),
                   // --- IMAGE URL ---
                   const SizedBox(height: 16),
                   Text(
@@ -291,15 +157,15 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                   ReorderableListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _images.length,
-                    onReorder: _reorderImages,
+                    itemCount: locationCreateController.images.length,
+                    onReorder: locationCreateController.reorderImages,
                     itemBuilder: (context, index) {
                       return Card(
-                        key: ValueKey(_images[index]),
+                        key: ValueKey(locationCreateController.images[index]),
                         child: ListTile(
                           onTap: () => "",
                           leading: Image.memory(
-                            _images[index],
+                            locationCreateController.images[index],
                             height: 80,
                             fit: BoxFit.cover,
                           ),
@@ -307,9 +173,8 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                           subtitle: index == 0 ? Text("Thumbnail") : null,
                           trailing: IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              setState(() => _images.removeAt(index));
-                            },
+                            onPressed: () =>
+                                locationCreateController.removeImage(index),
                           ),
                         ),
                       );
@@ -319,7 +184,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                   const SizedBox(height: 8),
 
                   OutlinedButton.icon(
-                    onPressed: _addImage,
+                    onPressed: locationCreateController.addImage,
                     icon: const Icon(Icons.add_a_photo),
                     label: const Text("Bild hinzufügen"),
                   ),
@@ -330,8 +195,8 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                     onTap: () {
                       Clipboard.setData(
                         ClipboardData(
-                          text:
-                              "${widget.point.latitude}, ${widget.point.longitude}",
+                          text: locationCreateController
+                              .getPositionForCopyClipboard(),
                         ),
                       );
                       ExceptionMessage.showInfo(
@@ -346,7 +211,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        "Position:\nLatitude: ${widget.point.latitude}\nLongitude: ${widget.point.longitude}",
+                        locationCreateController.getPositionAsString(),
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
@@ -357,7 +222,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _save,
+                      onPressed: () => save(context),
                       child: const Text("Location speichern"),
                     ),
                   ),
@@ -367,7 +232,7 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
           ),
         ),
         // 🔥 Overlay Loading Layer
-        if (_uploading)
+        if (locationCreateController.uploading)
           Positioned.fill(
             child: AbsorbPointer(
               absorbing: true,
@@ -397,80 +262,41 @@ class _LocationCreatePageState extends State<LocationCreatePage> {
     );
   }
 
-  void _reorderImages(int oldIndex, int newIndex) {
-    setState(() {
-      if (newIndex > oldIndex) newIndex--;
-      final img = _images.removeAt(oldIndex);
-      _images.insert(newIndex, img);
-    });
-  }
-
-  Future<void> _addImage() async {
-    final picked = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 100,
+  // DATE PICKER artem end
+  Future<void> _pickDateTime(
+    DateTime? initialDate,
+    ValueChanged<DateTime> onSelected,
+    BuildContext context,
+  ) async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: initialDate ?? now,
+      firstDate: DateTime(now.year - 2),
+      lastDate: DateTime(now.year + 5),
     );
 
-    if (picked == null) return;
+    if (date == null || !context.mounted) return;
 
-    setState(() => _uploading = true);
-    try {
-      //final original = File(picked.path);
-      //final compressed = await compressImage(original);
-      final bytes = await picked.readAsBytes();
-      final compressed = await compute(_compressImage, bytes);
+    // 2️⃣ Uhrzeit wählen
+    final time = await showTimePicker(
+      context: context,
+      initialTime: initialDate != null
+          ? TimeOfDay.fromDateTime(initialDate)
+          : TimeOfDay.fromDateTime(now),
+    );
 
-      if (!mounted) return;
-      setState(() => _images.add(compressed));
-    } catch (e) {
-      debugPrint("Add image failed: $e");
-    } finally {
-      if (mounted) setState(() => _uploading = false);
+    if (time == null) return;
+    onSelected(
+      DateTime(date.year, date.month, date.day, time.hour, time.minute),
+    );
+  }
+
+  void save(BuildContext context) async {
+    final saved = await locationCreateController.saveLocation();
+    if (saved) {
+      final locationBase = locationCreateController.locationBase!;
+      if (context.mounted) context.pop(locationBase);
     }
-  }
-
-  Future<File?> pickImage() async {
-    final picked = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 100, // wir komprimieren selbst
-    );
-
-    if (picked == null) return null;
-    return File(picked.path);
-  }
-
-  Future<XFile> compressImage(File file) async {
-    final dir = await getTemporaryDirectory();
-    final targetPath =
-        '${dir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-    final compressed = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      targetPath,
-      quality: 80, // 70–85 = optimal
-      minWidth: 1280, // mobile-friendly
-      format: CompressFormat.jpeg,
-    );
-
-    return compressed!;
-  }
-
-  static Uint8List _compressImage(Uint8List bytes) {
-    final image = img.decodeImage(bytes);
-    if (image == null) return bytes;
-
-    final resized = img.copyResize(
-      image,
-      width: image.width > 1280 ? 1280 : image.width,
-    );
-
-    return Uint8List.fromList(img.encodeJpg(resized, quality: 80));
-  }
-
-  String addressLabel(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Adresse eingeben';
-    }
-    return value;
   }
 }
