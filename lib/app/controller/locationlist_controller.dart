@@ -17,10 +17,12 @@ class LocationListController extends ChangeNotifier {
   bool _isInitialized = false;
   bool _isLoading = false;
   bool _isLoadingMore = false;
+  bool _loadMoreTriggered = false;
   String? _errorMessage;
 
   final TextEditingController _searchCtrl = TextEditingController();
   List<LocationBaseResponse> _locations = [];
+  Timer? _searchDebounce;
 
   LatLng? _currentLocation;
   LatLng? _filterCenter;
@@ -35,8 +37,6 @@ class LocationListController extends ChangeNotifier {
 
   DateTime _resetStart = DateTime.now();
   DateTime _resetEnd = DateTime.now().add(const Duration(days: 1));
-
-  Timer? _searchDebounce;
 
   TextEditingController get searchCtrl => _searchCtrl;
   List<LocationBaseResponse> get locations => _locations;
@@ -53,14 +53,20 @@ class LocationListController extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
+  bool get loadMoreTriggered => _loadMoreTriggered;
   bool get hasMore => _hasMore;
+
+  // ─────────────────────────────────────────────
+  // STATE MUTATION
+  // ─────────────────────────────────────────────
+  set loadMoreTriggered(bool value) => _loadMoreTriggered = value;
 
   Future<void> loadData() async {
     if (_isInitialized) return;
-    _isInitialized = true;
 
     await determinePosition();
     await loadLocationsByQuery();
+    _isInitialized = true;
   }
 
   @override
@@ -122,9 +128,47 @@ class LocationListController extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool handleScrollNotification(
+    BuildContext context,
+    ScrollNotification notification,
+  ) {
+    if (notification is! ScrollUpdateNotification &&
+        notification is! OverscrollNotification) {
+      return false;
+    }
+
+    final shouldLoadMore =
+        notification.metrics.extentAfter < 300 &&
+        hasMore &&
+        !isLoading &&
+        !isLoadingMore &&
+        !loadMoreTriggered;
+
+    if (shouldLoadMore) {
+      loadMoreTriggered = true;
+      loadMoreLocationsByQuery().whenComplete(() {
+        if (context.mounted) {
+          loadMoreTriggered = false;
+        }
+      });
+    }
+
+    if (notification.metrics.extentAfter >= 300) {
+      loadMoreTriggered = false;
+    }
+
+    return false;
+  }
+
+  // ─────────────────────────────────────────────
+  // API CALL BEHAVIOR
+  // ─────────────────────────────────────────────
+
   Future<void> loadLocationsByQuery() async {
     if (_isLoading) return;
     debugPrint("loadlocations");
+    final query = _searchCtrl.text.trim();
+    if (query.isEmpty || query.length < 3) return;
 
     try {
       if (_currentLocation == null && _filterCenter == null) {
@@ -137,7 +181,6 @@ class LocationListController extends ChangeNotifier {
       _hasMore = true;
       notifyListeners();
 
-      final query = _searchCtrl.text.trim();
       final result = await LocationService.fetchLocationsByFilterSettings(
         query,
         _filterCenter ?? _currentLocation!,
@@ -169,6 +212,8 @@ class LocationListController extends ChangeNotifier {
   Future<void> loadMoreLocationsByQuery() async {
     if (_isLoading || _isLoadingMore || !_hasMore) return;
     debugPrint("loadlocations more");
+    final query = _searchCtrl.text.trim();
+    if (query.isEmpty || query.length < 3) return;
 
     try {
       if (_currentLocation == null && _filterCenter == null) {
@@ -178,7 +223,6 @@ class LocationListController extends ChangeNotifier {
       _isLoadingMore = true;
       notifyListeners();
 
-      final query = _searchCtrl.text.trim();
       debugPrint("loadmore1");
       final result = await LocationService.fetchLocationsByFilterSettings(
         query,

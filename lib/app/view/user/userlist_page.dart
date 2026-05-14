@@ -9,65 +9,83 @@ class UserListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userListController = context.watch<UserListController>();
+    final controller = context.watch<UserListController>();
+    final users = controller.users;
 
     return Scaffold(
       appBar: AppBar(title: const Text("Benutzer"), centerTitle: true),
       backgroundColor: Colors.grey.shade200,
       body: Stack(
         children: [
-          if (userListController.isLoading)
+          if (controller.isLoading)
             const Center(child: CircularProgressIndicator()),
 
-          if (userListController.hasError)
-            Center(child: Text('Fehler: ${userListController.errorMessage}')),
+          if (!controller.isLoading && controller.hasError)
+            Center(child: Text('Fehler: ${controller.errorMessage}')),
 
-          // ⬇️ Optional: wenn keine Locations vorhanden sind
-          if (userListController.users.isEmpty)
+          if (!controller.isLoading && users.isEmpty)
             RefreshIndicator(
-              onRefresh: () async => userListController.reloadLocations(),
+              onRefresh: () async => controller.reloadUsers(),
               child: ListView(
-                children: const [
+                children: [
                   SizedBox(height: 200),
-                  Center(child: Text("Keine Locations gefunden.")),
+                  Center(
+                    child: Text(
+                      (controller.searchCtrl.text.length <= 3)
+                          ? "Bitte Namen eingeben."
+                          : "Keine Benutzer gefunden.",
+                    ),
+                  ),
                 ],
               ),
             ),
 
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const double headerHeight = 60;
-              int crossAxisCount = max(1, constraints.maxWidth ~/ 400);
+          if (!controller.isLoading && users.isNotEmpty)
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const double headerHeight = 60;
+                final int crossAxisCount = max(1, constraints.maxWidth ~/ 400);
 
-              final grid = GridView.builder(
-                padding: const EdgeInsets.fromLTRB(
-                  16,
-                  16 + headerHeight, // ✅ startet unter der Suchleiste
-                  16,
-                  16,
-                ),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  //childAspectRatio: 4 / 3,
-                  mainAxisExtent: 300,
-                ),
-                itemCount: userListController.users.length,
-                itemBuilder: (context, index) =>
-                    UserCard(userbase: userListController.users[index]),
-              );
+                return RefreshIndicator(
+                  onRefresh: () => controller.reloadUsers(),
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) => controller
+                        .handleScrollNotification(context, notification),
+                    child: GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(
+                        16,
+                        16 + headerHeight,
+                        16,
+                        16,
+                      ),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        mainAxisExtent: 300,
+                      ),
+                      itemCount:
+                          users.length + (controller.isLoadingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index >= users.length) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
 
-              // ⬇️ Pull-to-refresh, damit du manuell neu laden kannst
-              return RefreshIndicator(
-                onRefresh: () async {
-                  userListController.reloadLocations();
-                },
-                child: grid,
-              );
-            },
-          ),
-          _buildSearchAndFilterBar(context, userListController),
+                        final user = users[index];
+                        return UserCard(userbase: user);
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+
+          _buildSearchAndFilterBar(context, controller),
         ],
       ),
     );
@@ -89,7 +107,7 @@ class UserListPage extends StatelessWidget {
                 onChanged: userListController.onSearchChanged,
                 textInputAction: TextInputAction.search,
                 onSubmitted: (_) => userListController
-                    .reloadLocations(), //gibt es nicht bei mappage
+                    .reloadUsers(), //gibt es nicht bei mappage
                 decoration: InputDecoration(
                   hintText: "Suchen...",
                   prefixIcon: const Icon(Icons.search),

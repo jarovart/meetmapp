@@ -15,9 +15,13 @@ class UserService {
     required int page,
     required int pageSize,
   }) async {
-    if (query.isNotEmpty) {
-      return await UserRepository.fetchUsersByQuery(query, page, pageSize);
-    }
+    return await UserRepository.fetchUsersByQuery(query, page, pageSize);
+  }
+
+  static Future<SliceResponse<UserBaseResponse>> fetchAllUsers({
+    required int page,
+    required int pageSize,
+  }) async {
     return await UserRepository.fetchAllUsers(page, pageSize);
   }
 

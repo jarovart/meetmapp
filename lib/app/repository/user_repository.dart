@@ -21,8 +21,8 @@ class UserRepository {
   ) async {
     return ApiExceptionWrapper.guard(() async {
       final uri = Uri.parse(
-        '${ApiConfig.baseUrl}/api/users/query?page=$page&size=$pageSize',
-      ).replace(queryParameters: {'query': query});
+        '${ApiConfig.baseUrl}/api/users/findByQuery?query=$query&page=$page&size=$pageSize',
+      );
 
       final headers = await AuthRepository.authHeadersWithException();
       final response = await http.get(uri, headers: headers);

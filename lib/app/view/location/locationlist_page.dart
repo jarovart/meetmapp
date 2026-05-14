@@ -11,47 +11,8 @@ import 'package:meetmaap/app/view/util/filterbutton_widget.dart';
 import 'package:meetmaap/app/view/util/locationcard_widget.dart';
 import 'package:provider/provider.dart';
 
-class LocationsListPage extends StatefulWidget {
+class LocationsListPage extends StatelessWidget {
   const LocationsListPage({super.key});
-
-  @override
-  State<LocationsListPage> createState() => _LocationsListPageState();
-}
-
-class _LocationsListPageState extends State<LocationsListPage> {
-  bool _loadMoreTriggered = false;
-
-  bool _handleScrollNotification(
-    ScrollNotification notification,
-    LocationListController controller,
-  ) {
-    if (notification is! ScrollUpdateNotification &&
-        notification is! OverscrollNotification) {
-      return false;
-    }
-
-    final shouldLoadMore =
-        notification.metrics.extentAfter < 300 &&
-        controller.hasMore &&
-        !controller.isLoading &&
-        !controller.isLoadingMore &&
-        !_loadMoreTriggered;
-
-    if (shouldLoadMore) {
-      _loadMoreTriggered = true;
-      controller.loadMoreLocationsByQuery().whenComplete(() {
-        if (mounted) {
-          _loadMoreTriggered = false;
-        }
-      });
-    }
-
-    if (notification.metrics.extentAfter >= 300) {
-      _loadMoreTriggered = false;
-    }
-
-    return false;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,9 +37,15 @@ class _LocationsListPageState extends State<LocationsListPage> {
             RefreshIndicator(
               onRefresh: () => locationListController.reloadLocations(),
               child: ListView(
-                children: const [
+                children: [
                   SizedBox(height: 200),
-                  Center(child: Text("Keine Locations gefunden.")),
+                  Center(
+                    child: Text(
+                      (locationListController.searchCtrl.text.length <= 3)
+                          ? "Bitte Namen eingeben."
+                          : "Keine Locations gefunden.",
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -92,10 +59,8 @@ class _LocationsListPageState extends State<LocationsListPage> {
                 return RefreshIndicator(
                   onRefresh: () => locationListController.reloadLocations(),
                   child: NotificationListener<ScrollNotification>(
-                    onNotification: (notification) => _handleScrollNotification(
-                      notification,
-                      locationListController,
-                    ),
+                    onNotification: (notification) => locationListController
+                        .handleScrollNotification(context, notification),
                     child: GridView.builder(
                       padding: const EdgeInsets.fromLTRB(
                         16,
