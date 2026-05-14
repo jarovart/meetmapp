@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
 import 'package:meetmaap/app/view/util/gallery_widget.dart';
 import 'package:provider/provider.dart';
@@ -53,9 +55,25 @@ class LocationDetailsContent extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 12),
-                Text(
-                  location.title,
-                  style: Theme.of(context).textTheme.headlineMedium,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        location.title,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                    ),
+
+                    const SizedBox(width: 16),
+                    OutlinedButton.icon(
+                      onPressed: () async => context.push(
+                        RouteConfig.locationDetailUrl,
+                        extra: location,
+                      ),
+                      label: const Text("Open"),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 12),
