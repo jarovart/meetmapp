@@ -6,75 +6,98 @@ import 'package:meetmaap/app/service/authentication_service.dart';
 class AuthController extends ChangeNotifier with WidgetsBindingObserver {
   UserMyProfileResponse? _myProfile;
   DateTime? _lastRefreshAt;
+  String? _token;
 
-  AuthController() {
+  AuthController(String source) {
     WidgetsBinding.instance.addObserver(this);
-    loadSession();
+    loadSession("(Constructor  $source)");
   }
 
   bool get isLoggedIn => myProfile != null;
   String get myUserName => _myProfile?.username ?? '';
   UserMyProfileResponse? get myProfile => _myProfile;
 
-  Future<void> loadSession() async {
-    final loggedIn = await AuthService.isLoggedIn();
-
-    if (!loggedIn) {
-      _myProfile = null;
-      notifyListeners();
-    }
-
-    _myProfile = await AuthService.getMyUserProfile();
-    notifyListeners();
-  }
-
-  Future<void> refreshMyProfile() async {
-    debugPrint("refreshing my profile");
-    final loggedIn = await AuthService.isLoggedIn();
-    if (!loggedIn) {
-      _myProfile = null;
-      notifyListeners();
-      return;
-    }
-
-    _myProfile = await AuthService.getMyUserProfile();
-    notifyListeners();
-  }
+  bool get hasToken => _token != null && _token!.isNotEmpty;
 
   Future<void> login(String username, String password) async {
     await AuthService.login(username: username, password: password);
     _myProfile = await AuthService.getMyUserProfile();
+    _token = await AuthService.getToken();
     notifyListeners();
   }
 
   Future<void> logout() async {
     await AuthService.logout();
     _myProfile = null;
+    _token = null;
     notifyListeners();
   }
 
-  void setMyProfile(UserMyProfileResponse profile) {
-    _myProfile = profile;
-    notifyListeners();
-  }
-
-  Future<void> refreshIfStale() async {
+  bool _isRefreshCooldownActive() {
     final now = DateTime.now();
 
     if (_lastRefreshAt != null &&
         now.difference(_lastRefreshAt!) <
             const Duration(seconds: AppConfig.checkLoginIntervalInSeconds)) {
-      return;
+      return true;
     }
-
-    await refreshMyProfile();
     _lastRefreshAt = now;
+    return false;
+  }
+
+  void loadSession(String source) async {
+    debugPrint("Authcontroller $source loadsession.");
+    await refreshLogin(source);
+  }
+
+  Future<void> refreshLogin(String source) async {
+    debugPrint("Authcontroller $source refreshLogin before check.");
+    if (_isRefreshCooldownActive()) return;
+    final localMyProfile = _myProfile;
+
+    debugPrint(
+      "Authcontroller $source refreshLogin after check.==============================",
+    );
+    try {
+      debugPrint(
+        "authcontroller $source refreshLogin: cooldown inactive, not skipping",
+      );
+      final isLoggedIn = await AuthService.isLoggedInOnServer(
+        serverReachableOptional: true,
+      );
+
+      if (isLoggedIn) {
+        if (_myProfile == null) {
+          debugPrint(
+            "User is logged in on server but not in app, refreshing profile.",
+          );
+          _myProfile = await AuthService.getMyUserProfile();
+          _token = await AuthService.getToken();
+        }
+      } else {
+        if (_myProfile != null) {
+          debugPrint("User ist not logged in anymore, logging out.");
+          await AuthService.logout();
+          _myProfile = null;
+          _token = null;
+          notifyListeners();
+        }
+      }
+    } catch (e, st) {
+      debugPrint('Error in refreshLogin: $e');
+      debugPrintStack(stackTrace: st);
+      await AuthService.logout();
+      _myProfile = null;
+      _token = null;
+    } finally {
+      if (localMyProfile != _myProfile) notifyListeners();
+    }
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
-      refreshIfStale();
+      await refreshLogin("(didChangeAppLifecycleState ${state.toString()})");
     }
   }
 

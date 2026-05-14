@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/request/updatethumbnail_request.dart';
 import 'package:meetmaap/app/model/response/image_response.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
@@ -35,7 +36,7 @@ class ImageService {
 
   static Future<void> deleteMyProfileImage() async {
     if (!(await AuthRepository.isLoggedIn())) {
-      throw Exception("Not logged in");
+      throw CustomAppException("Not logged in");
     }
     return await ImageRepository.deleteMyProfileImage();
   }

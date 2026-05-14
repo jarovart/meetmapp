@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/request/editmyprofile_request.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/service/user_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
@@ -63,7 +62,7 @@ class EditMyProfileController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (!(await AuthRepository.isLoggedIn())) throw NotLoggedInException();
+      if (!(await AuthService.isLoggedIn())) throw NotLoggedInException();
       if ((await AuthService.getUsername() != _username)) return;
 
       _myProfile = await AuthService.fetchMyProfile();

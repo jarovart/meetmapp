@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
@@ -10,9 +11,11 @@ class ApiExceptionWrapper {
     } on AppException {
       rethrow;
     } on SocketException catch (e) {
-      throw AppNetworkException(debugMessage: e.toString());
+      throw AppNetworkException(debugMessage: e.toString(), originException: e);
+    } on TimeoutException catch (e) {
+      throw AppNetworkException(debugMessage: e.toString(), originException: e);
     } on http.ClientException catch (e) {
-      throw AppNetworkException(debugMessage: e.toString());
+      throw AppNetworkException(debugMessage: e.toString(), originException: e);
     } on FormatException catch (e) {
       throw AppUnknownException(debugMessage: e.toString());
     } catch (e) {

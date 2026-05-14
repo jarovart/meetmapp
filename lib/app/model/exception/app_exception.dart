@@ -54,7 +54,11 @@ class CooldownException extends AppHttpException {
 }
 
 class AppNetworkException extends AppException {
-  const AppNetworkException({super.debugMessage});
+  final Exception originException;
+  const AppNetworkException({
+    super.debugMessage,
+    required this.originException,
+  });
 
   @override
   String toString() => 'AppNetworkException(debugMessage: $debugMessage)';

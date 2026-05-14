@@ -47,7 +47,7 @@ class LoginController extends ChangeNotifier {
 
     try {
       await authController.login(_userCtrl.text.trim(), _passCtrl.text);
-      await authController.refreshMyProfile();
+      await authController.refreshLogin("submitbutton");
       final myUserName = authController.myUserName;
       debugPrint('Logged in as $myUserName');
 

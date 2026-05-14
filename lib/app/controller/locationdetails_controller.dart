@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
@@ -63,8 +63,8 @@ class LocationDetailsController extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      if (await AuthRepository.isLoggedIn()) {
-        _myProfile = await AuthRepository.getMyUserProfile();
+      if (await AuthService.isLoggedIn()) {
+        _myProfile = await AuthService.getMyUserProfile();
       }
 
       _locationFull = _locationBase is LocationFullResponse

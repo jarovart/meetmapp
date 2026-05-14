@@ -19,7 +19,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    authController.refreshIfStale();
+    authController.refreshLogin("(homepage start)");
     return Scaffold(
       appBar: _buildAppBar(context),
       body: Stack(
@@ -39,7 +39,14 @@ class HomePage extends StatelessWidget {
         icon: Icon(homeController.isMenuOpen ? Icons.close : Icons.menu),
         onPressed: homeController.toggleMenu,
       ),
-      actions: [_buildProfileAvatar(context)],
+
+      actions: [
+        IconButton(
+          icon: Icon(authController.hasToken ? Icons.close : Icons.token),
+          onPressed: () => authController.refreshLogin("appbarbutton"),
+        ),
+        _buildProfileAvatar(context),
+      ],
     );
   }
 
@@ -183,7 +190,7 @@ class HomePage extends StatelessWidget {
   }
 
   void _navigateToProfile(BuildContext context) async {
-    authController.refreshIfStale();
+    authController.refreshLogin("(homepage navigateToProfile)");
 
     if (homeController.loggedIn) {
       context.push(RouteConfig.myProfileUrl, extra: homeController.myProfile);

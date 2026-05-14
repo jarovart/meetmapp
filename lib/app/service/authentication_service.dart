@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/repository/user_repository.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class AuthService {
   static Future<bool> isLoggedIn() async {
@@ -35,8 +36,8 @@ class AuthService {
     );
   }
 
-  static Future<void> verify(String token) async {
-    return await AuthRepository.verify(token);
+  static Future<void> verifyEmail(String token) async {
+    return await AuthRepository.verifyEmail(token);
   }
 
   static Future<void> resendVerificationEmail({required String email}) async {
@@ -87,6 +88,28 @@ class AuthService {
     } catch (e) {
       debugPrint("Error fetching my profile: $e");
       return await AuthRepository.getMyUserProfile();
+    }
+  }
+
+  static Future<bool> isLoggedInOnServer({
+    bool serverReachableOptional = false,
+  }) async {
+    try {
+      await UserRepository.fetchMyProfile();
+      return true;
+    } catch (e) {
+      //Forbidden == usertoken is not valid
+      if (AppErrorMapper.isForbiddenException(e)) {
+        debugPrint("refreshLogin: serverforbidden");
+        return false;
+      }
+
+      if (serverReachableOptional &&
+          AppErrorMapper.isServerNotReachableException(e)) {
+        debugPrint("refreshLogin: serverunreachable");
+        return await AuthService.isLoggedIn();
+      }
+      rethrow;
     }
   }
 }

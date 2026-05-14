@@ -55,4 +55,39 @@ class UserMyProfileResponse extends UserFullResponse {
       'createdLocations': createdLocations,
     };
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is UserMyProfileResponse &&
+        other.id == id &&
+        other.username == username &&
+        other.firstName == firstName &&
+        other.lastName == lastName &&
+        other.aboutMe == aboutMe &&
+        other.likedLocationCount == likedLocationCount &&
+        other.joinedLocationCount == joinedLocationCount &&
+        other.email == email &&
+        other.createdLocations == createdLocations &&
+        other.createdAt == createdAt &&
+        other.profileImage == profileImage;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      id,
+      username,
+      firstName,
+      lastName,
+      aboutMe,
+      likedLocationCount,
+      joinedLocationCount,
+      email,
+      createdLocations,
+      createdAt,
+      profileImage,
+    );
+  }
 }

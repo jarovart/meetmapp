@@ -44,10 +44,14 @@ void main() {
     //          HomeController(authController: context.read<AuthController>()),
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthController()),
+        ChangeNotifierProvider(
+          create: (_) => AuthController("(Authcontrollermain)"),
+        ),
 
         ChangeNotifierProxyProvider<AuthController, HomeController>(
-          create: (context) => HomeController(),
+          create: (context) =>
+              HomeController()
+                ..updateMyProfile(context.read<AuthController>().myProfile),
           update: (_, authController, homeController) {
             homeController ??= HomeController();
             homeController.updateMyProfile(authController.myProfile);
@@ -122,7 +126,7 @@ class MainApplication extends StatelessWidget {
         path: RouteConfig.locationCreateUrl,
         redirect: (context, state) async {
           final authController = context.read<AuthController>();
-          await authController.refreshIfStale();
+          await authController.refreshLogin("(locationcreate main)");
 
           if (!authController.isLoggedIn) {
             debugPrint('Received locationCreate: ${state.uri.toString()}');

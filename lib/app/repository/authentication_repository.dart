@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/config/api_config.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
@@ -34,7 +35,9 @@ class AuthRepository {
 
   static Future<bool> isLoggedIn() async {
     final token = await getToken();
-    return token != null && token.isNotEmpty;
+    final validToken =
+        token != null && token.isNotEmpty && !JwtDecoder.isExpired(token);
+    return validToken && (await getMyUserProfile() != null);
   }
 
   static Future<void> login({
@@ -93,7 +96,7 @@ class AuthRepository {
     });
   }
 
-  static Future<void> verify(String token) async {
+  static Future<void> verifyEmail(String token) async {
     return ApiExceptionWrapper.guard(() async {
       final uri = Uri.parse('${ApiConfig.baseUrl}/api/auth/verify');
 

@@ -21,7 +21,7 @@ class _VerifyPageState extends State<VerifyPage> {
   void initState() {
     super.initState();
 
-    AuthService.verify(widget.token)
+    AuthService.verifyEmail(widget.token)
         .then((_) {
           if (!mounted) return;
           setState(() {

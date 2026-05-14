@@ -1,7 +1,27 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:http/http.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
 
 class AppErrorMapper {
-  //
+  static bool isForbiddenException(Object error) {
+    if (error is AppHttpException) {
+      return error.statusCode == 403;
+    }
+    return false;
+  }
+
+  static bool isServerNotReachableException(Object error) {
+    if (error is AppNetworkException) {
+      final origin = error.originException;
+      return origin is SocketException ||
+          origin is TimeoutException ||
+          origin is ClientException;
+    }
+    return false;
+  }
+
   static String toUserMessage(
     Object error, {
     String fallback = 'Etwas ist schiefgelaufen. Bitte versuche es erneut.',
