@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meetmaap/app/view/util/actionbutton.dart';
 import 'package:meetmaap/app/view/util/infocard.dart';
 
+//TODO: do we need it?
 class ActionStatsCard extends StatelessWidget {
   final int likedCount;
   final int joinedCount;
