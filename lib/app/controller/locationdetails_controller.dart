@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
@@ -17,6 +19,7 @@ class LocationDetailsController extends ChangeNotifier {
   String? _errorMessage;
   LocationFullResponse? _locationFull;
   UserMyProfileResponse? _myProfile;
+  Timer? _toggleDebounce;
 
   bool _isLiked = false;
   bool _isJoined = false;
@@ -85,7 +88,7 @@ class LocationDetailsController extends ChangeNotifier {
       _locationFull = _locationBase is LocationFullResponse
           // ignore: unnecessary_cast
           ? _locationBase as LocationFullResponse
-          : await LocationService.fetchFullLocation(locationBase!.id);
+          : await LocationService.fetchFullLocation(locationBase.id);
       _likedUserCount = _locationFull!.likedUserCount;
       _joinedUserCount = _locationFull!.joinedUserCount;
       _isLiked = _locationFull!.likedByCurrentUser ?? false;
@@ -112,6 +115,17 @@ class LocationDetailsController extends ChangeNotifier {
   // ─────────────────────────────────────────────
 
   Future<void> toggleLike() async {
+    if (_toggleDebounce?.isActive ?? false) {
+      _toggleDebounce!.cancel();
+    }
+
+    _toggleDebounce = Timer(
+      const Duration(milliseconds: 500),
+      () async => await _toggleLike(),
+    );
+  }
+
+  Future<void> _toggleLike() async {
     if (_myProfile == null || _locationFull == null) return;
 
     final previousLiked = _isLiked;
@@ -142,6 +156,17 @@ class LocationDetailsController extends ChangeNotifier {
   }
 
   Future<void> toggleJoin() async {
+    if (_toggleDebounce?.isActive ?? false) {
+      _toggleDebounce!.cancel();
+    }
+
+    _toggleDebounce = Timer(
+      const Duration(milliseconds: 500),
+      () async => await _toggleJoin(),
+    );
+  }
+
+  Future<void> _toggleJoin() async {
     if (_myProfile == null || _locationFull == null) return;
 
     final previousJoined = _isJoined;
