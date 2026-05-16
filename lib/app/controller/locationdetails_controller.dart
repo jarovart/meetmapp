@@ -4,12 +4,12 @@ import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/service/location_service.dart';
+import 'package:meetmaap/app/service/navigation_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class LocationDetailsController extends ChangeNotifier {
-  final LocationBaseResponse _locationBase;
+  LocationBaseResponse? _locationBase;
 
-  LocationDetailsController(this._locationBase);
   // ─────────────────────────────────────────────
   // STATE
   // ─────────────────────────────────────────────
@@ -23,21 +23,31 @@ class LocationDetailsController extends ChangeNotifier {
   int _likedUserCount = 0;
   int _joinedUserCount = 0;
 
+  String get title => _locationFull?.title ?? _locationBase!.title;
+
   bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _myProfile != null;
-  LocationBaseResponse get locationBase => _locationBase;
+  bool get canEdit =>
+      _myProfile != null &&
+      _locationFull != null &&
+      _myProfile!.id == _locationFull!.createdUserId;
+  LocationBaseResponse? get locationBase => _locationBase;
   LocationFullResponse? get locationFull => _locationFull;
 
   bool get isLiked => _isLiked;
   bool get isJoined => _isJoined;
+  bool get isLikeJoinAble => isLoggedIn && _locationFull != null;
   int get likedUserCount => _likedUserCount;
   int get joinedUserCount => _joinedUserCount;
+  bool get hasLocation => _locationBase != null || _locationFull != null;
+  LocationBaseResponse get location =>
+      _locationFull != null ? _locationFull! : _locationBase!;
 
   List<String> get imageUrls {
     if (locationFull == null) {
-      String thumbnailUrl = _locationBase.thumbnailImage?.imageUrl ?? '';
+      String thumbnailUrl = _locationBase?.thumbnailImage?.imageUrl ?? '';
       return [thumbnailUrl];
     }
     return _locationFull?.images.map((image) => image.imageUrl).toList() ??
@@ -57,11 +67,16 @@ class LocationDetailsController extends ChangeNotifier {
   // FUNCTIONS
   // ─────────────────────────────────────────────
 
-  Future<void> load() async {
+  Future<void> load(LocationBaseResponse? locationBase) async {
     try {
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
+      if (locationBase == null) {
+        debugPrint('LocationDetailsController: locationBase is null!');
+        return;
+      }
+      _locationBase = locationBase;
 
       if (await AuthService.isLoggedIn()) {
         _myProfile = await AuthService.getMyUserProfile();
@@ -70,7 +85,7 @@ class LocationDetailsController extends ChangeNotifier {
       _locationFull = _locationBase is LocationFullResponse
           // ignore: unnecessary_cast
           ? _locationBase as LocationFullResponse
-          : await LocationService.fetchFullLocation(_locationBase.id);
+          : await LocationService.fetchFullLocation(locationBase!.id);
       _likedUserCount = _locationFull!.likedUserCount;
       _joinedUserCount = _locationFull!.joinedUserCount;
       _isLiked = _locationFull!.likedByCurrentUser ?? false;
@@ -86,6 +101,10 @@ class LocationDetailsController extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> reload() async {
+    await load(_locationBase);
   }
 
   // ─────────────────────────────────────────────
@@ -150,5 +169,9 @@ class LocationDetailsController extends ChangeNotifier {
       _joinedUserCount = previousCount;
       notifyListeners();
     }
+  }
+
+  Future<void> navigateToLocation() async {
+    NavigationService.openNavigation(location.position);
   }
 }

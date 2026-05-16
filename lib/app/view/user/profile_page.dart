@@ -16,7 +16,7 @@ class UserProfilePage extends StatelessWidget {
 
     if (!profileController.hasUserProfile) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Profil bearbeiten")),
+        appBar: AppBar(title: const Text("Benutzerprofil")),
         body: Center(child: Text('Profil konnte nicht geladen werden.')),
       );
     }
@@ -27,15 +27,6 @@ class UserProfilePage extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Profil"),
           centerTitle: true,
-          /*leading: canGoBack
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => context.pop(),
-                )
-              : IconButton(
-                  icon: const Icon(Icons.home),
-                  onPressed: () => context.go('/'),
-                ),*/
           actions: [
             if (profileController.isMyProfile)
               Padding(

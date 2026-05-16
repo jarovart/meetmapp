@@ -23,7 +23,7 @@ class LocationDetailsBottomSheet extends StatelessWidget {
       ),
       builder: (_) {
         return ChangeNotifierProvider(
-          create: (_) => LocationDetailsController(locationBase)..load(),
+          create: (_) => LocationDetailsController()..load(locationBase),
           child: const LocationDetailsBottomSheet(),
         );
       },

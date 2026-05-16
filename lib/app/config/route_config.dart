@@ -2,7 +2,7 @@ class RouteConfig {
   static const String homePageUrl = "/";
   static const String mapUrl = "/map";
   static const String locationListUrl = "/locationlist";
-  static const String locationDetailUrl = "/locationdetail";
+  static const String locationUrl = "/location";
   static const String locationCreateUrl = "/locationcreate";
   static const String userListUrl = "/userlist";
   static const String profileUrl = "/profile/:username";

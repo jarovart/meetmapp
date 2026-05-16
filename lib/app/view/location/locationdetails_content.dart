@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
 import 'package:meetmaap/app/view/util/gallery_widget.dart';
-import 'package:provider/provider.dart';
+import 'package:meetmaap/app/view/util/locationbottomaction.dart';
 
 class LocationDetailsContent extends StatelessWidget {
   final LocationDetailsController controller;
@@ -20,7 +20,7 @@ class LocationDetailsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formatter = DateFormat('dd.MM.yyyy HH:mm');
-    final location = controller.locationFull ?? controller.locationBase;
+    final location = controller.location;
     List<String> imageUrls = controller.imageUrls;
 
     return Material(
@@ -68,8 +68,8 @@ class LocationDetailsContent extends StatelessWidget {
                     const SizedBox(width: 16),
                     OutlinedButton.icon(
                       onPressed: () async => context.push(
-                        RouteConfig.locationDetailUrl,
-                        extra: location,
+                        RouteConfig.locationUrl,
+                        extra: controller,
                       ),
                       label: const Text("Open"),
                     ),
@@ -151,125 +151,15 @@ class LocationDetailsContent extends StatelessWidget {
           ),
 
           LocationBottomActions(
-            isLiked: true,
-            isJoined: false,
-            likeCount: location.likedUserCount,
-            joinCount: location.joinedUserCount,
-            onLikeTap: () {
-              //  LocationService.toggleLike(location.id);
-            },
-            onJoinTap: () {
-              // toggle join
-            },
+            isLikeJoinAble: controller.isLikeJoinAble,
+            isLiked: controller.isLiked,
+            isJoined: controller.isJoined,
+            likeCount: controller.likedUserCount,
+            joinCount: controller.joinedUserCount,
+            onLikeTap: controller.toggleLike,
+            onJoinTap: controller.toggleJoin,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class LocationBottomActions extends StatelessWidget {
-  final bool isLiked;
-  final bool isJoined;
-  final int likeCount;
-  final int joinCount;
-  final VoidCallback onLikeTap;
-  final VoidCallback onJoinTap;
-
-  const LocationBottomActions({
-    super.key,
-    required this.isLiked,
-    required this.isJoined,
-    required this.likeCount,
-    required this.joinCount,
-    required this.onLikeTap,
-    required this.onJoinTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<LocationDetailsController>(
-      builder: (context, controller, _) {
-        final location = controller.locationFull;
-        debugPrint(location?.title ?? "errors");
-        return SafeArea(
-          top: false,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            //color: const Color.fromARGB(255, 223, 222, 222).withValues(alpha: 0.7),
-            decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).scaffoldBackgroundColor.withValues(red: 1, alpha: 0.3),
-              border: const Border(top: BorderSide(color: Color(0xFFE0E0E0))),
-              boxShadow: const [
-                BoxShadow(
-                  blurRadius: 10,
-                  offset: Offset(0, -2),
-                  color: Color(0x12000000),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child:
-                      controller.isLoggedIn && controller.locationFull != null
-                      ? OutlinedButton.icon(
-                          onPressed: controller.isLoggedIn
-                              ? controller.toggleLike
-                              : null,
-                          icon: Icon(
-                            controller.isLiked
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                          ),
-                          label: Text('Like · ${controller.likedUserCount}'),
-                        )
-                      : countInfo(
-                          Icons.favorite_border,
-                          '${controller.likedUserCount} Likes',
-                        ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child:
-                      controller.isLoggedIn && controller.locationFull != null
-                      ? ElevatedButton.icon(
-                          onPressed: controller.isLoggedIn
-                              ? controller.toggleJoin
-                              : null,
-                          icon: Icon(
-                            controller.isJoined
-                                ? Icons.check_circle
-                                : Icons.group_add_outlined,
-                          ),
-                          label: Text('Join · ${controller.joinedUserCount}'),
-                        )
-                      : countInfo(
-                          Icons.group_outlined,
-                          '${controller.joinedUserCount} Beitritte',
-                        ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget countInfo(IconData icon, String text) {
-    return Container(
-      height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [Icon(icon, size: 20), const SizedBox(width: 8), Text(text)],
       ),
     );
   }

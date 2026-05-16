@@ -19,7 +19,7 @@ class LocationDetailsGeneralDialog extends StatelessWidget {
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (_, _, _) {
         return ChangeNotifierProvider(
-          create: (_) => LocationDetailsController(locationBase)..load(),
+          create: (_) => LocationDetailsController()..load(locationBase),
           child: SafeArea(
             left: false,
             right: true,

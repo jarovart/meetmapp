@@ -8,6 +8,7 @@ import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/controller/editmyprofile_controller.dart';
 import 'package:meetmaap/app/controller/home_controller.dart';
 import 'package:meetmaap/app/controller/locationcreate_controller.dart';
+import 'package:meetmaap/app/controller/locationdetails_controller.dart';
 import 'package:meetmaap/app/controller/locationlist_controller.dart';
 import 'package:meetmaap/app/controller/login_controller.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
@@ -114,11 +115,23 @@ class MainApplication extends StatelessWidget {
       ),
 
       GoRoute(
-        path: RouteConfig.locationDetailUrl,
+        path: RouteConfig.locationUrl,
         builder: (context, state) {
+          final extra = state.extra;
+          if (extra is LocationDetailsController) {
+            return ChangeNotifierProvider.value(
+              value: extra,
+              child: const LocationDetailPage(),
+            );
+          }
+
           final locationbase =
-              state.extra as LocationBaseResponse; // oder LocationBase
-          return LocationDetailPage(locationbase: locationbase);
+              extra as LocationBaseResponse?; // oder LocationBase
+
+          return ChangeNotifierProvider(
+            create: (_) => LocationDetailsController()..load(locationbase),
+            child: LocationDetailPage(),
+          );
         },
       ),
 
