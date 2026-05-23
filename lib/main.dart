@@ -118,6 +118,22 @@ class MainApplication extends StatelessWidget {
         path: RouteConfig.locationUrl,
         builder: (context, state) {
           final extra = state.extra;
+
+          late final LocationDetailsController controller;
+
+          if (extra is LocationDetailsController) {
+            controller = extra;
+          } else if (extra is LocationBaseResponse) {
+            controller = LocationDetailsController();
+            controller.load(extra);
+          } else {
+            return const Scaffold(
+              body: Center(
+                child: Text('Location konnte nicht geladen werden.'),
+              ),
+            );
+          }
+
           if (extra is LocationDetailsController) {
             return ChangeNotifierProvider.value(
               value: extra,
@@ -125,12 +141,10 @@ class MainApplication extends StatelessWidget {
             );
           }
 
-          final locationbase =
-              extra as LocationBaseResponse?; // oder LocationBase
-
-          return ChangeNotifierProvider(
-            create: (_) => LocationDetailsController()..load(locationbase),
-            child: LocationDetailPage(),
+          return ChangeNotifierProvider<LocationDetailsController>.value(
+            key: ValueKey(controller),
+            value: controller,
+            child: const LocationDetailPage(),
           );
         },
       ),

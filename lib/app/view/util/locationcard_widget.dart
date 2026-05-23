@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 
 class LocationCard extends StatelessWidget {
@@ -14,7 +15,7 @@ class LocationCard extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => context.push('/locationdetail', extra: locationbase),
+      onTap: () => context.push(RouteConfig.locationUrl, extra: locationbase),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

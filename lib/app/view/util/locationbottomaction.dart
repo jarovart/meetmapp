@@ -69,7 +69,7 @@ class LocationBottomActions extends StatelessWidget {
                       ),
                       label: Text('Join · $joinCount'),
                     )
-                  : countInfo(Icons.group_outlined, '$joinCount} Beitritte'),
+                  : countInfo(Icons.group_outlined, '$joinCount Beitritte'),
             ),
           ],
         ),

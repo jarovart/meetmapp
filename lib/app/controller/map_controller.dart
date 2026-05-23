@@ -9,6 +9,7 @@ import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/debouncer.dart';
 import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
@@ -33,6 +34,7 @@ class MapViewController extends ChangeNotifier {
   String? _errorMessage; //TODO: errormessage einbinden
   bool _isSearchLoading = false;
   String? _searchErrorMessage;
+  LocationFullResponse? _locationToCheck;
 
   RangeValues _selectedRange = const RangeValues(0, 4);
   final List<String> _dayOptions = [
@@ -56,6 +58,8 @@ class MapViewController extends ChangeNotifier {
   LatLng? get currentPosition => _currentPosition;
   LatLng? get mapCenterBeforeSheet => _mapCenterBeforeSheet;
   bool get isSearchLoading => _isSearchLoading;
+  bool get isOnlyOneLocation => _locationToCheck != null;
+  LocationFullResponse? get locationToCheck => _locationToCheck;
   String? get searchErrorMessage => _searchErrorMessage;
   String? get errorMessage => _errorMessage;
   FocusNode get searchFocusNode => _searchFocusNode;
@@ -87,6 +91,9 @@ class MapViewController extends ChangeNotifier {
   String setDayOptionsText(double index) {
     return _dayOptions[index.round()];
   }
+
+  void setOnlyOneLocation(LocationFullResponse? location) =>
+      _locationToCheck = location;
 
   void selectLocation(LocationBaseResponse? location) {
     _selectedLocation = location;

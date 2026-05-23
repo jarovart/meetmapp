@@ -5,11 +5,14 @@ import 'package:meetmaap/app/view/location/locationdetails_content.dart';
 import 'package:provider/provider.dart';
 
 class LocationDetailsBottomSheet extends StatelessWidget {
-  const LocationDetailsBottomSheet({super.key});
+  final bool canOpenInNewPage;
+
+  const LocationDetailsBottomSheet({super.key, this.canOpenInNewPage = true});
 
   static Future<void> show(
     BuildContext context, {
     required LocationBaseResponse locationBase,
+    bool canOpenInNewPage = true,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -24,7 +27,7 @@ class LocationDetailsBottomSheet extends StatelessWidget {
       builder: (_) {
         return ChangeNotifierProvider(
           create: (_) => LocationDetailsController()..load(locationBase),
-          child: const LocationDetailsBottomSheet(),
+          child: LocationDetailsBottomSheet(canOpenInNewPage: canOpenInNewPage),
         );
       },
     );
@@ -33,6 +36,7 @@ class LocationDetailsBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<LocationDetailsController>();
+    controller.canOpenInNewPage = canOpenInNewPage;
 
     if (controller.isLoading) {
       return const Padding(

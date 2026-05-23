@@ -5,11 +5,13 @@ import 'package:meetmaap/app/view/location/locationdetails_content.dart';
 import 'package:provider/provider.dart';
 
 class LocationDetailsGeneralDialog extends StatelessWidget {
-  const LocationDetailsGeneralDialog({super.key});
+  final bool canOpenInNewPage;
+  const LocationDetailsGeneralDialog({super.key, this.canOpenInNewPage = true});
 
   static Future<void> show(
     BuildContext context, {
     required LocationBaseResponse locationBase,
+    bool canOpenInNewPage = true,
   }) {
     return showGeneralDialog(
       context: context,
@@ -38,7 +40,9 @@ class LocationDetailsGeneralDialog extends StatelessWidget {
                   height: MediaQuery.of(context).size.height,
                   child: SafeArea(
                     left: true,
-                    child: LocationDetailsGeneralDialog(),
+                    child: LocationDetailsGeneralDialog(
+                      canOpenInNewPage: canOpenInNewPage,
+                    ),
                   ),
                 ),
               ),
@@ -63,6 +67,7 @@ class LocationDetailsGeneralDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<LocationDetailsController>();
+    controller.canOpenInNewPage = canOpenInNewPage;
     debugPrint("super rebuild");
 
     if (controller.isLoading) {

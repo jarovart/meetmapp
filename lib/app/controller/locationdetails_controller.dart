@@ -25,6 +25,7 @@ class LocationDetailsController extends ChangeNotifier {
   bool _isJoined = false;
   int _likedUserCount = 0;
   int _joinedUserCount = 0;
+  bool canOpenInNewPage = true;
 
   String get title => _locationFull?.title ?? _locationBase!.title;
 

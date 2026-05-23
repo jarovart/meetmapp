@@ -65,14 +65,16 @@ class LocationDetailsContent extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(width: 16),
-                    OutlinedButton.icon(
-                      onPressed: () async => context.push(
-                        RouteConfig.locationUrl,
-                        extra: controller,
+                    if (controller.canOpenInNewPage) ...[
+                      const SizedBox(width: 16),
+                      OutlinedButton.icon(
+                        onPressed: () async => context.push(
+                          RouteConfig.locationUrl,
+                          extra: controller,
+                        ),
+                        label: const Text("Open"),
                       ),
-                      label: const Text("Open"),
-                    ),
+                    ],
                   ],
                 ),
 

@@ -22,16 +22,12 @@ class MapPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mapViewController = context.watch<MapViewController>();
-
+    mapViewController.setOnlyOneLocation(locationToCheck);
     // Show only a single location e.g. in a stack of location details
-    if (locationToCheck != null) {
+    if (mapViewController.isOnlyOneLocation) {
       return Scaffold(
         appBar: AppBar(title: Text("Location von ${locationToCheck!.title}")),
-        body: buildMap(
-          context,
-          mapViewController,
-          locationToCheck: locationToCheck,
-        ),
+        body: buildMap(context, mapViewController),
       );
     }
 
@@ -40,17 +36,12 @@ class MapPage extends StatelessWidget {
     return buildMap(context, mapViewController);
   }
 
-  Widget buildMap(
-    BuildContext context,
-    MapViewController mapViewController, {
-    LocationFullResponse? locationToCheck,
-  }) {
-    bool noLocationToCheck = locationToCheck == null;
+  Widget buildMap(BuildContext context, MapViewController mapViewController) {
     return Stack(
       children: [
         FlutterMap(
           mapController: mapViewController.mapController,
-          options: noLocationToCheck
+          options: !mapViewController.isOnlyOneLocation
               ? MapOptions(
                   initialCenter: mapViewController.initialCenter,
                   initialZoom: 6.0,
@@ -74,7 +65,7 @@ class MapPage extends StatelessWidget {
                   },
                 )
               : MapOptions(
-                  initialCenter: locationToCheck.position,
+                  initialCenter: mapViewController.locationToCheck!.position,
                   initialZoom: 13.0,
                   onMapEvent: (event) {
                     if (event is MapEventTap) {
@@ -82,15 +73,10 @@ class MapPage extends StatelessWidget {
                     }
                   },
                 ),
-          children: _buildMapChildren(
-            context,
-            mapViewController,
-            noLocationToCheck,
-            locationToCheck,
-          ),
+          children: _buildMapChildren(context, mapViewController),
         ),
         // Overlay: Search Bar and Slider/GPS positioned on top
-        _buildMapSiblings(context, mapViewController, noLocationToCheck),
+        _buildMapSiblings(context, mapViewController),
       ],
     );
   }
@@ -98,10 +84,8 @@ class MapPage extends StatelessWidget {
   List<Widget> _buildMapChildren(
     BuildContext context,
     MapViewController mapViewController,
-    bool noLocationToCheck,
-    LocationFullResponse? locationToCheck,
   ) {
-    if (noLocationToCheck) {
+    if (!mapViewController.isOnlyOneLocation) {
       return [
         _buildTileLayer(),
         if (mapViewController.currentPosition != null)
@@ -111,7 +95,11 @@ class MapPage extends StatelessWidget {
     }
     return [
       _buildTileLayer(),
-      _buildLocationSoloMarker(context, mapViewController, locationToCheck!),
+      _buildLocationSoloMarker(
+        context,
+        mapViewController,
+        mapViewController.locationToCheck!,
+      ),
     ];
   }
 
@@ -126,9 +114,8 @@ class MapPage extends StatelessWidget {
   Widget _buildMapSiblings(
     BuildContext context,
     MapViewController mapViewController,
-    bool noLocationToCheck,
   ) {
-    if (!noLocationToCheck) return const SizedBox.shrink();
+    if (mapViewController.isOnlyOneLocation) return const SizedBox.shrink();
 
     return Stack(
       children: [
@@ -519,9 +506,11 @@ class MapPage extends StatelessWidget {
 
     if (_useBottomSheetForMobile(context)) {
       mapViewController.shiftTargetForView(location.position);
-      LocationDetailsBottomSheet.show(context, locationBase: location).then((
-        _,
-      ) {
+      LocationDetailsBottomSheet.show(
+        context,
+        locationBase: location,
+        canOpenInNewPage: !mapViewController.isOnlyOneLocation,
+      ).then((_) {
         mapViewController.restoreCenterAfterSheet();
         mapViewController.selectLocation(null);
       });
@@ -531,9 +520,11 @@ class MapPage extends StatelessWidget {
         isMobileSheetOpen: false,
       );
       //LocationDetailsGeneralDialog.show(context, locationDetailsController).then((
-      LocationDetailsGeneralDialog.show(context, locationBase: location).then((
-        _,
-      ) {
+      LocationDetailsGeneralDialog.show(
+        context,
+        locationBase: location,
+        canOpenInNewPage: !mapViewController.isOnlyOneLocation,
+      ).then((_) {
         mapViewController.restoreCenterAfterSheet();
         mapViewController.selectLocation(null);
       });
