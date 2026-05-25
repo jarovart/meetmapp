@@ -14,6 +14,7 @@ import 'package:meetmaap/app/model/request/createlocation_request.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/slicelist_response.dart';
 import 'package:meetmaap/app/model/util/api_exception_wrapper.dart';
+import 'package:meetmaap/app/model/util/locationbounds.dart';
 import 'package:meetmaap/app/repository/util/api_response_handler.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 
@@ -203,8 +204,7 @@ class LocationRepository {
 
   static Future<SliceResponse<LocationBaseResponse>> fetchAllLocationsByFilter(
     String searchText,
-    LatLng position,
-    double radiusKm,
+    LocationBounds bounds,
     DateTime startDate,
     DateTime endDate, {
     required int page,
@@ -216,9 +216,10 @@ class LocationRepository {
           .replace(
             queryParameters: {
               'query': searchText,
-              'lat': position.latitude.toString(),
-              'lng': position.longitude.toString(),
-              'radiusKm': radiusKm.toString(),
+              'minLat': bounds.minLat.toString(),
+              'maxLat': bounds.maxLat.toString(),
+              'minLng': bounds.minLng.toString(),
+              'maxLng': bounds.maxLng.toString(),
               'rangeStart': startDate.toIso8601String(),
               'rangeEnd': endDate.toIso8601String(),
               'page': page.toString(),

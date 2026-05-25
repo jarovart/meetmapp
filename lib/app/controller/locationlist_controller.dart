@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/app/model/util/locationbounds.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
@@ -160,6 +162,25 @@ class LocationListController extends ChangeNotifier {
     return false;
   }
 
+  LocationBounds _buildBoundsFromCenter({
+    required LatLng center,
+    required double boxSizeKm,
+  }) {
+    final halfKm = boxSizeKm / 2;
+
+    final latDelta = halfKm / 111.0;
+    final lngDelta =
+        halfKm /
+        (111.0 * cos(center.latitude * pi / 180).abs().clamp(0.01, 1.0));
+
+    return LocationBounds(
+      minLat: center.latitude - latDelta,
+      maxLat: center.latitude + latDelta,
+      minLng: center.longitude - lngDelta,
+      maxLng: center.longitude + lngDelta,
+    );
+  }
+
   // ─────────────────────────────────────────────
   // API CALL BEHAVIOR
   // ─────────────────────────────────────────────
@@ -181,10 +202,14 @@ class LocationListController extends ChangeNotifier {
       _hasMore = true;
       notifyListeners();
 
+      final bounds = _buildBoundsFromCenter(
+        center: _filterCenter ?? _currentLocation!,
+        boxSizeKm: _filterRadiusKm,
+      );
+
       final result = await LocationService.fetchLocationsByFilterSettings(
         query,
-        _filterCenter ?? _currentLocation!,
-        _filterRadiusKm,
+        bounds,
         _filterStart ?? _resetStart,
         _filterEnd ?? _resetEnd,
         page: _page,
@@ -223,11 +248,15 @@ class LocationListController extends ChangeNotifier {
       _isLoadingMore = true;
       notifyListeners();
 
+      final bounds = _buildBoundsFromCenter(
+        center: _filterCenter ?? _currentLocation!,
+        boxSizeKm: _filterRadiusKm,
+      );
+
       debugPrint("loadmore1");
       final result = await LocationService.fetchLocationsByFilterSettings(
         query,
-        _filterCenter ?? _currentLocation!,
-        _filterRadiusKm,
+        bounds,
         _filterStart ?? _resetStart,
         _filterEnd ?? _resetEnd,
         page: _page,
