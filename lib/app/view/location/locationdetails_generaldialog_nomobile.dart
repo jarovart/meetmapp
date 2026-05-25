@@ -20,11 +20,11 @@ class LocationDetailsGeneralDialog extends StatelessWidget {
       barrierLabel: 'Location details',
       barrierColor: Colors.black.withValues(alpha: 0.25),
       transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (_, _, _) {
+      pageBuilder: (dialogContext, _, _) {
         return ChangeNotifierProvider(
           create: (_) => LocationDetailsController(
             authController: context.read<AuthController>(),
-          )..load('', locationBase),
+          )..load(locationBase.id.toString(), locationBase),
           child: SafeArea(
             left: false,
             right: true,
@@ -40,7 +40,7 @@ class LocationDetailsGeneralDialog extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: SizedBox(
                   width: 420,
-                  height: MediaQuery.of(context).size.height,
+                  height: MediaQuery.of(dialogContext).size.height,
                   child: SafeArea(
                     left: true,
                     child: LocationDetailsGeneralDialog(

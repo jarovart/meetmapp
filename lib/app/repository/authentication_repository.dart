@@ -197,4 +197,12 @@ class AuthRepository {
       'Authorization': 'Bearer $token',
     };
   }
+
+  static Future<Map<String, String>> authHeaderMultipartWithException() async {
+    final token = await AuthRepository.getToken();
+    if (token == null || token.isEmpty) {
+      throw NotLoggedInException();
+    }
+    return {'Authorization': 'Bearer $token'};
+  }
 }

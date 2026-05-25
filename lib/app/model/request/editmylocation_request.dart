@@ -1,6 +1,7 @@
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/model/request/image_request.dart';
 
-class EditMyLocationRequest {
+class UpdateMyLocationRequest {
   final int id;
   final String title;
   final String description;
@@ -8,9 +9,9 @@ class EditMyLocationRequest {
   final LatLng position;
   final DateTime startDateTime;
   final DateTime endDateTime;
-  //List<ImageOrderItem> imageOrder
+  final List<ImageRequest> imageRequests;
 
-  EditMyLocationRequest({
+  UpdateMyLocationRequest({
     required this.id,
     required this.title,
     required this.description,
@@ -18,7 +19,7 @@ class EditMyLocationRequest {
     required this.position,
     required this.startDateTime,
     required this.endDateTime,
-    //required this.imageOrder,
+    required this.imageRequests,
   });
 
   Map<String, dynamic> toMap() {
@@ -31,6 +32,7 @@ class EditMyLocationRequest {
       "longitude": position.longitude,
       "startDateTime": startDateTime.toIso8601String(),
       "endDateTime": endDateTime.toIso8601String(),
+      'imageRequests': imageRequests.map((e) => e.toOrderMap()).toList(),
     };
   }
 }

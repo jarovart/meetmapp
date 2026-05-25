@@ -331,24 +331,74 @@ class LocationRepository {
     });
   }
 
-  static Future<LocationFullResponse> updateMyLocation(
-    EditMyLocationRequest editMyLocationRequest,
+  static Future<LocationFullResponse> updateMyLocation1(
+    UpdateMyLocationRequest updateMyLocationRequest,
   ) async {
     return ApiExceptionWrapper.guard(() async {
       final uri = Uri.parse(
-        '${ApiConfig.baseUrl}/api/locations/${editMyLocationRequest.id}',
+        '${ApiConfig.baseUrl}/api/locations/${updateMyLocationRequest.id}',
       );
       final headers = await AuthRepository.authHeadersWithException();
       final response = await http.patch(
         uri,
         headers: headers,
-        body: jsonEncode(editMyLocationRequest.toMap()),
+        body: jsonEncode(updateMyLocationRequest.toMap()),
       );
 
       final body = ApiResponseHandler.parseJsonObject(response);
       final updateLocation = LocationFullResponse.fromMap(body);
 
       return updateLocation;
+    });
+  }
+
+  static Future<LocationFullResponse> updateMyLocation(
+    UpdateMyLocationRequest updateMyLocationRequest,
+  ) async {
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse(
+        '${ApiConfig.baseUrl}/api/locations/${updateMyLocationRequest.id}',
+      );
+
+      final headers = await AuthRepository.authHeaderMultipartWithException();
+
+      final request = http.MultipartRequest('PATCH', uri);
+      request.headers.addAll(headers);
+
+      //request.fields['data'] = jsonEncode(updateMyLocationRequest.toMap());
+      request.files.add(
+        http.MultipartFile.fromString(
+          'data',
+          jsonEncode(updateMyLocationRequest.toMap()),
+          contentType: http.MediaType('application', 'json'),
+        ),
+      );
+
+      final newImages = updateMyLocationRequest.imageRequests
+          .where((img) => img.isNew)
+          .toList();
+
+      for (final image in newImages) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'files',
+            image.bytes,
+            filename: '${image.clientKey}.jpg',
+          ),
+        );
+
+        request.fields['clientKeys'] = [
+          if (request.fields['clientKeys'] != null)
+            ...request.fields['clientKeys']!.split(','),
+          image.clientKey,
+        ].join(',');
+      }
+
+      final streamed = await request.send();
+      final response = await http.Response.fromStream(streamed);
+
+      final body = ApiResponseHandler.parseJsonObject(response);
+      return LocationFullResponse.fromMap(body);
     });
   }
 }

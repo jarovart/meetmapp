@@ -7,9 +7,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/request/editmylocation_request.dart';
+import 'package:meetmaap/app/model/request/image_request.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/model/util/edit_image.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
@@ -36,7 +36,7 @@ class EditMyLocationController extends ChangeNotifier {
   final TextEditingController _addressCtrl = TextEditingController();
   LatLng? _position;
 
-  List<EditableLocationImage> _images = [];
+  List<ImageRequest> _images = [];
 
   // ─────────────────────────────────────────────
   // STATE
@@ -68,7 +68,7 @@ class EditMyLocationController extends ChangeNotifier {
       ? 'lat: ${_position!.latitude}, lng: ${_position!.longitude}'
       : '';
 
-  List<EditableLocationImage> get images => _images;
+  List<ImageRequest> get images => _images;
 
   // ─────────────────────────────────────────────
   // STATE MUTATION
@@ -151,16 +151,16 @@ class EditMyLocationController extends ChangeNotifier {
 
   Future<void> _loadImages() async {
     _images.clear();
-
+    int sortIndex = 0;
     for (final image in location.images) {
       final response = await http.get(Uri.parse(image.imageUrl));
 
       if (response.statusCode == 200) {
         _images.add(
-          EditableLocationImage(
+          ImageRequest.existing(
             id: image.id,
             bytes: response.bodyBytes,
-            isNew: false,
+            sortIndex: sortIndex++,
           ),
         );
       }
@@ -187,7 +187,7 @@ class EditMyLocationController extends ChangeNotifier {
       final compressed = await compute(_compressImage, bytes);
 
       _images.add(
-        EditableLocationImage(id: null, bytes: compressed, isNew: true),
+        ImageRequest.newImage(bytes: compressed, sortIndex: _images.length),
       );
     } catch (e) {
       debugPrint("Add image failed: $e");
@@ -221,6 +221,16 @@ class EditMyLocationController extends ChangeNotifier {
     return Uint8List.fromList(img.encodeJpg(resized, quality: 80));
   }
 
+  List<ImageRequest> _imagesWithUpdatedSortIndex() {
+    return _images.asMap().entries.map((entry) {
+      return entry.value.copyWithSortIndex(entry.key);
+    }).toList();
+  }
+
+  // ─────────────────────────────────────────────
+  // API CALL BEHAVIOR
+  // ─────────────────────────────────────────────
+
   Future<bool> saveLocation() async {
     if (!_formKey.currentState!.validate()) {
       _errorMessage = "Bitte alle Pflichtfelder ausfüllen.";
@@ -240,21 +250,9 @@ class EditMyLocationController extends ChangeNotifier {
       _uploading = true;
       notifyListeners();
 
-      final keepImageIds = _images
-          .where((img) => img.id != null)
-          .map((img) => img.id!)
-          .toList();
+      final orderedImages = _imagesWithUpdatedSortIndex();
 
-      final newImages = _images
-          .where((img) => img.isNew)
-          .map((img) => img.bytes)
-          .toList();
-
-      final thumbnailImageId = keepImageIds.isNotEmpty
-          ? keepImageIds.first
-          : null;
-
-      final editMyLocationRequest = EditMyLocationRequest(
+      final updateMyLocationRequest = UpdateMyLocationRequest(
         id: location.id,
         title: titleCtrl.text.trim(),
         description: descriptionCtrl.text.trim(),
@@ -262,16 +260,14 @@ class EditMyLocationController extends ChangeNotifier {
         position: LatLng(position.latitude, position.longitude),
         startDateTime: selectedStartDateTime!,
         endDateTime: selectedEndDateTime!,
-        //imageOrder: _myProfile!.username,
+        imageRequests: orderedImages,
       );
 
-      LocationFullResponse locationFull =
-          await LocationService.updateMyLocation(
-            editMyLocationRequest,
-            newImages,
-          );
-
+      final locationFull = await LocationService.updateMyLocation(
+        updateMyLocationRequest,
+      );
       _location = locationFull;
+
       return true;
     } catch (e, st) {
       debugPrint('Error while updating location: $e');
@@ -288,8 +284,3 @@ class EditMyLocationController extends ChangeNotifier {
     return false;
   }
 }
-
-  // ─────────────────────────────────────────────
-  // API CALL BEHAVIOR
-  // ─────────────────────────────────────────────
-

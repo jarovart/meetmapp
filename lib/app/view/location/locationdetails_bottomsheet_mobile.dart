@@ -29,7 +29,7 @@ class LocationDetailsBottomSheet extends StatelessWidget {
         return ChangeNotifierProvider(
           create: (_) => LocationDetailsController(
             authController: context.read<AuthController>(),
-          )..load('', locationBase),
+          )..load(locationBase.id.toString(), locationBase),
           child: LocationDetailsBottomSheet(canOpenInNewPage: canOpenInNewPage),
         );
       },

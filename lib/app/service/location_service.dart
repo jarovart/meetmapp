@@ -163,14 +163,10 @@ class LocationService {
   }
 
   static Future<LocationFullResponse> updateMyLocation(
-    EditMyLocationRequest editMyLocationRequest,
-    List<Uint8List> newImages,
+    UpdateMyLocationRequest updateMyLocationRequest,
   ) async {
-    if (newImages.isNotEmpty) {
-      //await delete old images?
-    }
     final locationFull = await LocationRepository.updateMyLocation(
-      editMyLocationRequest,
+      updateMyLocationRequest,
     );
     return locationFull;
   }
