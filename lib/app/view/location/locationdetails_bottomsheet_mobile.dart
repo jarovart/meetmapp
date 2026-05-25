@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/view/location/locationdetails_content.dart';
@@ -26,7 +27,9 @@ class LocationDetailsBottomSheet extends StatelessWidget {
       ),
       builder: (_) {
         return ChangeNotifierProvider(
-          create: (_) => LocationDetailsController()..load(locationBase),
+          create: (_) => LocationDetailsController(
+            authController: context.read<AuthController>(),
+          )..load('', locationBase),
           child: LocationDetailsBottomSheet(canOpenInNewPage: canOpenInNewPage),
         );
       },

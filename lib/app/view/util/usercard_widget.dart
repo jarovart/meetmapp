@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
 
 class UserCard extends StatelessWidget {
@@ -11,8 +12,10 @@ class UserCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () =>
-          context.push('/profile/${userbase.username}', extra: userbase),
+      onTap: () => context.push(
+        RouteConfig.getProfileUrl(userbase.username),
+        extra: userbase,
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

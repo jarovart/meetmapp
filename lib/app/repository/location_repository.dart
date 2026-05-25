@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/config/api_config.dart';
 import 'package:meetmaap/app/model/enums/locationtype_enum.dart';
 import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
+import 'package:meetmaap/app/model/request/editmylocation_request.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/request/createlocation_request.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
@@ -327,6 +328,27 @@ class LocationRepository {
 
       ApiResponseHandler.ensureSuccess(response);
       return true;
+    });
+  }
+
+  static Future<LocationFullResponse> updateMyLocation(
+    EditMyLocationRequest editMyLocationRequest,
+  ) async {
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse(
+        '${ApiConfig.baseUrl}/api/locations/${editMyLocationRequest.id}',
+      );
+      final headers = await AuthRepository.authHeadersWithException();
+      final response = await http.patch(
+        uri,
+        headers: headers,
+        body: jsonEncode(editMyLocationRequest.toMap()),
+      );
+
+      final body = ApiResponseHandler.parseJsonObject(response);
+      final updateLocation = LocationFullResponse.fromMap(body);
+
+      return updateLocation;
     });
   }
 }

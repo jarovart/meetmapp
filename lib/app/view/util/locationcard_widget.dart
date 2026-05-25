@@ -15,7 +15,10 @@ class LocationCard extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => context.push(RouteConfig.locationUrl, extra: locationbase),
+      onTap: () => context.push(
+        RouteConfig.getLocationUrl(locationbase.id),
+        extra: locationbase,
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

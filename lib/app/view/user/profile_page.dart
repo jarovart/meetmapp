@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:meetmaap/app/controller/profile_controller.dart';
@@ -37,7 +38,10 @@ class UserProfilePage extends StatelessWidget {
                     if (!context.mounted || myUserId == null) return;
 
                     final result = await context.push<bool>(
-                      "/profile/${profileController.myProfile!.username}/edit",
+                      RouteConfig.getProfileEditUrl(
+                        profileController.myProfile!.username,
+                      ),
+                      //"/profile/${profileController.myProfile!.username}/edit",
                       extra: profileController.myProfile,
                     );
                     if (result == true) {

@@ -69,8 +69,8 @@ class LocationDetailsContent extends StatelessWidget {
                       const SizedBox(width: 16),
                       OutlinedButton.icon(
                         onPressed: () async => context.push(
-                          RouteConfig.locationUrl,
-                          extra: controller,
+                          RouteConfig.getLocationUrl(location.id),
+                          extra: location,
                         ),
                         label: const Text("Open"),
                       ),

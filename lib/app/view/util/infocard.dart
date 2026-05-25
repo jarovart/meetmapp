@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class InfoCard extends StatelessWidget {
   final Widget child;
+  final String? title;
 
-  const InfoCard({required this.child});
+  const InfoCard({required this.child, this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,17 @@ class InfoCard extends StatelessWidget {
           ),
         ],
       ),
-      child: child,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title != null)
+            Text(
+              title!,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          child,
+        ],
+      ),
     );
   }
 }

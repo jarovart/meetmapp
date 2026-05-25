@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/config/app_config.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
+import 'package:meetmaap/app/controller/edit_mylocation_controller.dart';
 import 'package:meetmaap/app/controller/editmyprofile_controller.dart';
 import 'package:meetmaap/app/controller/home_controller.dart';
 import 'package:meetmaap/app/controller/locationcreate_controller.dart';
@@ -25,6 +26,7 @@ import 'package:meetmaap/app/view/authentication/registercheckemailpage.dart';
 import 'package:meetmaap/app/view/authentication/registerpage.dart';
 import 'package:meetmaap/app/view/authentication/resetpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
+import 'package:meetmaap/app/view/location/edit_mylocation_page.dart';
 import 'package:meetmaap/app/view/location/locationdetail_page.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 import 'package:meetmaap/app/view/setting/setting_page.dart';
@@ -117,36 +119,34 @@ class MainApplication extends StatelessWidget {
       GoRoute(
         path: RouteConfig.locationUrl,
         builder: (context, state) {
-          final extra = state.extra;
+          final locationId = state.pathParameters['locationId'];
+          final location = state.extra as LocationBaseResponse?;
+          final authController = context.read<AuthController>();
 
-          late final LocationDetailsController controller;
-
-          if (extra is LocationDetailsController) {
-            controller = extra;
-          } else if (extra is LocationBaseResponse) {
-            controller = LocationDetailsController();
-            controller.load(extra);
-          } else {
-            return const Scaffold(
-              body: Center(
-                child: Text('Location konnte nicht geladen werden.'),
-              ),
-            );
-          }
-
-          if (extra is LocationDetailsController) {
-            return ChangeNotifierProvider.value(
-              value: extra,
-              child: const LocationDetailPage(),
-            );
-          }
-
-          return ChangeNotifierProvider<LocationDetailsController>.value(
-            key: ValueKey(controller),
-            value: controller,
+          return ChangeNotifierProvider(
+            create: (_) =>
+                LocationDetailsController(authController: authController)
+                  ..load(locationId, location),
             child: const LocationDetailPage(),
           );
         },
+        routes: [
+          GoRoute(
+            path: RouteConfig.editUrl,
+            builder: (context, state) {
+              final locationId = state.pathParameters['locationId'];
+              final location = state.extra as LocationFullResponse?;
+              final authController = context.read<AuthController>();
+
+              return ChangeNotifierProvider(
+                create: (_) =>
+                    EditMyLocationController(authController: authController)
+                      ..load(locationId, location),
+                child: EditMyLocationPage(),
+              );
+            },
+          ),
+        ],
       ),
 
       GoRoute(
@@ -209,7 +209,7 @@ class MainApplication extends StatelessWidget {
         },
         routes: [
           GoRoute(
-            path: RouteConfig.profileEditUrl,
+            path: RouteConfig.editUrl,
             builder: (context, state) {
               final username = state.pathParameters['username'];
               return ChangeNotifierProvider(

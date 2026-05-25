@@ -1,0 +1,295 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/controller/auth_controller.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
+import 'package:meetmaap/app/model/request/editmylocation_request.dart';
+import 'package:meetmaap/app/model/response/locationfull_response.dart';
+import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
+import 'package:meetmaap/app/model/util/edit_image.dart';
+import 'package:meetmaap/app/service/location_service.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+
+class EditMyLocationController extends ChangeNotifier {
+  final AuthController authController;
+
+  EditMyLocationController({required this.authController});
+
+  final picker = ImagePicker();
+  bool _isLoading = false;
+  bool _uploading = false;
+  String? _errorMessage;
+  bool _isSaving = false;
+  UserMyProfileResponse? _myProfile;
+  LocationFullResponse? _location;
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleCtrl = TextEditingController();
+  final TextEditingController _descriptionCtrl = TextEditingController();
+
+  DateTime? _selectedStartDateTime;
+  DateTime? _selectedEndDateTime;
+
+  final TextEditingController _addressCtrl = TextEditingController();
+  LatLng? _position;
+
+  List<EditableLocationImage> _images = [];
+
+  // ─────────────────────────────────────────────
+  // STATE
+  // ─────────────────────────────────────────────
+  bool get isLoading => _isLoading;
+  bool get isOwnerOfProfile => true;
+
+  bool get isSaving => _isSaving;
+
+  bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
+
+  bool get isUploading => _uploading;
+
+  String get errorMessage => _errorMessage ?? "Unbekannter Fehler";
+
+  LocationFullResponse get location => _location!;
+
+  GlobalKey<FormState> get formKey => _formKey;
+
+  TextEditingController get titleCtrl => _titleCtrl;
+  TextEditingController get descriptionCtrl => _descriptionCtrl;
+
+  DateTime? get selectedStartDateTime => _selectedStartDateTime;
+  DateTime? get selectedEndDateTime => _selectedEndDateTime;
+
+  TextEditingController get addressCtrl => _addressCtrl;
+  LatLng get position => _position!;
+  String get positionAsString => _position != null
+      ? 'lat: ${_position!.latitude}, lng: ${_position!.longitude}'
+      : '';
+
+  List<EditableLocationImage> get images => _images;
+
+  // ─────────────────────────────────────────────
+  // STATE MUTATION
+  // ─────────────────────────────────────────────
+  set selectedStartDateTime(DateTime? value) {
+    _errorMessage = null;
+    _selectedStartDateTime = value;
+    notifyListeners();
+  }
+
+  set selectedEndDateTime(DateTime? value) {
+    _errorMessage = null;
+    _selectedEndDateTime = value;
+    notifyListeners();
+  }
+
+  set selectedPosition(LatLng value) {
+    _errorMessage = null;
+    _position = value;
+    notifyListeners();
+  }
+
+  // ─────────────────────────────────────────────
+  // FUNCTIONS
+  // ─────────────────────────────────────────────
+  Future<void> load(String? locationId, LocationFullResponse? location) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      if (!(authController.isLoggedIn)) throw NotLoggedInException();
+      if (location == null) {
+        final id = int.tryParse(locationId ?? '');
+        if (id == null) throw CustomAppException("Ungültige Locationid");
+
+        _location = await LocationService.fetchFullLocation(id);
+      } else {
+        _location = location;
+      }
+      _myProfile = authController.myProfile;
+      if (_myProfile?.username != _location?.createdUsername) {
+        throw CustomAppException(
+          "Sie sind nicht der Besitzer der Location und können diese daher nicht bearbeiten.",
+        );
+      }
+      //setCurrentProfileImageUrl(_myProfile?.profileImage?.imageUrl ?? '');
+      await _initEditFields();
+    } catch (e, st) {
+      debugPrint('load editprofile failed: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Profil konnte nicht geladen werden.',
+      );
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initEditFields() async {
+    _titleCtrl.text = _location?.title ?? '';
+    _descriptionCtrl.text = _location?.description ?? '';
+    _selectedStartDateTime = location.startDateTime;
+    _selectedEndDateTime = location.endDateTime;
+    _addressCtrl.text = location.address;
+    _position = location.position;
+    await _loadImages();
+    //_lastNameCtrl.text = _myProfile?.lastName ?? '';
+    //_aboutMeCtrl.text = _myProfile?.aboutMe ?? '';
+  }
+
+  Future<void> _loadImages() async {
+    _images.clear();
+
+    for (final image in location.images) {
+      final response = await http.get(Uri.parse(image.imageUrl));
+
+      if (response.statusCode == 200) {
+        _images.add(
+          EditableLocationImage(
+            id: image.id,
+            bytes: response.bodyBytes,
+            isNew: false,
+          ),
+        );
+      }
+    }
+  }
+
+  void resetAddress() {
+    _addressCtrl.text = location.address;
+    notifyListeners();
+  }
+
+  Future<void> addImage() async {
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 100,
+    );
+
+    if (picked == null) return;
+
+    _uploading = true;
+    notifyListeners();
+    try {
+      final bytes = await picked.readAsBytes();
+      final compressed = await compute(_compressImage, bytes);
+
+      _images.add(
+        EditableLocationImage(id: null, bytes: compressed, isNew: true),
+      );
+    } catch (e) {
+      debugPrint("Add image failed: $e");
+    } finally {
+      _uploading = false;
+      notifyListeners();
+    }
+  }
+
+  void reorderImages(int oldIndex, int newIndex) {
+    if (newIndex > oldIndex) newIndex--;
+    final img = _images.removeAt(oldIndex);
+    _images.insert(newIndex, img);
+    notifyListeners();
+  }
+
+  void removeImage(int index) {
+    _images.removeAt(index);
+    notifyListeners();
+  }
+
+  static Uint8List _compressImage(Uint8List bytes) {
+    final image = img.decodeImage(bytes);
+    if (image == null) return bytes;
+
+    final resized = img.copyResize(
+      image,
+      width: image.width > 1280 ? 1280 : image.width,
+    );
+
+    return Uint8List.fromList(img.encodeJpg(resized, quality: 80));
+  }
+
+  Future<bool> saveLocation() async {
+    if (!_formKey.currentState!.validate()) {
+      _errorMessage = "Bitte alle Pflichtfelder ausfüllen.";
+      notifyListeners();
+      return false;
+    }
+
+    if (selectedStartDateTime == null ||
+        selectedEndDateTime == null ||
+        selectedEndDateTime!.isBefore(selectedStartDateTime!)) {
+      _errorMessage =
+          "Bitte ein Start- und ein Enddatum auswählen und Enddatum darf nicht vor Startdatum sein.";
+      notifyListeners();
+      return false;
+    }
+    try {
+      _uploading = true;
+      notifyListeners();
+
+      final keepImageIds = _images
+          .where((img) => img.id != null)
+          .map((img) => img.id!)
+          .toList();
+
+      final newImages = _images
+          .where((img) => img.isNew)
+          .map((img) => img.bytes)
+          .toList();
+
+      final thumbnailImageId = keepImageIds.isNotEmpty
+          ? keepImageIds.first
+          : null;
+
+      final editMyLocationRequest = EditMyLocationRequest(
+        id: location.id,
+        title: titleCtrl.text.trim(),
+        description: descriptionCtrl.text.trim(),
+        address: addressCtrl.text.trim(),
+        position: LatLng(position.latitude, position.longitude),
+        startDateTime: selectedStartDateTime!,
+        endDateTime: selectedEndDateTime!,
+        //imageOrder: _myProfile!.username,
+      );
+
+      LocationFullResponse locationFull =
+          await LocationService.updateMyLocation(
+            editMyLocationRequest,
+            newImages,
+          );
+
+      _location = locationFull;
+      return true;
+    } catch (e, st) {
+      debugPrint('Error while updating location: $e');
+      debugPrintStack(stackTrace: st);
+
+      _errorMessage = AppErrorMapper.toUserMessage(
+        e,
+        fallback: 'Fehler beim Aktualisieren der Location.',
+      );
+    } finally {
+      _uploading = false;
+      notifyListeners();
+    }
+    return false;
+  }
+}
+
+  // ─────────────────────────────────────────────
+  // API CALL BEHAVIOR
+  // ─────────────────────────────────────────────
+

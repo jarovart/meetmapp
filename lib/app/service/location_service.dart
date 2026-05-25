@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/model/request/createlocation_request.dart';
 import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
+import 'package:meetmaap/app/model/request/editmylocation_request.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/slicelist_response.dart';
@@ -157,5 +160,18 @@ class LocationService {
     ];
 
     return parts.where((e) => e != null).join(', ');
+  }
+
+  static Future<LocationFullResponse> updateMyLocation(
+    EditMyLocationRequest editMyLocationRequest,
+    List<Uint8List> newImages,
+  ) async {
+    if (newImages.isNotEmpty) {
+      //await delete old images?
+    }
+    final locationFull = await LocationRepository.updateMyLocation(
+      editMyLocationRequest,
+    );
+    return locationFull;
   }
 }

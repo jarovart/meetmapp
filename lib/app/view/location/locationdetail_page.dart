@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:meetmaap/app/config/app_config.dart';
+import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
 import 'package:meetmaap/app/view/util/InfoRow.dart';
 import 'package:meetmaap/app/view/util/gallery_widget.dart';
@@ -26,7 +27,7 @@ class LocationDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(controller.locationBase?.title ?? 'Location'),
+        title: Text(controller.title),
         centerTitle: true,
         actions: [
           if (controller.canEdit)
@@ -35,7 +36,7 @@ class LocationDetailPage extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: () async {
                   final result = await context.push<bool>(
-                    "/location/${controller.locationFull}/edit",
+                    RouteConfig.getLocationEditUrl(controller.locationFull!.id),
                     extra: controller.locationFull,
                   );
                   if (result == true) {
@@ -229,7 +230,7 @@ class LocationDetailPage extends StatelessWidget {
                                 onTap: (!controller.hasLocation)
                                     ? null
                                     : () => context.push(
-                                        '/map',
+                                        RouteConfig.mapUrl,
                                         extra: controller.location,
                                       ),
                               ),

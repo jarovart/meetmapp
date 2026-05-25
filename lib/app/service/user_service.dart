@@ -39,11 +39,11 @@ class UserService {
     return await UserRepository.fetchFullUserById(user.id);
   }
 
-  static Future fetchMyProfile() async {
+  static Future<UserMyProfileResponse> fetchMyProfile() async {
     return await UserRepository.fetchMyProfile();
   }
 
-  static Future updateMyProfile(
+  static Future<UserMyProfileResponse> updateMyProfile(
     EditMyProfileRequest request,
     Uint8List? profileImage,
     bool removeCurrentImage,

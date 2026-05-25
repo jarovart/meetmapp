@@ -1,22 +1,25 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:meetmaap/app/controller/auth_controller.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/service/navigation_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class LocationDetailsController extends ChangeNotifier {
-  LocationBaseResponse? _locationBase;
+  final AuthController authController;
 
+  LocationDetailsController({required this.authController});
   // ─────────────────────────────────────────────
   // STATE
   // ─────────────────────────────────────────────
   bool _isLoading = false;
   String? _errorMessage;
+  LocationBaseResponse? _locationBase;
   LocationFullResponse? _locationFull;
   UserMyProfileResponse? _myProfile;
   Timer? _toggleDebounce;
@@ -71,25 +74,31 @@ class LocationDetailsController extends ChangeNotifier {
   // FUNCTIONS
   // ─────────────────────────────────────────────
 
-  Future<void> load(LocationBaseResponse? locationBase) async {
+  Future<void> load(
+    String? locationId,
+    LocationBaseResponse? locationBase,
+  ) async {
+    if (_isLoading) return;
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
     try {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
       if (locationBase == null) {
-        debugPrint('LocationDetailsController: locationBase is null!');
-        return;
-      }
-      _locationBase = locationBase;
+        final id = int.tryParse(locationId ?? '');
+        if (id == null) throw CustomAppException("Ungültige Locationid");
 
-      if (await AuthService.isLoggedIn()) {
-        _myProfile = await AuthService.getMyUserProfile();
+        _locationFull = await LocationService.fetchFullLocation(id);
+        _locationBase = _locationFull;
+      } else {
+        _locationBase = locationBase;
       }
+      _myProfile = authController.myProfile;
 
-      _locationFull = _locationBase is LocationFullResponse
-          // ignore: unnecessary_cast
+      _locationFull ??= _locationBase is LocationFullResponse
           ? _locationBase as LocationFullResponse
-          : await LocationService.fetchFullLocation(locationBase.id);
+          : await LocationService.fetchFullLocation(_locationBase!.id);
+
       _likedUserCount = _locationFull!.likedUserCount;
       _joinedUserCount = _locationFull!.joinedUserCount;
       _isLiked = _locationFull!.likedByCurrentUser ?? false;
@@ -108,7 +117,11 @@ class LocationDetailsController extends ChangeNotifier {
   }
 
   Future<void> reload() async {
-    await load(_locationBase);
+    final id = _locationFull?.id ?? _locationBase?.id;
+
+    if (id == null) return;
+    _locationFull = null;
+    await load(id.toString(), null);
   }
 
   // ─────────────────────────────────────────────

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
@@ -70,6 +71,8 @@ class MapPage extends StatelessWidget {
                   onMapEvent: (event) {
                     if (event is MapEventTap) {
                       mapViewController.selectLocation(null);
+                    } else if (event is MapEventLongPress) {
+                      GoRouter.of(context).pop(event.tapPosition);
                     }
                   },
                 ),
@@ -115,7 +118,9 @@ class MapPage extends StatelessWidget {
     BuildContext context,
     MapViewController mapViewController,
   ) {
-    if (mapViewController.isOnlyOneLocation) return const SizedBox.shrink();
+    if (mapViewController.isOnlyOneLocation) {
+      return _buildInfoBar(context, mapViewController);
+    }
 
     return Stack(
       children: [
@@ -208,6 +213,66 @@ class MapPage extends StatelessWidget {
           child: const Icon(Icons.my_location, color: Colors.blue, size: 40),
         ),
       ],
+    );
+  }
+
+  Widget _buildInfoBar(
+    BuildContext context,
+    MapViewController mapViewController,
+  ) {
+    return Positioned(
+      top: MediaQuery.of(context).size.height * 0.05,
+      left: 0,
+      right: 0,
+      child: IgnorePointer(
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 380),
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 24,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.place_outlined, size: 28, color: Colors.black87),
+                SizedBox(height: 8),
+                Text(
+                  "Choose the perfect place",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "Long press anywhere on the map to drop a pin and set the location.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    color: Colors.black54,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 

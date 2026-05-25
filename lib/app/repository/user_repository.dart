@@ -103,7 +103,7 @@ class UserRepository {
   ) async {
     return ApiExceptionWrapper.guard(() async {
       final uri = Uri.parse('${ApiConfig.baseUrl}/api/users/me');
-      final headers = await AuthRepository.authHeaders();
+      final headers = await AuthRepository.authHeadersWithException();
       final response = await http.patch(
         uri,
         headers: headers,
