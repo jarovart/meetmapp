@@ -1,13 +1,12 @@
 import 'dart:typed_data';
 
-import 'package:meetmaap/app/model/request/editmyprofile_request.dart';
+import 'package:meetmaap/app/model/request/updatemyprofile_request.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/slicelist_response.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
 import 'package:meetmaap/app/model/response/userfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/repository/user_repository.dart';
-import 'package:meetmaap/app/service/image_service.dart';
 
 class UserService {
   static Future<SliceResponse<UserBaseResponse>> fetchUsersByQuery(
@@ -44,17 +43,12 @@ class UserService {
   }
 
   static Future<UserMyProfileResponse> updateMyProfile(
-    EditMyProfileRequest request,
+    UpdateMyProfileRequest request,
     Uint8List? profileImage,
-    bool removeCurrentImage,
   ) async {
-    if (removeCurrentImage) {
-      await ImageService.deleteMyProfileImage();
-    } else if (profileImage != null && profileImage.isNotEmpty) {
-      await ImageService.uploadImageForUserProfile(profileImage);
-    }
     UserMyProfileResponse userResponse = await UserRepository.updateMyProfile(
       request,
+      profileImage,
     );
     return userResponse;
   }

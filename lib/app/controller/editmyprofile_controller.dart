@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/request/editmyprofile_request.dart';
+import 'package:meetmaap/app/model/request/updatemyprofile_request.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/service/user_service.dart';
@@ -179,16 +179,16 @@ class EditMyProfileController extends ChangeNotifier {
   }
 
   Future<void> _updateMyProfile() async {
-    final profileRequest = EditMyProfileRequest(
+    final profileRequest = UpdateMyProfileRequest(
       firstName: firstNameCtrl.text.trim(),
       lastName: lastNameCtrl.text.trim(),
       aboutMe: aboutMeCtrl.text.trim(),
+      removeProfileImage: _removeCurrentProfileImage,
     );
 
     final updatedProfile = await UserService.updateMyProfile(
       profileRequest,
       _selectedProfileImage,
-      _removeCurrentProfileImage,
     );
     _myProfile = updatedProfile;
     _currentProfileImageUrl = _myProfile?.profileImage?.imageUrl ?? '';

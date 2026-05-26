@@ -20,12 +20,7 @@ class ImageRequest {
       clientKey = 'new_${DateTime.now().microsecondsSinceEpoch}';
 
   Map<String, dynamic> toOrderMap() {
-    return {
-      'id': id,
-      'clientKey': clientKey,
-      'isNew': isNew,
-      'sortIndex': sortIndex,
-    };
+    return {'id': id, 'clientKey': clientKey, 'isNew': isNew};
   }
 
   ImageRequest copyWithSortIndex(int index) {

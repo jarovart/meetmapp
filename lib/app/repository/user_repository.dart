@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:meetmaap/app/config/api_config.dart';
-import 'package:meetmaap/app/model/request/editmyprofile_request.dart';
+import 'package:meetmaap/app/model/request/updatemyprofile_request.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/slicelist_response.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
@@ -99,21 +100,43 @@ class UserRepository {
   }
 
   static Future<UserMyProfileResponse> updateMyProfile(
-    EditMyProfileRequest request,
+    UpdateMyProfileRequest updateRequest,
+    Uint8List? profileImage,
   ) async {
     return ApiExceptionWrapper.guard(() async {
       final uri = Uri.parse('${ApiConfig.baseUrl}/api/users/me');
-      final headers = await AuthRepository.authHeadersWithException();
-      final response = await http.patch(
-        uri,
-        headers: headers,
-        body: jsonEncode(request.toMap()),
+      final headers = await AuthRepository.authHeaderMultipartWithException();
+
+      final request = http.MultipartRequest('PATCH', uri);
+      request.headers.addAll(headers);
+
+      request.files.add(
+        http.MultipartFile.fromString(
+          'data',
+          jsonEncode(updateRequest.toMap()),
+          contentType: http.MediaType('application', 'json'),
+        ),
       );
+
+      if (profileImage != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'files',
+            profileImage!,
+            filename: 'image.jpg',
+            contentType: http.MediaType('image', 'jpeg'),
+          ),
+        );
+      }
+
+      final streamed = await request.send();
+      final response = await http.Response.fromStream(streamed);
 
       final body = ApiResponseHandler.parseJsonObject(response);
       final updatedProfile = UserMyProfileResponse.fromMap(body);
 
       await AuthRepository.saveMyProfile(updatedProfile);
+
       return updatedProfile;
     });
   }

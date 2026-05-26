@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/request/editmylocation_request.dart';
+import 'package:meetmaap/app/model/request/updatemylocation_request.dart';
 import 'package:meetmaap/app/model/request/image_request.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';

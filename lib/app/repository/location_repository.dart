@@ -8,7 +8,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/config/api_config.dart';
 import 'package:meetmaap/app/model/enums/locationtype_enum.dart';
 import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
-import 'package:meetmaap/app/model/request/editmylocation_request.dart';
+import 'package:meetmaap/app/model/request/updatemylocation_request.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/request/createlocation_request.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
@@ -385,14 +385,9 @@ class LocationRepository {
             'files',
             image.bytes,
             filename: '${image.clientKey}.jpg',
+            contentType: http.MediaType('image', 'jpeg'),
           ),
         );
-
-        request.fields['clientKeys'] = [
-          if (request.fields['clientKeys'] != null)
-            ...request.fields['clientKeys']!.split(','),
-          image.clientKey,
-        ].join(',');
       }
 
       final streamed = await request.send();
