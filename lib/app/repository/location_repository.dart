@@ -366,7 +366,6 @@ class LocationRepository {
       final request = http.MultipartRequest('PATCH', uri);
       request.headers.addAll(headers);
 
-      //request.fields['data'] = jsonEncode(updateMyLocationRequest.toMap());
       request.files.add(
         http.MultipartFile.fromString(
           'data',
