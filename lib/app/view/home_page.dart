@@ -6,6 +6,7 @@ import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/controller/home_controller.dart';
 import 'package:meetmaap/app/model/exception/exception_message.dart';
 import 'package:meetmaap/app/view/map_page.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class HomePage extends StatelessWidget {
   final HomeController homeController;
@@ -26,7 +27,7 @@ class HomePage extends StatelessWidget {
         children: [
           MapPage(),
           if (homeController.isMenuOpen) _buildMenuScrim(),
-          _buildSlidingMenu(),
+          _buildSlidingMenu(context),
         ],
       ),
     );
@@ -50,18 +51,18 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSlidingMenu() {
+  Widget _buildSlidingMenu(BuildContext context) {
     final loggedIn = homeController.loggedIn;
     final items = [
-      if (!loggedIn) "Login",
-      "Locations",
-      if (loggedIn) "Benutzer",
-      "Freunde",
-      "Favoriten",
+      if (!loggedIn) context.l10n.login,
+      context.l10n.locations,
+      if (loggedIn) context.l10n.users,
+      context.l10n.friends,
+      context.l10n.favourites,
       "Test-ShowModal",
       "Test-SliderGPS",
-      "Einstellungen",
-      if (loggedIn) "Logout",
+      context.l10n.settings,
+      if (loggedIn) context.l10n.logout,
     ];
 
     return _buildMenuWithItems(items);
@@ -100,15 +101,15 @@ class HomePage extends StatelessWidget {
                       leading: const Icon(Icons.arrow_right),
                       onTap: () async {
                         // handle navigation for special entries
-                        if (label == 'Login') {
+                        if (label == context.l10n.login) {
                           homeController.toggleMenu();
                           await context.push(RouteConfig.loginUrl);
                           return;
-                        } else if (label == 'Locations') {
+                        } else if (label == context.l10n.locations) {
                           homeController.toggleMenu();
                           context.push(RouteConfig.locationListUrl);
                           return;
-                        } else if (label == 'Benutzer') {
+                        } else if (label == context.l10n.users) {
                           homeController.toggleMenu();
                           context.push(RouteConfig.userListUrl);
                           return;
@@ -120,18 +121,18 @@ class HomePage extends StatelessWidget {
                           homeController.toggleMenu();
                           context.push(RouteConfig.testSliderGps);
                           return;
-                        } else if (label == "Einstellungen") {
+                        } else if (label == context.l10n.settings) {
                           homeController.toggleMenu();
                           context.push(RouteConfig.settingsUrl);
                           return;
-                        } else if (label == "Logout") {
+                        } else if (label == context.l10n.logout) {
                           homeController.toggleMenu();
                           authController.logout();
                           return;
                         }
                         ExceptionMessage.showError(
                           context,
-                          "Ausgewaehlt: $label",
+                          context.l10n.choosedLabel(label),
                         );
                       },
                     );

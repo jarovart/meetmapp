@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class LocationBottomActions extends StatelessWidget {
@@ -26,6 +27,8 @@ class LocationBottomActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthController authController = context.read<AuthController>();
+    final l10n = context.l10n;
+
     return SafeArea(
       top: false,
       child: Container(
@@ -53,9 +56,12 @@ class LocationBottomActions extends StatelessWidget {
                       icon: Icon(
                         isLiked ? Icons.favorite : Icons.favorite_border,
                       ),
-                      label: Text('Like · $likeCount'),
+                      label: Text(l10n.likesCount(likeCount)),
                     )
-                  : countInfo(Icons.favorite_border, '$likeCount Likes'),
+                  : countInfo(
+                      Icons.favorite_border,
+                      l10n.likesCount(likeCount),
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -67,9 +73,9 @@ class LocationBottomActions extends StatelessWidget {
                             ? Icons.check_circle
                             : Icons.group_add_outlined,
                       ),
-                      label: Text('Join · $joinCount'),
+                      label: Text(l10n.joinsCount(joinCount)),
                     )
-                  : countInfo(Icons.group_outlined, '$joinCount Beitritte'),
+                  : countInfo(Icons.group_outlined, l10n.joinsCount(joinCount)),
             ),
           ],
         ),

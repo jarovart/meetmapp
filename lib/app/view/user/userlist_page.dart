@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:meetmaap/app/controller/userlist_controller.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/app/view/util/usercard_widget.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class UserListPage extends StatelessWidget {
@@ -11,9 +13,10 @@ class UserListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = context.watch<UserListController>();
     final users = controller.users;
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Benutzer"), centerTitle: true),
+      appBar: AppBar(title: Text(l10n.users), centerTitle: true),
       backgroundColor: Colors.grey.shade200,
       body: Stack(
         children: [
@@ -21,7 +24,15 @@ class UserListPage extends StatelessWidget {
             const Center(child: CircularProgressIndicator()),
 
           if (!controller.isLoading && controller.hasError)
-            Center(child: Text('Fehler: ${controller.errorMessage}')),
+            Center(
+              child: Text(
+                AppErrorMapper.toUserMessage(
+                  e,
+                  l10n,
+                  fallback: l10n.errorCallUsers,
+                ),
+              ),
+            ),
 
           if (!controller.isLoading && users.isEmpty)
             RefreshIndicator(
@@ -32,8 +43,8 @@ class UserListPage extends StatelessWidget {
                   Center(
                     child: Text(
                       (controller.searchCtrl.text.length <= 3)
-                          ? "Bitte Namen eingeben."
-                          : "Keine Benutzer gefunden.",
+                          ? l10n.useSearch
+                          : l10n.usersNotFound,
                     ),
                   ),
                 ],
@@ -95,6 +106,8 @@ class UserListPage extends StatelessWidget {
     BuildContext context,
     UserListController userListController,
   ) {
+    final l10n = context.l10n;
+
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -109,7 +122,7 @@ class UserListPage extends StatelessWidget {
                 onSubmitted: (_) => userListController
                     .reloadUsers(), //gibt es nicht bei mappage
                 decoration: InputDecoration(
-                  hintText: "Suchen...",
+                  hintText: l10n.searching,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: userListController.searchCtrl.text.isNotEmpty
                       ? IconButton(

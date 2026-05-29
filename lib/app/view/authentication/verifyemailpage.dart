@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class VerifyPage extends StatefulWidget {
   final String token;
@@ -34,7 +36,8 @@ class _VerifyPageState extends State<VerifyPage> {
           setState(
             () => _error = AppErrorMapper.toUserMessage(
               e,
-              fallback: 'Verifizierung fehlgeschlagen.',
+              context.l10n,
+              fallback: context.l10n.verifcationFailed,
             ),
           );
         });
@@ -44,7 +47,7 @@ class _VerifyPageState extends State<VerifyPage> {
   Widget build(BuildContext context) {
     if (!_verified) {
       return Scaffold(
-        appBar: AppBar(title: const Text('E-Mail Verifizierung')),
+        appBar: AppBar(title: Text(context.l10n.verifyEmail)),
         body: Center(
           child: SingleChildScrollView(
             child: Padding(
@@ -58,12 +61,12 @@ class _VerifyPageState extends State<VerifyPage> {
                   if (_error != null)
                     ElevatedButton(
                       onPressed: () {
-                        context.go('/');
+                        context.go(RouteConfig.homePageUrl);
                       },
-                      child: Text('Zurück zur Startseite'),
+                      child: Text(context.l10n.backtToHomepage),
                     ),
                   if (!_loading && _error == null)
-                    const Text('Verifiziere E-Mail Adresse...'),
+                    Text(context.l10n.verifyingEmail),
                 ],
               ),
             ),
@@ -73,7 +76,7 @@ class _VerifyPageState extends State<VerifyPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(title: Text(context.l10n.login)),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -81,12 +84,12 @@ class _VerifyPageState extends State<VerifyPage> {
             child: Column(
               children: [
                 Icon(Icons.check_circle, color: Colors.green, size: 64),
-                Text('Registrierung erfolgreich 🎉'),
+                Text(context.l10n.registerSuccessfully),
                 ElevatedButton(
                   onPressed: () {
-                    context.go('/login');
+                    context.go(RouteConfig.loginUrl);
                   },
-                  child: Text('Jetzt einloggen'),
+                  child: Text(context.l10n.loginNow),
                 ),
               ],
             ),

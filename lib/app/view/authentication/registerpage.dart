@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -44,21 +46,19 @@ class _RegisterPageState extends State<RegisterPage> {
           password2.isEmpty ||
           firstname.isEmpty ||
           lastname.isEmpty) {
-        throw CustomAppException('Alle Felder müssen ausgefüllt sein');
+        throw FillAllFieldsException();
       }
 
       if (password != password2) {
-        throw CustomAppException('Passwörter stimmen nicht überein');
+        throw NotMatchPasswordsException();
       }
 
       if (password.length < 8) {
-        throw CustomAppException(
-          'Passwörter müssen mindestens 8 Zeichen lang sein',
-        );
+        throw Atleast8CharPasswordException();
       }
 
       if (email.contains(' ') || !email.contains('@')) {
-        throw CustomAppException('Ungültige E-Mail Adresse');
+        throw EmailInvalidException();
       }
 
       await AuthService.register(
@@ -68,13 +68,7 @@ class _RegisterPageState extends State<RegisterPage> {
         email: email,
         password: password,
       );
-      if (mounted) context.push('/registercheckemail', extra: email);
-
-      /*if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registrierung erfolgreich')),
-      );
-      setState(() => registeredUsername = username);*/
+      if (mounted) context.push(RouteConfig.sendRegisterEmailUrl, extra: email);
     } catch (e, st) {
       if (e is CooldownException) {
         startCooldown(e.seconds);
@@ -84,7 +78,8 @@ class _RegisterPageState extends State<RegisterPage> {
       setState(
         () => _error = AppErrorMapper.toUserMessage(
           e,
-          fallback: 'Fehler beim Registrieren.',
+          context.l10n,
+          fallback: context.l10n.errorRegister,
         ),
       );
     } finally {
@@ -95,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Register')),
+      appBar: AppBar(title: Text(context.l10n.register)),
       body: Center(
         child: SingleChildScrollView(
           child: ConstrainedBox(
@@ -106,14 +101,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Registrieren',
+                    context.l10n.register,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _userCtrl,
                     autofillHints: const [AutofillHints.newUsername],
-                    decoration: const InputDecoration(labelText: 'Username'),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.username,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -123,8 +120,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: TextField(
                           controller: _firstname,
                           autofillHints: const [AutofillHints.givenName],
-                          decoration: const InputDecoration(
-                            labelText: 'Firstname',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.firstName,
                           ),
                         ),
                       ),
@@ -133,8 +130,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: TextField(
                           controller: _lastname,
                           autofillHints: const [AutofillHints.familyName],
-                          decoration: const InputDecoration(
-                            labelText: 'Familyname',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.familyName,
                           ),
                         ),
                       ),
@@ -144,22 +141,24 @@ class _RegisterPageState extends State<RegisterPage> {
                   TextField(
                     controller: _emailCtrl,
                     autofillHints: const [AutofillHints.email],
-                    decoration: const InputDecoration(labelText: 'E-Mail'),
+                    decoration: InputDecoration(labelText: context.l10n.email),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _passCtrl,
                     autofillHints: const [AutofillHints.newPassword],
                     obscureText: true,
-                    decoration: const InputDecoration(labelText: 'Passwort'),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.password,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _passCtrl2,
                     autofillHints: const [AutofillHints.newPassword],
                     obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Passwort wiederholen',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.repeatPassword,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -170,8 +169,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: _loading
                         ? const CircularProgressIndicator()
                         : _cooldown > 0
-                        ? Text('Bitte warten ($_cooldown s)')
-                        : const Text('Registrieren'),
+                        ? Text(context.l10n.waitForXSeconds(_cooldown))
+                        : Text(context.l10n.register),
                   ),
                 ],
               ),

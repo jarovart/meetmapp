@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
+import 'package:meetmaap/l10n/app_localizations.dart';
 
 class AppErrorMapper {
   static bool isForbiddenException(Object error) {
@@ -23,121 +24,168 @@ class AppErrorMapper {
   }
 
   static String toUserMessage(
-    Object error, {
-    String fallback = 'Etwas ist schiefgelaufen. Bitte versuche es erneut.',
+    Object error,
+    AppLocalizations l10n, {
+    String? fallback,
   }) {
+    String fallbackMessage = fallback ?? l10n.defaultErrorMessage;
     if (error is CustomAppException) {
-      return error.message.isNotEmpty ? error.message : fallback;
+      return _getAppErrorMessage(error, l10n, fallbackMessage);
     }
 
     if (error is AppHttpException) {
       if (error.errorCode != null) {
-        final mappedByCode = _mapErrorCode(error.errorCode!);
+        final mappedByCode = _mapErrorCode(error.errorCode!, l10n);
         if (mappedByCode != null) return mappedByCode;
       }
 
-      return _mapStatusCode(error.statusCode, fallback: fallback);
+      return _mapStatusCode(error.statusCode, l10n, fallback: fallbackMessage);
     }
 
     if (error is NotLoggedInException) {
-      return 'Bitte anmelden, um fortzufahren.';
+      return l10n.loginToProceed;
     }
 
     if (error is AppNetworkException) {
-      return 'Server aktuell nicht erreichbar. Bitte prüfe deine Verbindung und versuche es erneut.';
+      return l10n.serverNotReachable;
     }
 
     if (error is AppUnknownException) {
-      return fallback;
+      return fallbackMessage;
     }
 
-    return fallback;
+    return fallbackMessage;
   }
 
-  static String _mapStatusCode(int statusCode, {required String fallback}) {
+  static String _mapStatusCode(
+    int statusCode,
+    AppLocalizations l10n, {
+    required String fallback,
+  }) {
     switch (statusCode) {
       case 400:
-        return 'Die Eingaben sind ungültig.';
+        return l10n.invalidInput;
       case 401:
-        return 'Du bist nicht mehr eingeloggt. Bitte melde dich erneut an.';
+        return l10n.notLoggedInLoginAgain;
       case 403:
-        return 'Du hast keine Berechtigung für diese Aktion.';
+        return l10n.noAuthorization;
       case 404:
-        return 'Die angeforderten Daten wurden nicht gefunden.';
+        return l10n.requestedDataNotFound;
       case 409:
-        return 'Die Aktion konnte nicht ausgeführt werden.';
+        return l10n.actionCouldNotBePerformed;
       case 410:
-        return 'Der Link ist abgelaufen';
+        return l10n.linkExpired;
       case 413:
-        return 'Die hochgeladene Datei ist zu groß.';
+        return l10n.fileTooLarge;
       case 415:
-        return 'Dieses Dateiformat wird nicht unterstützt.';
+        return l10n.unsupportedFileType;
       case 422:
-        return 'Die Daten konnten nicht verarbeitet werden.';
+        return l10n.dataCouldNotBeProcessed;
       case 429:
-        return 'Zu viele Anfragen wurden verschickt.';
+        return l10n.tooManyRequests;
       case 500:
       case 502:
       case 503:
       case 504:
-        return 'Auf dem Server ist ein Fehler aufgetreten. Bitte versuche es später erneut.';
+        return l10n.serverError;
       default:
         return fallback;
     }
   }
 
-  static String? _mapErrorCode(String errorCode) {
+  static String? _mapErrorCode(String errorCode, AppLocalizations l10n) {
     switch (errorCode) {
       case 'IMAGE_NOT_FOUND':
-        return 'Bild konnte nicht gefunden werden.';
+        return l10n.imageNotFound;
       case 'INVALID_CREDENTIALS':
-        return '';
+        return l10n.invalidCredentials;
       case 'LINK_NOT_VALID':
-        return 'Der Link ist ungültig.';
+        return l10n.invalidLink;
       case 'LINK_USED':
-        return 'Der Link wurde bereits verwendet.';
+        return l10n.linkAlreadyUsed;
       case 'LINK_EXPIRED':
-        return 'Der Link ist abgelaufen.';
+        return l10n.linkExpired;
       case 'LOCATION_NOT_FOUND':
-        return 'Location wurde nicht gefunden.';
+        return l10n.noLocationsFound;
       case 'LOCATION_FORBIDDEN':
-        return 'Kein Zugriff auf die Location.';
+        return l10n.noAccessLocation;
       case 'LOCATION_LIKE_NOT_FOUND':
-        return 'Diese Aktion konnte nicht durchgeführt werden.';
+        return l10n.actionCouldNotBePerformed;
       case 'LOCATION_JOIN_NOT_FOUND':
-        return 'Diese Aktion konnte nicht durchgeführt werden.';
+        return l10n.actionCouldNotBePerformed;
       case 'TOKEN_EXPIRED':
-        return 'Login Token ist abgelaufen.';
+        return l10n.tokenExpired;
       case 'TOKEN_INVALID':
-        return 'Login Token ist ungültig.';
+        return l10n.tokenInvalid;
       case 'TOKEN_MISSING':
-        return 'Der Token wurde nicht übertragen.';
+        return l10n.tokenMissing;
       case 'USER_NOT_FOUND':
-        return 'Benutzer wurde nicht gefunden.';
+        return l10n.userNotFound;
       case 'USER_EMAIL_EXISTS':
-        return 'E-Mail existiert bereits.';
+        return l10n.emailAlreadyExists;
       case 'USER_EMAIL_INVALID':
-        return 'E-Mail ist ungültig.';
+        return l10n.emailInvalid;
       case 'USER_EMAIL_REQUIRED':
-        return 'E-Mail ist erforderlich.';
+        return l10n.emailRequired;
       case 'USER_PASSWORD_REQUIRED':
-        return 'Passwort ist erforderlich.';
+        return l10n.passwordRequired;
       case 'USER_PASSWORD_TOO_SHORT':
-        return 'Passwort ist zu kurz.';
+        return l10n.passwordTooShort;
       case 'USER_USERNAME_EXISTS':
-        return 'Der Nutzername existiert bereits.';
+        return l10n.usernameAlreadyExists;
       case 'NOT_AUTHENTICATED':
-        return 'Bitte melde dich erneut an.';
+        return l10n.loginAgain;
       case 'PROFILE_UPDATE_FAILED':
-        return 'Profil konnte nicht gespeichert werden.';
+        return l10n.profileUpdateFailed;
       case 'PROFILE_IMAGE_TOO_LARGE':
-        return 'Das Profilbild ist zu groß.';
+        return l10n.profileImageTooLarge;
       case 'PROFILE_IMAGE_INVALID_TYPE':
-        return 'Das Profilbild hat ein ungültiges Format.';
+        return l10n.profileImageInvalidFormat;
       case 'LIKED_LOCATIONS_NOT_PUBLIC':
-        return 'Diese Inhalte sind nicht öffentlich sichtbar.';
+        return l10n.contentIsNotPublic;
       default:
         return null;
+    }
+  }
+
+  static String _getAppErrorMessage(
+    CustomAppException error,
+    AppLocalizations l10n,
+    String fallback,
+  ) {
+    switch (error) {
+      case LocationCouldNotBeLoadedException():
+        return l10n.locationCouldNotBeLoaded;
+      case LocationServiceDisabled():
+        return l10n.disabledLocationServices;
+      case LocationPermissionDenied():
+        return l10n.deniedLocationPermission;
+      case LocationError():
+        return error.message;
+      case NoTokenException():
+        return l10n.tokenMissing;
+      case InvalidLocationIdException():
+        return l10n.invalidLocationId;
+      case NotLocationOwnerNoEditException():
+        return l10n.notLocationOwnerNoEdit;
+      case FillAllFieldsException():
+        return l10n.fillAllFields;
+      case InfoChooseStartAndEnddateException():
+        return l10n.infoChooseStartAndEnddate;
+      case InfoEnddateBeforeStartdateException():
+        return l10n.infoEnddateBeforeStartdate;
+      case ValidEmailHintException():
+        return l10n.validEmailHint;
+      case NotMatchPasswordsException():
+        return l10n.notMatchPasswords;
+      case Atleast8CharPasswordException():
+        return l10n.atleast8CharPassword;
+      case EmailInvalidException():
+        return l10n.emailInvalid;
+      case NoGpsAndNoFilterLocationException():
+        return l10n.noGpsAndNoFilterLocation;
+      default:
+        return fallback;
     }
   }
 }

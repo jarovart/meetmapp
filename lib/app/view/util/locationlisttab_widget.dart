@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class LocationListTab extends StatefulWidget {
   final String title;
@@ -67,18 +68,16 @@ class _LocationListTabState extends State<LocationListTab> {
     if (widget.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
+    final l10n = context.l10n;
 
     if (widget.locations.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Keine Einträge vorhanden"),
+            Text(l10n.noEntriesAvailable),
             const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: widget.onRetry,
-              child: const Text("Neu laden"),
-            ),
+            OutlinedButton(onPressed: widget.onRetry, child: Text(l10n.reload)),
           ],
         ),
       );

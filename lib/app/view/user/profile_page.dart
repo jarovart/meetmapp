@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 import 'package:meetmaap/app/controller/profile_controller.dart';
 import 'package:meetmaap/app/view/util/locationlisttab_widget.dart';
@@ -13,12 +15,14 @@ class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profileController = context.watch<UserProfileController>();
-    //final canGoBack = Navigator.of(context).canPop();
+    final l10n = context.l10n;
 
     if (!profileController.hasUserProfile) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Benutzerprofil")),
-        body: Center(child: Text('Profil konnte nicht geladen werden.')),
+        appBar: AppBar(
+          title: Text(l10n.profileOf(profileController.displayUsername)),
+        ),
+        body: Center(child: Text(l10n.profileCouldNotBeLoaded)),
       );
     }
 
@@ -26,7 +30,7 @@ class UserProfilePage extends StatelessWidget {
       length: (profileController.isMyProfile) ? 3 : 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Profil"),
+          title: Text(l10n.profileOf(profileController.displayUsername)),
           centerTitle: true,
           actions: [
             if (profileController.isMyProfile)
@@ -41,14 +45,13 @@ class UserProfilePage extends StatelessWidget {
                       RouteConfig.getProfileEditUrl(
                         profileController.myProfile!.username,
                       ),
-                      //"/profile/${profileController.myProfile!.username}/edit",
                       extra: profileController.myProfile,
                     );
                     if (result == true) {
                       profileController.reload();
                     }
                   },
-                  label: const Text("Edit"),
+                  label: Text(l10n.edit),
                   icon: const Icon(Icons.edit_attributes_outlined),
                 ),
               ),
@@ -63,19 +66,27 @@ class UserProfilePage extends StatelessWidget {
     BuildContext context,
     UserProfileController profileController,
   ) {
+    final l10n = context.l10n;
+
     if (profileController.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (profileController.hasError && profileController.userData == null) {
       return Center(
-        child: Text(profileController.errorMessage ?? "Unbekannter Fehler"),
+        child: Text(
+          AppErrorMapper.toUserMessage(
+            profileController.error!,
+            l10n,
+            fallback: l10n.unknownError,
+          ),
+        ),
       );
     }
 
     final user = profileController.userData;
     if (user == null) {
-      return const Center(child: Text("Kein User geladen."));
+      return Center(child: Text(l10n.profileCouldNotBeLoaded));
     }
 
     final me = profileController.myProfile;
@@ -92,7 +103,11 @@ class UserProfilePage extends StatelessWidget {
                   if (profileController.hasError) ...[
                     Center(
                       child: Text(
-                        profileController.errorMessage ?? "Fehler",
+                        AppErrorMapper.toUserMessage(
+                          profileController.error!,
+                          l10n,
+                          fallback: l10n.unknownError,
+                        ),
                         style: const TextStyle(color: Colors.red),
                       ),
                     ),
@@ -136,9 +151,9 @@ class UserProfilePage extends StatelessWidget {
                   }
                 },
                 tabs: [
-                  Tab(text: 'Erstellt'),
-                  Tab(text: 'Beigetreten'),
-                  if (profileController.isMyProfile) Tab(text: 'Geliked'),
+                  Tab(text: l10n.created),
+                  Tab(text: l10n.joined),
+                  if (profileController.isMyProfile) Tab(text: l10n.liked),
                 ],
               ),
             ),
@@ -148,7 +163,7 @@ class UserProfilePage extends StatelessWidget {
       body: TabBarView(
         children: [
           LocationListTab(
-            title: "Erstellte Locations",
+            title: l10n.createdLocations,
             locations: profileController.createdLocations,
             isLoading: profileController.isLoadingCreated,
             onRetry: () => profileController.loadCreatedLocations(),
@@ -160,7 +175,7 @@ class UserProfilePage extends StatelessWidget {
             hasMore: profileController.hasMoreCreated,
           ),
           LocationListTab(
-            title: "Beigetretene Locations",
+            title: l10n.joinedLocations,
             locations: profileController.joinedLocations,
             isLoading: profileController.isLoadingJoined,
             onRetry: () =>
@@ -172,7 +187,7 @@ class UserProfilePage extends StatelessWidget {
           ),
           if (profileController.isMyProfile)
             LocationListTab(
-              title: "Gelikte Locations",
+              title: l10n.likedLocations,
               locations: profileController.likedLocations,
               isLoading: profileController.isLoadingLiked,
               onRetry: () =>
@@ -252,6 +267,7 @@ class UserProfilePage extends StatelessWidget {
   }
 
   Widget _buildInfoSection(BuildContext context, {required String? aboutMe}) {
+    final l10n = context.l10n;
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 2,
@@ -260,12 +276,12 @@ class UserProfilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Über mich", style: Theme.of(context).textTheme.titleMedium),
+            Text(l10n.aboutMe, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
               aboutMe?.isNotEmpty == true
                   ? aboutMe!
-                  : "Keine Beschreibung vorhanden.",
+                  : l10n.noDescriptionAvailable,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
@@ -280,11 +296,12 @@ class UserProfilePage extends StatelessWidget {
     required int joinedLocations,
     required int likedLocations,
   }) {
+    final l10n = context.l10n;
     final items = <Widget>[
       if (createdLocations != null)
-        _buildStatCard("Erstellt", createdLocations, Icons.create),
-      _buildStatCard("Beigetreten", joinedLocations, Icons.group),
-      _buildStatCard("Geliked", likedLocations, Icons.favorite),
+        _buildStatCard(l10n.created, createdLocations, Icons.create),
+      _buildStatCard(l10n.joined, joinedLocations, Icons.group),
+      _buildStatCard(l10n.liked, likedLocations, Icons.favorite),
     ];
 
     return Row(

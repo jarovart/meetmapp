@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -34,7 +35,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     try {
       final email = _emailCtrl.text.trim();
       if (email.isEmpty || !email.contains('@') || email.contains(' ')) {
-        throw CustomAppException('Bitte gültige E-Mail eingeben');
+        throw ValidEmailHintException();
       }
 
       await AuthRepository.forgotPassword(email: email);
@@ -51,7 +52,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       setState(
         () => _error = AppErrorMapper.toUserMessage(
           e,
-          fallback: 'Fehler beim Passwort zurücksetzen.',
+          context.l10n,
+          fallback: context.l10n.errorPasswordReset,
         ),
       );
     } finally {
@@ -62,7 +64,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Passwort vergessen')),
+      appBar: AppBar(title: Text(context.l10n.forgotPassword)),
       body: Center(
         child: SingleChildScrollView(
           child: ConstrainedBox(
@@ -75,15 +77,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       children: [
                         const Icon(Icons.mark_email_read, size: 64),
                         const SizedBox(height: 12),
-                        const Text(
-                          'Wenn die E-Mail existiert, haben wir dir einen Link geschickt.',
+                        Text(
+                          context.l10n.linkSendToEmail,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
-                        /*ElevatedButton(
-                        onPressed: () => context.pop(),
-                        child: const Text('Zurück zum Login'),
-                      ),*/
                       ],
                     )
                   : Column(
@@ -121,8 +119,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                     ),
                                   )
                                 : _cooldown > 0
-                                ? Text('Bitte warten ($_cooldown s)')
-                                : const Text('Link senden'),
+                                ? Text(context.l10n.waitForXSeconds(_cooldown))
+                                : Text(context.l10n.sendLink),
                           ),
                         ),
                       ],

@@ -18,7 +18,7 @@ class UserListController extends ChangeNotifier {
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _loadMoreTriggered = false;
-  String? _errorMessage;
+  Object? _error;
 
   final TextEditingController _searchCtrl = TextEditingController();
   List<UserBaseResponse> _users = [];
@@ -30,8 +30,8 @@ class UserListController extends ChangeNotifier {
 
   List<UserBaseResponse> get users => _users;
   TextEditingController get searchCtrl => _searchCtrl;
-  bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
-  String? get errorMessage => _errorMessage;
+  bool get hasError => _error != null;
+  Object? get error => _error;
   bool get isLoading => _isLoading;
 
   bool get isLoadingMore => _isLoadingMore;
@@ -127,7 +127,7 @@ class UserListController extends ChangeNotifier {
 
     try {
       _isLoading = true;
-      _errorMessage = null;
+      _error = null;
       _page = 0;
       _hasMore = true;
       notifyListeners();
@@ -144,11 +144,7 @@ class UserListController extends ChangeNotifier {
     } catch (e, st) {
       debugPrint('Error while fetching users: $e');
       debugPrintStack(stackTrace: st);
-
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Abrufen der Benutzerliste.',
-      );
+      _error = e;
       _users = [];
     } finally {
       _isLoading = false;
@@ -179,11 +175,7 @@ class UserListController extends ChangeNotifier {
     } catch (e, st) {
       debugPrint('Error while fetching more users: $e');
       debugPrintStack(stackTrace: st);
-
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Weitere Benutzer konnten nicht geladen werden.',
-      );
+      _error = e;
     } finally {
       _isLoadingMore = false;
       notifyListeners();

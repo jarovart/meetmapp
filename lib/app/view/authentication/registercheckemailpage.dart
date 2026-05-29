@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class RegisterCheckEmailPage extends StatefulWidget {
   final String email;
@@ -21,7 +22,7 @@ class _RegisterCheckEmailPageState extends State<RegisterCheckEmailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(title: Text(context.l10n.login)),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -44,8 +45,8 @@ class _RegisterCheckEmailPageState extends State<RegisterCheckEmailPage> {
                   child: _loading
                       ? const CircularProgressIndicator()
                       : _cooldown > 0
-                      ? Text('Bitte warten ($_cooldown s)')
-                      : Text('E-Mail erneut senden'),
+                      ? Text(context.l10n.waitForXSeconds(_cooldown))
+                      : Text(context.l10n.resendEmail),
                 ),
               ],
             ),
@@ -65,9 +66,9 @@ class _RegisterCheckEmailPageState extends State<RegisterCheckEmailPage> {
       await AuthService.resendVerificationEmail(email: widget.email);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('E-Mail wurde erneut gesendet')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.resentEmail)));
     } catch (e, st) {
       debugPrint('Error while checking email: $e');
       if (!mounted) return;
@@ -78,7 +79,8 @@ class _RegisterCheckEmailPageState extends State<RegisterCheckEmailPage> {
       setState(
         () => _error = AppErrorMapper.toUserMessage(
           e,
-          fallback: 'Fehler beim Verschicken der E-Mail.',
+          context.l10n,
+          fallback: context.l10n.errorSendEmail,
         ),
       );
     } finally {

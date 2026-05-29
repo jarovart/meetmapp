@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/app/view/util/gallery_widget.dart';
 import 'package:meetmaap/app/view/util/locationbottomaction.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class LocationDetailsContent extends StatelessWidget {
   final LocationDetailsController controller;
@@ -22,6 +24,7 @@ class LocationDetailsContent extends StatelessWidget {
     final formatter = DateFormat('dd.MM.yyyy HH:mm');
     final location = controller.location;
     List<String> imageUrls = controller.imageUrls;
+    final l10n = context.l10n;
 
     return Material(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -50,7 +53,11 @@ class LocationDetailsContent extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Text(
-                      controller.errorMessage!,
+                      AppErrorMapper.toUserMessage(
+                        controller.error!,
+                        l10n,
+                        fallback: l10n.locationCouldNotBeLoaded,
+                      ),
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),
@@ -72,7 +79,7 @@ class LocationDetailsContent extends StatelessWidget {
                           RouteConfig.getLocationUrl(location.id),
                           extra: location,
                         ),
-                        label: const Text("Open"),
+                        label: Text(l10n.openLocation),
                       ),
                     ],
                   ],
@@ -93,10 +100,14 @@ class LocationDetailsContent extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     Text(
-                      "Startzeit: ${formatter.format(location.startDateTime)} Uhr",
+                      l10n.displayStartdate(
+                        formatter.format(location.startDateTime),
+                      ),
                     ),
                     Text(
-                      "Endzeit: ${formatter.format(location.endDateTime)} Uhr",
+                      l10n.displayEnddate(
+                        formatter.format(location.endDateTime),
+                      ),
                     ),
                   ],
                 ),
@@ -116,32 +127,10 @@ class LocationDetailsContent extends StatelessWidget {
                   spacing: 22,
                   runSpacing: 8,
                   children: [
-                    const Text("Erstellt von"),
+                    Text(l10n.createdBy),
                     Text(location.createdUsername),
                   ],
                 ),
-
-                /*const SizedBox(height: 12),
-                Wrap(
-                  spacing: 22,
-                  runSpacing: 8,
-                  children: [
-                    const Text("Likes"),
-                    Text(location.likedUserCount.toString()),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 22,
-                  runSpacing: 8,
-                  children: [
-                    const Text("Joined by"),
-                    Text(location.joinedUserCount.toString()),
-                  ],
-                ),
-                */
-                // Bilder
                 const SizedBox(height: 24),
 
                 ImageGalleryWidget(

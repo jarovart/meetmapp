@@ -36,7 +36,7 @@ class ImageService {
 
   static Future<void> deleteMyProfileImage() async {
     if (!(await AuthRepository.isLoggedIn())) {
-      throw CustomAppException("Not logged in");
+      throw NotLoggedInException();
     }
     return await ImageRepository.deleteMyProfileImage();
   }

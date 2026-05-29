@@ -4,9 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/edit_mylocation_controller.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/app/view/util/editrow.dart';
 import 'package:meetmaap/app/view/util/infocard.dart';
 import 'package:meetmaap/app/view/util/inforow.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class EditMyLocationPage extends StatelessWidget {
@@ -15,13 +17,12 @@ class EditMyLocationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final editController = context.watch<EditMyLocationController>();
+    final l10n = context.l10n;
 
     if (!editController.isOwnerOfProfile) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Location bearbeiten")),
-        body: Center(
-          child: Text('Du hast keine Berechtigung für diese Aktion.'),
-        ),
+        appBar: AppBar(title: Text(l10n.editLocation)),
+        body: Center(child: Text(l10n.noAuthorization)),
       );
     }
 
@@ -29,7 +30,7 @@ class EditMyLocationPage extends StatelessWidget {
       children: [
         Scaffold(
           appBar: AppBar(
-            title: const Text("Location bearbeiten"),
+            title: Text(l10n.editLocation),
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 12.0),
@@ -49,7 +50,7 @@ class EditMyLocationPage extends StatelessWidget {
                           height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text("Speichern"),
+                      : Text(l10n.save),
                 ),
               ),
             ],
@@ -63,14 +64,17 @@ class EditMyLocationPage extends StatelessWidget {
                   if (editController.hasError) ...[
                     Center(
                       child: Text(
-                        editController.errorMessage,
+                        AppErrorMapper.toUserMessage(
+                          editController.error!,
+                          l10n,
+                          fallback: l10n.errorUpdatingLocation,
+                        ),
                         style: const TextStyle(color: Colors.red),
                       ),
                     ),
                     const SizedBox(height: 12),
                   ],
 
-                  //buildProfileImageSection(context, editController),
                   InfoCard(
                     child: Column(
                       children: [
@@ -78,9 +82,7 @@ class EditMyLocationPage extends StatelessWidget {
                           icon: Icons.title_outlined,
                           child: TextFormField(
                             controller: editController.titleCtrl,
-                            decoration: const InputDecoration(
-                              labelText: "Title",
-                            ),
+                            decoration: InputDecoration(labelText: l10n.title),
                           ),
                         ),
                         const Divider(height: 24),
@@ -88,8 +90,8 @@ class EditMyLocationPage extends StatelessWidget {
                           icon: Icons.description_outlined,
                           child: TextFormField(
                             controller: editController.descriptionCtrl,
-                            decoration: const InputDecoration(
-                              labelText: "Description",
+                            decoration: InputDecoration(
+                              labelText: l10n.description,
                             ),
                           ),
                         ),
@@ -104,7 +106,7 @@ class EditMyLocationPage extends StatelessWidget {
                       children: [
                         InfoRow(
                           icon: Icons.event_available_outlined,
-                          label: 'Start',
+                          label: l10n.chooseStartdate,
                           value: DateFormat(
                             'dd.MM.yyyy HH:mm',
                           ).format(editController.selectedStartDateTime!),
@@ -117,7 +119,7 @@ class EditMyLocationPage extends StatelessWidget {
                         const Divider(height: 24),
                         InfoRow(
                           icon: Icons.event_busy_outlined,
-                          label: 'Ende',
+                          label: l10n.chooseEnddate,
                           value: DateFormat(
                             'dd.MM.yyyy HH:mm',
                           ).format(editController.selectedEndDateTime!),
@@ -141,9 +143,9 @@ class EditMyLocationPage extends StatelessWidget {
                           child: TextFormField(
                             controller: editController.addressCtrl,
                             decoration: InputDecoration(
-                              labelText: "Adresse",
+                              labelText: l10n.address,
                               suffixIcon: IconButton(
-                                tooltip: "Adresse zurücksetzen",
+                                tooltip: l10n.resetAddress,
                                 icon: Icon(Icons.undo),
                                 onPressed: editController.resetAddress,
                               ),
@@ -153,7 +155,7 @@ class EditMyLocationPage extends StatelessWidget {
                         const Divider(height: 24),
                         InfoRow(
                           icon: Icons.location_on_outlined,
-                          label: "Position (lat, lng)",
+                          label: l10n.position,
                           value: editController.positionAsString,
                           onTap: () async {
                             final LatLng? position = await context.push(
@@ -172,7 +174,7 @@ class EditMyLocationPage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   InfoCard(
-                    title: "Bilder",
+                    title: l10n.images,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -193,7 +195,9 @@ class EditMyLocationPage extends StatelessWidget {
                                   fit: BoxFit.cover,
                                 ),
                                 title: Text("Bild ${index + 1}"),
-                                subtitle: index == 0 ? Text("Thumbnail") : null,
+                                subtitle: index == 0
+                                    ? Text(l10n.thumbnail)
+                                    : null,
                                 trailing: IconButton(
                                   icon: const Icon(
                                     Icons.delete,
@@ -210,7 +214,7 @@ class EditMyLocationPage extends StatelessWidget {
                         OutlinedButton.icon(
                           onPressed: editController.addImage,
                           icon: const Icon(Icons.add_a_photo),
-                          label: const Text("Bild hinzufügen"),
+                          label: Text(l10n.addImage),
                         ),
                         const SizedBox(height: 12),
                       ],
@@ -227,12 +231,12 @@ class EditMyLocationPage extends StatelessWidget {
               absorbing: true,
               child: Container(
                 color: Colors.black.withValues(alpha: 0.35),
-                child: const Center(
+                child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "Loading...",
+                        l10n.loading,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 32,

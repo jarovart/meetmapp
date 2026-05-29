@@ -58,7 +58,7 @@ class AuthRepository {
       final userId = json['userId'] as int;
 
       if (token == null || token.isEmpty) {
-        throw CustomAppException('Kein Token erhalten');
+        throw NoTokenException();
       }
 
       await _storage.write(key: _tokenKey, value: token);

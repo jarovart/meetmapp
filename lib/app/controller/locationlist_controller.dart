@@ -4,11 +4,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/util/locationbounds.dart';
 import 'package:meetmaap/app/service/location_service.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class LocationListController extends ChangeNotifier {
   LocationListController() {
@@ -20,7 +18,7 @@ class LocationListController extends ChangeNotifier {
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _loadMoreTriggered = false;
-  String? _errorMessage;
+  Object? _error;
 
   final TextEditingController _searchCtrl = TextEditingController();
   List<LocationBaseResponse> _locations = [];
@@ -51,8 +49,8 @@ class LocationListController extends ChangeNotifier {
   DateTime get resetStart => _resetStart;
   DateTime get resetEnd => _resetEnd;
 
-  bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
-  String? get errorMessage => _errorMessage;
+  bool get hasError => _error != null;
+  Object? get error => _error;
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
   bool get loadMoreTriggered => _loadMoreTriggered;
@@ -61,7 +59,6 @@ class LocationListController extends ChangeNotifier {
   // ─────────────────────────────────────────────
   // STATE MUTATION
   // ─────────────────────────────────────────────
-  set loadMoreTriggered(bool value) => _loadMoreTriggered = value;
 
   Future<void> loadData() async {
     if (_isInitialized) return;
@@ -100,12 +97,13 @@ class LocationListController extends ChangeNotifier {
       case LocationSuccess(:final position):
         _currentLocation = position;
       case LocationServiceDisabled():
-        debugPrint("Standortdienste sind deaktiviert");
+        _error = result;
       case LocationPermissionDenied():
-        debugPrint("Standort-Berechtigung verweigert");
-      case LocationError(:final message):
-        debugPrint("Fehler: $message");
+        _error = result;
+      case LocationError():
+        _error = result;
     }
+    notifyListeners();
   }
 
   Future<void> reloadLocations() async {
@@ -147,16 +145,16 @@ class LocationListController extends ChangeNotifier {
         !loadMoreTriggered;
 
     if (shouldLoadMore) {
-      loadMoreTriggered = true;
+      _loadMoreTriggered = true;
       loadMoreLocationsByQuery().whenComplete(() {
         if (context.mounted) {
-          loadMoreTriggered = false;
+          _loadMoreTriggered = false;
         }
       });
     }
 
     if (notification.metrics.extentAfter >= 300) {
-      loadMoreTriggered = false;
+      _loadMoreTriggered = false;
     }
 
     return false;
@@ -193,11 +191,11 @@ class LocationListController extends ChangeNotifier {
 
     try {
       if (_currentLocation == null && _filterCenter == null) {
-        throw CustomAppException("No gps and no filter location available");
+        throw NoGpsAndNoFilterLocationException();
       }
 
       _isLoading = true;
-      _errorMessage = null;
+      _error = null;
       _page = 0;
       _hasMore = true;
       notifyListeners();
@@ -223,10 +221,7 @@ class LocationListController extends ChangeNotifier {
       debugPrint('Error while fetching locations: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Abrufen der Locations.',
-      );
+      _error = e;
       _locations = [];
     } finally {
       _isLoading = false;
@@ -242,7 +237,7 @@ class LocationListController extends ChangeNotifier {
 
     try {
       if (_currentLocation == null && _filterCenter == null) {
-        throw CustomAppException("No gps and no filter location available");
+        throw NoGpsAndNoFilterLocationException();
       }
 
       _isLoadingMore = true;
@@ -270,10 +265,7 @@ class LocationListController extends ChangeNotifier {
       debugPrint('Error while fetching more locations: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Weitere Locations konnten nicht geladen werden.',
-      );
+      _error = e;
     } finally {
       _isLoadingMore = false;
       notifyListeners();

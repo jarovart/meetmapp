@@ -11,7 +11,6 @@ import 'package:meetmaap/app/model/request/image_request.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/service/location_service.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class EditMyLocationController extends ChangeNotifier {
   final AuthController authController;
@@ -21,7 +20,7 @@ class EditMyLocationController extends ChangeNotifier {
   final picker = ImagePicker();
   bool _isLoading = false;
   bool _uploading = false;
-  String? _errorMessage;
+  Object? _error;
   bool _isSaving = false;
   UserMyProfileResponse? _myProfile;
   LocationFullResponse? _location;
@@ -46,11 +45,11 @@ class EditMyLocationController extends ChangeNotifier {
 
   bool get isSaving => _isSaving;
 
-  bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
+  bool get hasError => _error != null;
 
   bool get isUploading => _uploading;
 
-  String get errorMessage => _errorMessage ?? "Unbekannter Fehler";
+  Object? get error => _error;
 
   LocationFullResponse get location => _location!;
 
@@ -74,19 +73,19 @@ class EditMyLocationController extends ChangeNotifier {
   // STATE MUTATION
   // ─────────────────────────────────────────────
   set selectedStartDateTime(DateTime? value) {
-    _errorMessage = null;
+    _error = null;
     _selectedStartDateTime = value;
     notifyListeners();
   }
 
   set selectedEndDateTime(DateTime? value) {
-    _errorMessage = null;
+    _error = null;
     _selectedEndDateTime = value;
     notifyListeners();
   }
 
   set selectedPosition(LatLng value) {
-    _errorMessage = null;
+    _error = null;
     _position = value;
     notifyListeners();
   }
@@ -96,14 +95,14 @@ class EditMyLocationController extends ChangeNotifier {
   // ─────────────────────────────────────────────
   Future<void> load(String? locationId, LocationFullResponse? location) async {
     _isLoading = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
       if (!(authController.isLoggedIn)) throw NotLoggedInException();
       if (location == null) {
         final id = int.tryParse(locationId ?? '');
-        if (id == null) throw CustomAppException("Ungültige Locationid");
+        if (id == null) throw InvalidLocationIdException();
 
         _location = await LocationService.fetchFullLocation(id);
       } else {
@@ -111,20 +110,15 @@ class EditMyLocationController extends ChangeNotifier {
       }
       _myProfile = authController.myProfile;
       if (_myProfile?.username != _location?.createdUsername) {
-        throw CustomAppException(
-          "Sie sind nicht der Besitzer der Location und können diese daher nicht bearbeiten.",
-        );
+        throw NotLocationOwnerNoEditException();
       }
-      //setCurrentProfileImageUrl(_myProfile?.profileImage?.imageUrl ?? '');
+
       await _initEditFields();
     } catch (e, st) {
       debugPrint('load editprofile failed: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Profil konnte nicht geladen werden.',
-      );
+      _error = e;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -191,6 +185,8 @@ class EditMyLocationController extends ChangeNotifier {
       );
     } catch (e) {
       debugPrint("Add image failed: $e");
+
+      _error = e;
     } finally {
       _uploading = false;
       notifyListeners();
@@ -232,21 +228,18 @@ class EditMyLocationController extends ChangeNotifier {
   // ─────────────────────────────────────────────
 
   Future<bool> saveLocation() async {
-    if (!_formKey.currentState!.validate()) {
-      _errorMessage = "Bitte alle Pflichtfelder ausfüllen.";
-      notifyListeners();
-      return false;
-    }
-
-    if (selectedStartDateTime == null ||
-        selectedEndDateTime == null ||
-        selectedEndDateTime!.isBefore(selectedStartDateTime!)) {
-      _errorMessage =
-          "Bitte ein Start- und ein Enddatum auswählen und Enddatum darf nicht vor Startdatum sein.";
-      notifyListeners();
-      return false;
-    }
     try {
+      if (!_formKey.currentState!.validate()) {
+        throw FillAllFieldsException();
+      }
+
+      if (selectedStartDateTime == null || selectedEndDateTime == null) {
+        throw InfoChooseStartAndEnddateException();
+      }
+      if (selectedEndDateTime!.isBefore(selectedStartDateTime!)) {
+        throw InfoEnddateBeforeStartdateException();
+      }
+
       _uploading = true;
       notifyListeners();
 
@@ -273,10 +266,7 @@ class EditMyLocationController extends ChangeNotifier {
       debugPrint('Error while updating location: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Aktualisieren der Location.',
-      );
+      _error = e;
     } finally {
       _uploading = false;
       notifyListeners();

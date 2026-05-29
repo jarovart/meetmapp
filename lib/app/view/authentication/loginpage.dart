@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/controller/login_controller.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class LoginPage extends StatelessWidget {
   final String? redirectionUrl;
@@ -23,7 +25,7 @@ class LoginPage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(title: Text(context.l10n.login)),
       body: Center(
         child: SingleChildScrollView(
           child: ConstrainedBox(
@@ -61,7 +63,7 @@ class LoginPage extends StatelessWidget {
                   width: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Ausloggen'),
+              : Text(context.l10n.logout),
         ),
       ),
     ];
@@ -69,7 +71,10 @@ class LoginPage extends StatelessWidget {
 
   List<Widget> loginWidgets(BuildContext context) {
     return [
-      Text('Login', style: Theme.of(context).textTheme.headlineMedium),
+      Text(
+        context.l10n.login,
+        style: Theme.of(context).textTheme.headlineMedium,
+      ),
       const SizedBox(height: 16),
 
       AutofillGroup(
@@ -77,7 +82,7 @@ class LoginPage extends StatelessWidget {
           children: [
             TextField(
               controller: loginController.userCtrl,
-              decoration: const InputDecoration(labelText: 'Username'),
+              decoration: InputDecoration(labelText: context.l10n.username),
               autofillHints: const [AutofillHints.username],
               textInputAction: TextInputAction.next,
             ),
@@ -85,7 +90,7 @@ class LoginPage extends StatelessWidget {
 
             TextField(
               controller: loginController.passCtrl,
-              decoration: const InputDecoration(labelText: 'Passwort'),
+              decoration: InputDecoration(labelText: context.l10n.password),
               autofillHints: const [AutofillHints.password],
               obscureText: true,
               onSubmitted: (_) => _submit(context),
@@ -96,7 +101,7 @@ class LoginPage extends StatelessWidget {
 
       TextButton(
         onPressed: () => context.push(RouteConfig.forgotPasswordUrl),
-        child: const Text('Passwort vergessen?'),
+        child: Text(context.l10n.forgotPasswordQuestion),
       ),
 
       const SizedBox(height: 16),
@@ -104,7 +109,11 @@ class LoginPage extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
-            loginController.errorMessage,
+            AppErrorMapper.toUserMessage(
+              loginController.error!,
+              context.l10n,
+              fallback: context.l10n.errorLogin,
+            ),
             style: const TextStyle(color: Colors.red),
           ),
         ),
@@ -119,19 +128,19 @@ class LoginPage extends StatelessWidget {
                   width: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Einloggen'),
+              : Text(context.l10n.login),
         ),
       ),
       const SizedBox(height: 16),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Noch keinen Account?"),
+          Text(context.l10n.noAccountQuestion),
           TextButton(
             onPressed: () {
               context.push(RouteConfig.registerUrl);
             },
-            child: const Text('Registrieren'),
+            child: Text(context.l10n.register),
           ),
         ],
       ),

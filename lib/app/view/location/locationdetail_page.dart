@@ -5,10 +5,12 @@ import 'package:meetmaap/app/config/app_config.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
 import 'package:meetmaap/app/view/util/InfoRow.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/app/view/util/gallery_widget.dart';
 import 'package:meetmaap/app/view/util/imageviewer_widget.dart';
 import 'package:meetmaap/app/view/util/infocard.dart';
 import 'package:meetmaap/app/view/util/locationbottomaction.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class LocationDetailPage extends StatelessWidget {
@@ -17,11 +19,12 @@ class LocationDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<LocationDetailsController>();
+    final l10n = context.l10n;
 
     if (!controller.hasLocation) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Location")),
-        body: Center(child: Text('Location konnte nicht geladen werden.')),
+        appBar: AppBar(title: Text(l10n.location)),
+        body: Center(child: Text(l10n.locationCouldNotBeLoaded)),
       );
     }
 
@@ -43,7 +46,7 @@ class LocationDetailPage extends StatelessWidget {
                     controller.reload();
                   }
                 },
-                label: const Text("Edit"),
+                label: Text(l10n.edit),
                 icon: const Icon(Icons.edit_attributes_outlined),
               ),
             ),
@@ -57,13 +60,21 @@ class LocationDetailPage extends StatelessWidget {
     BuildContext context,
     LocationDetailsController controller,
   ) {
-    /*if (controller.isLoading) {
+    if (controller.isLoading) {
       return const Center(child: CircularProgressIndicator());
-    }*/
+    }
+    final l10n = context.l10n;
 
     if (controller.hasError) {
       return Center(
-        child: Text(controller.errorMessage ?? "Unbekannter Fehler"),
+        child: Text(
+          AppErrorMapper.toUserMessage(
+            controller.error!,
+            l10n,
+            fallback: l10n.locationCouldNotBeLoaded,
+          ),
+          style: const TextStyle(color: Colors.red),
+        ),
       );
     }
     final location = controller.location;
@@ -181,7 +192,7 @@ class LocationDetailPage extends StatelessWidget {
                         InfoCard(
                           child: InfoRow(
                             icon: Icons.description_outlined,
-                            label: 'Beschreibung',
+                            label: l10n.description,
                             value: controller.location.description,
                           ),
                         ),
@@ -193,7 +204,7 @@ class LocationDetailPage extends StatelessWidget {
                             children: [
                               InfoRow(
                                 icon: Icons.event_available_outlined,
-                                label: 'Start',
+                                label: l10n.chooseStartdate,
                                 value: DateFormat(
                                   'dd.MM.yyyy HH:mm',
                                 ).format(controller.location.startDateTime),
@@ -201,7 +212,7 @@ class LocationDetailPage extends StatelessWidget {
                               const Divider(height: 24),
                               InfoRow(
                                 icon: Icons.event_busy_outlined,
-                                label: 'Ende',
+                                label: l10n.chooseEnddate,
                                 value: DateFormat(
                                   'dd.MM.yyyy HH:mm',
                                 ).format(controller.location.endDateTime),
@@ -209,10 +220,12 @@ class LocationDetailPage extends StatelessWidget {
                               const Divider(height: 24),
                               InfoRow(
                                 icon: Icons.person_outline,
-                                label: 'Erstellt von',
+                                label: l10n.createdBy,
                                 value: controller.location.createdUsername,
                                 onTap: () => context.push(
-                                  '/profile/${controller.location.createdUsername}',
+                                  RouteConfig.getProfileUrl(
+                                    controller.location.createdUsername,
+                                  ),
                                 ),
                               ),
                             ],
@@ -238,7 +251,7 @@ class LocationDetailPage extends StatelessWidget {
                               const Divider(height: 24),
                               InfoRow(
                                 icon: Icons.navigation_outlined,
-                                value: "Navigation",
+                                value: l10n.navigateToLocation,
                                 onTap: controller.navigateToLocation,
                               ),
                             ],

@@ -32,6 +32,8 @@ import 'package:meetmaap/app/view/map_page.dart';
 import 'package:meetmaap/app/view/setting/setting_page.dart';
 import 'package:meetmaap/app/view/user/edit_myprofile_page.dart';
 import 'package:meetmaap/app/view/user/userlist_page.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:meetmaap/l10n/app_localizations.dart';
 import 'package:meetmaap/testexample/testshowmodal.dart';
 import 'package:meetmaap/testexample/testslidergps.dart';
 import 'package:meetmaap/app/view/location/locationlist_page.dart';
@@ -43,8 +45,6 @@ import 'package:provider/provider.dart';
 void main() {
   usePathUrlStrategy();
   runApp(
-    //create: (context) =>
-    //          HomeController(authController: context.read<AuthController>()),
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -68,13 +68,18 @@ void main() {
         ChangeNotifierProvider(create: (_) => UserListController()),
         ChangeNotifierProvider(create: (_) => SettingsController()),
       ],
-      child: MainApplication(),
+      child: Consumer<SettingsController>(
+        builder: (context, settingsController, _) {
+          return MainApplication(settingsController: settingsController);
+        },
+      ),
     ),
   );
 }
 
 class MainApplication extends StatelessWidget {
-  MainApplication({super.key});
+  final SettingsController settingsController;
+  MainApplication({super.key, required this.settingsController});
 
   final GoRouter router = GoRouter(
     routes: [
@@ -268,8 +273,8 @@ class MainApplication extends StatelessWidget {
           final token = state.uri.queryParameters['token'];
 
           if (token == null || token.isEmpty) {
-            return const Scaffold(
-              body: Center(child: Text('Ungültiger Verifizierungslink')),
+            return Scaffold(
+              body: Center(child: Text(context.l10n.invalidVerifyLink)),
             );
           }
 
@@ -287,7 +292,9 @@ class MainApplication extends StatelessWidget {
         builder: (context, state) {
           final token = state.uri.queryParameters['token'];
           if (token == null || token.isEmpty) {
-            return const Scaffold(body: Center(child: Text('Ungültiger Link')));
+            return Scaffold(
+              body: Center(child: Text(context.l10n.invalidVerifyLink)),
+            );
           }
           return ResetPasswordPage(token: token);
         },
@@ -327,6 +334,11 @@ class MainApplication extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.green),
       routerConfig: router,
+
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+
+      locale: settingsController.locale, // null = Systemsprache verwenden
     );
   }
 }

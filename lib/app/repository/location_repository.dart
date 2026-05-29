@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/config/api_config.dart';
 import 'package:meetmaap/app/model/enums/locationtype_enum.dart';
-import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/request/updatemylocation_request.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/request/createlocation_request.dart';
@@ -25,18 +25,18 @@ class LocationRepository {
     try {
       // Service aktiv?
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return const LocationServiceDisabled();
+      if (!serviceEnabled) return LocationServiceDisabled();
 
       // Permission prüfen
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          return const LocationPermissionDenied();
+          return LocationPermissionDenied();
         }
       }
       if (permission == LocationPermission.deniedForever) {
-        return const LocationPermissionDenied();
+        return LocationPermissionDenied();
       }
 
       // Standort holen

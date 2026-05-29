@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meetmaap/app/view/util/actionbutton.dart';
 import 'package:meetmaap/app/view/util/infocard.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 //TODO: do we need it?
 class ActionStatsCard extends StatelessWidget {
@@ -22,13 +23,15 @@ class ActionStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return InfoCard(
       child: Row(
         children: [
           Expanded(
             child: ActionButton(
               icon: isLiked ? Icons.favorite : Icons.favorite_border,
-              label: '$likedCount Likes',
+              label: l10n.likesCount(likedCount),
               active: isLiked,
               onTap: onLike,
             ),
@@ -37,7 +40,7 @@ class ActionStatsCard extends StatelessWidget {
           Expanded(
             child: ActionButton(
               icon: isJoined ? Icons.check_circle : Icons.group_add_outlined,
-              label: '$joinedCount Joins',
+              label: l10n.joinsCount(joinedCount),
               active: isJoined,
               onTap: onJoin,
             ),

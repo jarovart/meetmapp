@@ -1,3 +1,5 @@
+import 'package:latlong2/latlong.dart';
+
 abstract class AppException implements Exception {
   final String? debugMessage;
 
@@ -78,11 +80,53 @@ class NotLoggedInException extends AppException {
   String toString() => 'NotLoggedInException(debugMessage: $debugMessage)';
 }
 
-class CustomAppException extends AppException {
-  const CustomAppException([String? debugMessage])
-    : super(debugMessage: debugMessage);
-
+abstract class CustomAppException extends AppException {
   @override
   String toString() => 'CustomAppException(debugMessage: $debugMessage)';
-  String get message => debugMessage ?? '';
 }
+
+class LocationCouldNotBeLoadedException extends CustomAppException {}
+
+sealed class LocationResult extends CustomAppException {
+  LocationResult();
+}
+
+class LocationSuccess extends LocationResult {
+  final LatLng position;
+  LocationSuccess(this.position);
+}
+
+class LocationPermissionDenied extends LocationResult {
+  LocationPermissionDenied();
+}
+
+class LocationServiceDisabled extends LocationResult {
+  LocationServiceDisabled();
+}
+
+class LocationError extends LocationResult {
+  final String message;
+  LocationError(this.message);
+}
+
+class NoTokenException extends CustomAppException {}
+
+class InvalidLocationIdException extends CustomAppException {}
+
+class NotLocationOwnerNoEditException extends CustomAppException {}
+
+class FillAllFieldsException extends CustomAppException {}
+
+class InfoChooseStartAndEnddateException extends CustomAppException {}
+
+class InfoEnddateBeforeStartdateException extends CustomAppException {}
+
+class ValidEmailHintException extends CustomAppException {}
+
+class NotMatchPasswordsException extends CustomAppException {}
+
+class Atleast8CharPasswordException extends CustomAppException {}
+
+class EmailInvalidException extends CustomAppException {}
+
+class NoGpsAndNoFilterLocationException extends CustomAppException {}

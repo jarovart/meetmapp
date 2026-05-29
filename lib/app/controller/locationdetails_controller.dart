@@ -8,7 +8,6 @@ import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/service/location_service.dart';
 import 'package:meetmaap/app/service/navigation_service.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class LocationDetailsController extends ChangeNotifier {
   final AuthController authController;
@@ -18,7 +17,7 @@ class LocationDetailsController extends ChangeNotifier {
   // STATE
   // ─────────────────────────────────────────────
   bool _isLoading = false;
-  String? _errorMessage;
+  Object? _error;
   LocationBaseResponse? _locationBase;
   LocationFullResponse? _locationFull;
   UserMyProfileResponse? _myProfile;
@@ -32,8 +31,8 @@ class LocationDetailsController extends ChangeNotifier {
 
   String get title => _locationFull?.title ?? _locationBase!.title;
 
-  bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
-  String? get errorMessage => _errorMessage;
+  bool get hasError => _error != null;
+  Object? get error => _error;
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _myProfile != null;
   bool get canEdit =>
@@ -80,13 +79,13 @@ class LocationDetailsController extends ChangeNotifier {
   ) async {
     if (_isLoading) return;
     _isLoading = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
       if (locationBase == null) {
         final id = int.tryParse(locationId ?? '');
-        if (id == null) throw CustomAppException("Ungültige Locationid");
+        if (id == null) throw InvalidLocationIdException();
 
         _locationFull = await LocationService.fetchFullLocation(id);
         _locationBase = _locationFull;
@@ -106,10 +105,7 @@ class LocationDetailsController extends ChangeNotifier {
     } catch (e, st) {
       debugPrint('Error while loading location details: $e');
       debugPrintStack(stackTrace: st);
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Location konnte nicht geladen werden.',
-      );
+      _error = e;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -159,10 +155,7 @@ class LocationDetailsController extends ChangeNotifier {
       debugPrint('Error while toggling like: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Liken der Location.',
-      );
+      _error = e;
       _isLiked = previousLiked;
       _likedUserCount = previousCount;
       notifyListeners();
@@ -200,10 +193,7 @@ class LocationDetailsController extends ChangeNotifier {
       debugPrint('Error while toggling join: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Beitreten der Location.',
-      );
+      _error = e;
       _isJoined = previousJoined;
       _joinedUserCount = previousCount;
       notifyListeners();

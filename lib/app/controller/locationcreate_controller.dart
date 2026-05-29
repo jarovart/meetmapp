@@ -2,15 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/request/createlocation_request.dart';
 import 'package:meetmaap/app/model/response/image_response.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/service/image_service.dart';
 import 'package:meetmaap/app/service/location_service.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class LocationCreateController extends ChangeNotifier {
   final LatLng point;
@@ -27,7 +26,7 @@ class LocationCreateController extends ChangeNotifier {
   final picker = ImagePicker();
   final List<Uint8List> _images = [];
   bool _uploading = false;
-  String? _error;
+  Object? _error;
   String? _initialAddress;
   DateTime? _selectedStartDateTime;
   DateTime? _selectedEndDateTime;
@@ -44,7 +43,7 @@ class LocationCreateController extends ChangeNotifier {
 
   bool get uploading => _uploading;
   bool get hasError => _error != null;
-  String get error => _error ?? '';
+  Object? get error => _error;
   String? get initialAddress => _initialAddress;
   DateTime? get selectedStartDateTime => _selectedStartDateTime;
   DateTime? get selectedEndDateTime => _selectedEndDateTime;
@@ -83,25 +82,20 @@ class LocationCreateController extends ChangeNotifier {
 
   Future<bool> saveLocation() async {
     if (!_formKey.currentState!.validate()) {
-      _error = "Bitte alle Pflichtfelder ausfüllen.";
-      notifyListeners();
-      return false;
+      throw FillAllFieldsException();
     }
 
-    if (selectedStartDateTime == null ||
-        selectedEndDateTime == null ||
-        selectedEndDateTime!.isBefore(selectedStartDateTime!)) {
-      _error =
-          "Bitte ein Start- und ein Enddatum auswählen und Enddatum darf nicht vor Startdatum sein.";
-      notifyListeners();
-      return false;
+    if (selectedStartDateTime == null || selectedEndDateTime == null) {
+      throw InfoChooseStartAndEnddateException();
+    }
+    if (selectedEndDateTime!.isBefore(selectedStartDateTime!)) {
+      throw InfoEnddateBeforeStartdateException();
     }
 
     _uploading = true;
     notifyListeners();
 
     try {
-      // 👇 HIER erstellst du das Objekt (LocationFull)
       final createdLocation = CreateLocationRequest(
         title: titleController.text.trim(),
         description: descriptionController.text.trim(),
@@ -137,10 +131,7 @@ class LocationCreateController extends ChangeNotifier {
       debugPrint('Error while uploading location: $e');
       debugPrintStack(stackTrace: st);
 
-      _error = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Hochladen der Location.',
-      );
+      _error = e;
     } finally {
       _uploading = false;
       notifyListeners();
@@ -165,6 +156,7 @@ class LocationCreateController extends ChangeNotifier {
       _images.add(compressed);
     } catch (e) {
       debugPrint("Add image failed: $e");
+      _error = e;
     } finally {
       _uploading = false;
       notifyListeners();
@@ -190,16 +182,7 @@ class LocationCreateController extends ChangeNotifier {
     notifyListeners();
   }
 
-  String getDatumAsString(DateTime dateTime) {
-    final formatter = DateFormat('dd.MM.yyyy HH:mm');
-    return "Datum: ${formatter.format(dateTime)}";
-  }
-
   String getPositionForCopyClipboard() {
     return "${point.latitude}, ${point.longitude}";
-  }
-
-  String getPositionAsString() {
-    return "Position:\nLatitude: ${point.latitude}\nLongitude: ${point.longitude}";
   }
 }

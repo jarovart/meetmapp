@@ -7,12 +7,15 @@ import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_ti
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
+import 'package:meetmaap/app/model/exception/exception_message.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/view/location/locationdetails_bottomsheet_mobile.dart';
 import 'package:meetmaap/app/view/location/locationdetails_generaldialog_nomobile.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
 import 'package:meetmaap/app/view/util/geolocationbutton_widget.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class MapPage extends StatelessWidget {
@@ -24,10 +27,16 @@ class MapPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final mapViewController = context.watch<MapViewController>();
     mapViewController.setOnlyOneLocation(locationToCheck);
-    // Show only a single location e.g. in a stack of location details
+
+    if (mapViewController.hasError) {
+      _showError(context, mapViewController);
+    }
+
     if (mapViewController.isOnlyOneLocation) {
       return Scaffold(
-        appBar: AppBar(title: Text("Location von ${locationToCheck!.title}")),
+        appBar: AppBar(
+          title: Text(context.l10n.locationOf(locationToCheck!.title)),
+        ),
         body: buildMap(context, mapViewController),
       );
     }
@@ -243,13 +252,13 @@ class MapPage extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.place_outlined, size: 28, color: Colors.black87),
                 SizedBox(height: 8),
                 Text(
-                  "Choose the perfect place",
+                  context.l10n.choosePerfectPlace,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 17,
@@ -260,7 +269,7 @@ class MapPage extends StatelessWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  "Long press anywhere on the map to drop a pin and set the location.",
+                  context.l10n.longPressSetPostion,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13.5,
@@ -361,7 +370,7 @@ class MapPage extends StatelessWidget {
     final query = mapViewController.searchController.text.trim();
     final hasQuery = query.isNotEmpty;
     final hasResults = mapViewController.searchResults.isNotEmpty;
-    final hasError = mapViewController.searchErrorMessage != null;
+    final hasError = mapViewController.hasSearchError;
     final isLoading = mapViewController.isSearchLoading;
     final showNoResults =
         query.length >= 3 && !isLoading && !hasError && !hasResults;
@@ -396,7 +405,7 @@ class MapPage extends StatelessWidget {
                 child: Builder(
                   builder: (context) {
                     if (isLoading) {
-                      return const Padding(
+                      return Padding(
                         padding: EdgeInsets.all(16),
                         child: Row(
                           children: [
@@ -406,7 +415,7 @@ class MapPage extends StatelessWidget {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                             SizedBox(width: 12),
-                            Text('Suche läuft...'),
+                            Text(context.l10n.searching),
                           ],
                         ),
                       );
@@ -422,7 +431,11 @@ class MapPage extends StatelessWidget {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                mapViewController.searchErrorMessage!,
+                                AppErrorMapper.toUserMessage(
+                                  mapViewController.searchError!,
+                                  context.l10n,
+                                  fallback: context.l10n.errorSearch,
+                                ),
                                 style: const TextStyle(color: Colors.red),
                               ),
                             ),
@@ -432,13 +445,15 @@ class MapPage extends StatelessWidget {
                     }
 
                     if (showNoResults) {
-                      return const Padding(
+                      return Padding(
                         padding: EdgeInsets.all(16),
                         child: Row(
                           children: [
                             Icon(Icons.search_off),
                             SizedBox(width: 12),
-                            Expanded(child: Text('Keine Orte gefunden.')),
+                            Expanded(
+                              child: Text(context.l10n.noLocationsFound),
+                            ),
                           ],
                         ),
                       );
@@ -584,7 +599,6 @@ class MapPage extends StatelessWidget {
         location.position,
         isMobileSheetOpen: false,
       );
-      //LocationDetailsGeneralDialog.show(context, locationDetailsController).then((
       LocationDetailsGeneralDialog.show(
         context,
         locationBase: location,
@@ -604,5 +618,16 @@ class MapPage extends StatelessWidget {
 
     // Mobile Portrait → BottomSheet
     return (Platform.isAndroid || Platform.isIOS) && size.width < size.height;
+  }
+
+  void _showError(BuildContext context, MapViewController controller) {
+    ExceptionMessage.showError(
+      context,
+      AppErrorMapper.toUserMessage(
+        controller.error!,
+        context.l10n,
+        fallback: context.l10n.errorCallLocations,
+      ),
+    );
   }
 }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class LocationCard extends StatelessWidget {
   final LocationBaseResponse locationbase;
@@ -12,6 +13,7 @@ class LocationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formatter = DateFormat('dd.MM.yyyy HH:mm');
+    final l10n = context.l10n;
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -105,12 +107,16 @@ class LocationCard extends StatelessWidget {
                           runSpacing: 8,
                           children: [
                             Text(
-                              "Startzeit: ${formatter.format(locationbase.startDateTime)} Uhr",
+                              l10n.displayStartdate(
+                                formatter.format(locationbase.startDateTime),
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              "Endzeit: ${formatter.format(locationbase.endDateTime)} Uhr",
+                              l10n.displayEnddate(
+                                formatter.format(locationbase.endDateTime),
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),

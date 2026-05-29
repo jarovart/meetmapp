@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class LoginController extends ChangeNotifier {
   // ─────────────────────────────────────────────
@@ -11,13 +10,13 @@ class LoginController extends ChangeNotifier {
   final _userCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _loading = false;
-  String? _error;
+  Object? _error;
   UserMyProfileResponse? _myProfile;
 
   bool get loading => _loading;
   bool get loggedIn => _myProfile != null;
   bool get hasErrors => _error != null;
-  String get errorMessage => _error ?? '';
+  Object? get error => _error;
   TextEditingController get userCtrl => _userCtrl;
   TextEditingController get passCtrl => _passCtrl;
 
@@ -56,10 +55,7 @@ class LoginController extends ChangeNotifier {
       debugPrint('Error while log in profile: $e');
       debugPrintStack(stackTrace: st);
 
-      _error = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Einloggen.',
-      );
+      _error = e;
     } finally {
       _loading = false;
       notifyListeners();
@@ -75,10 +71,7 @@ class LoginController extends ChangeNotifier {
       debugPrint('Error while log out profile: $e');
       debugPrintStack(stackTrace: st);
 
-      _error = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Ausloggen.',
-      );
+      _error = error;
     } finally {
       _loading = false;
       notifyListeners();

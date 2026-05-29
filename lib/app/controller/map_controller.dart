@@ -7,12 +7,10 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/debouncer.dart';
-import 'package:meetmaap/app/model/exception/geolocationpermission_exception.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/service/location_service.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
 
 class MapViewController extends ChangeNotifier {
@@ -31,9 +29,9 @@ class MapViewController extends ChangeNotifier {
   LatLng _initialCenter = LatLng(51.1657, 10.4515); // Mitte von Deutschland
   LatLng? _currentPosition;
   LatLng? _mapCenterBeforeSheet;
-  String? _errorMessage; //TODO: errormessage einbinden
+  Object? _error;
   bool _isSearchLoading = false;
-  String? _searchErrorMessage;
+  Object? _searchError;
   LocationFullResponse? _locationToCheck;
 
   RangeValues _selectedRange = const RangeValues(0, 4);
@@ -60,8 +58,10 @@ class MapViewController extends ChangeNotifier {
   bool get isSearchLoading => _isSearchLoading;
   bool get isOnlyOneLocation => _locationToCheck != null;
   LocationFullResponse? get locationToCheck => _locationToCheck;
-  String? get searchErrorMessage => _searchErrorMessage;
-  String? get errorMessage => _errorMessage;
+  bool get hasError => _error != null;
+  bool get hasSearchError => _searchError != null;
+  Object? get error => _error;
+  Object? get searchError => _searchError;
   FocusNode get searchFocusNode => _searchFocusNode;
 
   RangeValues get selectedRange => _selectedRange;
@@ -102,7 +102,7 @@ class MapViewController extends ChangeNotifier {
 
   void updateSearchResults(List<LocationBaseResponse> results) {
     _searchResults = results;
-    _searchErrorMessage = null;
+    _searchError = null;
     _isSearchLoading = false;
     debugPrint("updateSearchResults: ${results.length}");
     notifyListeners();
@@ -110,22 +110,16 @@ class MapViewController extends ChangeNotifier {
 
   void clearSearchResults() {
     _searchResults.clear();
-    _searchErrorMessage = null;
+    _searchError = null;
     _isSearchLoading = false;
     notifyListeners();
   }
 
   void clearSearchState() {
     _searchResults.clear();
-    _searchErrorMessage = null;
+    _searchError = null;
     _isSearchLoading = false;
     notifyListeners();
-  }
-
-  void updateMyProfile(UserMyProfileResponse? profile) {
-    debugPrint("funktioniert");
-    /*  _myProfile = profile;
-    notifyListeners();*/
   }
 
   // ─────────────────────────────────────────────
@@ -259,7 +253,7 @@ class MapViewController extends ChangeNotifier {
       }
 
       _isSearchLoading = true;
-      _searchErrorMessage = null;
+      _searchError = null;
       notifyListeners();
       try {
         final results = await LocationService.searchLocations(trimmed);
@@ -284,20 +278,14 @@ class MapViewController extends ChangeNotifier {
         }
 
         _searchResults = results;
-        _searchErrorMessage = null;
-        //updateSearchResults(results);
+        _searchError = null;
       } catch (e, st) {
         if (_searchController.text.trim() != trimmed) return;
         debugPrint('Error while searching for locations in mapcontroller: $e');
         debugPrintStack(stackTrace: st);
 
         _searchResults = [];
-        _searchErrorMessage = AppErrorMapper.toUserMessage(
-          e,
-          fallback: 'Suche fehlgeschlagen.',
-        );
-        //ExceptionMessage.showError(context, "Suche fehlgeschlagen");
-        //debugPrint("Suche fehlgeschlagen");
+        _searchError = e;
       } finally {
         if (_searchController.text.trim() == trimmed) {
           _isSearchLoading = false;
@@ -314,21 +302,17 @@ class MapViewController extends ChangeNotifier {
   Future<void> _determinePosition({bool refreshLocation = false}) async {
     final result = await LocationService.getCurrentLocation();
 
-    //if (!mounted) return; // Ist das Widget noch im Baum?
     switch (result) {
       case LocationSuccess(:final position):
         _initialCenter = position;
         _currentPosition = position;
-        mapController.move(position, 13.00); //todo auf 15 ändern
+        mapController.move(position, 13.00);
       case LocationServiceDisabled():
-        debugPrint("Standortdienste sind deaktiviert");
-      //ExceptionMessage.showError(context, "Standortdienste sind deaktiviert");
+        _error = result;
       case LocationPermissionDenied():
-        debugPrint("Standort-Berechtigung verweigert");
-      //ExceptionMessage.showError(context, "Standort-Berechtigung verweigert");
-      case LocationError(:final message):
-        debugPrint("Fehler: $message");
-      //ExceptionMessage.showError(context, "Fehler: $message");
+        _error = result;
+      case LocationError():
+        _error = result;
     }
     if (refreshLocation) {
       fetchLocations();
@@ -339,7 +323,7 @@ class MapViewController extends ChangeNotifier {
 
   Future<void> fetchLocations() async {
     try {
-      _errorMessage = null; // reset vorher
+      _error = null; // reset vorher
       debugPrint("Start: _fetchLocationsWithinWithTime");
       final bounds = mapController.camera.visibleBounds;
       _locations = await LocationService.fetchLocationsWithinWithTime(
@@ -352,11 +336,7 @@ class MapViewController extends ChangeNotifier {
       debugPrint('Exception: _fetchLocationsWithinWithTime: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Suchen der Locations.',
-      );
-      //ExceptionMessage.showError(context, "Fehler beim Laden der Locations");
+      _error = e;
     } finally {
       notifyListeners();
     }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:meetmaap/app/controller/debouncer.dart';
+import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
 import 'package:meetmaap/app/model/response/userfull_response.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/service/user_service.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 
 class UserProfileController extends ChangeNotifier {
   final String? _username;
@@ -18,7 +18,7 @@ class UserProfileController extends ChangeNotifier {
   int? _userId;
   UserBaseResponse? _userBaseResponse;
   UserFullResponse? _userData;
-  String? _errorMessage;
+  Object? _error;
 
   List<LocationBaseResponse> _createdLocations = [];
   List<LocationBaseResponse> _joinedLocations = [];
@@ -52,8 +52,8 @@ class UserProfileController extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isSaving => _saving;
-  bool get hasError => _errorMessage != null && _errorMessage!.isNotEmpty;
-  String? get errorMessage => _errorMessage;
+  bool get hasError => _error != null;
+  Object? get error => _error;
   Debouncer get debouncer => _debouncer!;
 
   UserFullResponse? get userData => _userData;
@@ -95,50 +95,38 @@ class UserProfileController extends ChangeNotifier {
 
     if (userBaseResponse != null) _userBaseResponse = userBaseResponse;
     _isLoading = true;
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
 
     try {
       final loggedIn = await AuthService.isLoggedIn();
       final hasUsername = _username != null && _username.isNotEmpty;
-      debugPrint("1");
       if (!loggedIn && !hasUsername) {
-        debugPrint("1a");
         return;
       }
 
-      debugPrint("2");
       if (loggedIn) {
         final myUsername = await AuthService.getUsername();
-
-        debugPrint("3");
 
         debugPrint("$hasUsername + $myUsername + $_username");
         if (!hasUsername || myUsername == _username || _username == "me") {
           _userData = await AuthService.fetchMyProfile();
-          debugPrint("3a");
         }
       }
 
       if (_userData == null) {
-        debugPrint("4");
         if (_userBaseResponse != null) {
-          debugPrint("5");
           _userData = await UserService.fetchFullUserById(
             _userBaseResponse!.id,
           );
         } else if (hasUsername) {
-          debugPrint("6");
           _userData = await UserService.fetchFullUserByUserName(_username);
         } else {
-          debugPrint("7");
-          throw Exception("userData can not be loaded.");
+          throw LocationCouldNotBeLoadedException();
         }
       }
 
       _userId = _userData!.id;
-
-      // reset tab data when switching profile
       _createdLocations = [];
       _joinedLocations = [];
       _likedLocations = [];
@@ -156,10 +144,7 @@ class UserProfileController extends ChangeNotifier {
       debugPrint('Error while loading profile: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Laden des Profils.',
-      );
+      _error = e;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -180,7 +165,7 @@ class UserProfileController extends ChangeNotifier {
     if (_isLoadingCreated || _createdLoaded || _userId == null) return;
 
     _isLoadingCreated = true;
-    _errorMessage = null;
+    _error = null;
     _createdPage = 0;
     _hasMoreCreated = true;
     notifyListeners();
@@ -199,10 +184,7 @@ class UserProfileController extends ChangeNotifier {
       debugPrint('Error while loading created locations: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Laden der Locations.',
-      );
+      _error = e;
     } finally {
       _isLoadingCreated = false;
       notifyListeners();
@@ -234,10 +216,7 @@ class UserProfileController extends ChangeNotifier {
       debugPrint('Error while loading more created locations: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Weitere Locations konnten nicht geladen werden.',
-      );
+      _error = e;
     } finally {
       _isLoadingMoreCreated = false;
       notifyListeners();
@@ -248,7 +227,7 @@ class UserProfileController extends ChangeNotifier {
     if (_isLoadingJoined || _joinedLoaded || _userId == null) return;
 
     _isLoadingJoined = true;
-    _errorMessage = null;
+    _error = null;
     _joinedPage = 0;
     _hasMoreJoined = true;
     notifyListeners();
@@ -267,10 +246,7 @@ class UserProfileController extends ChangeNotifier {
       debugPrint('Error while loading joined locations: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Laden der Locations.',
-      );
+      _error = e;
     } finally {
       _isLoadingJoined = false;
       notifyListeners();
@@ -302,10 +278,7 @@ class UserProfileController extends ChangeNotifier {
       debugPrint('Error while loading more joined locations: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Weitere Locations konnten nicht geladen werden.',
-      );
+      _error = e;
     } finally {
       _isLoadingMoreJoined = false;
       notifyListeners();
@@ -316,7 +289,7 @@ class UserProfileController extends ChangeNotifier {
     if (_isLoadingLiked || _likedLoaded || _userId == null) return;
 
     _isLoadingLiked = true;
-    _errorMessage = null;
+    _error = null;
     _likedPage = 0;
     _hasMoreLiked = true;
     notifyListeners();
@@ -335,10 +308,7 @@ class UserProfileController extends ChangeNotifier {
       debugPrint('Error while loading liked locations: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Fehler beim Laden der Locations.',
-      );
+      _error = e;
     } finally {
       _isLoadingLiked = false;
       notifyListeners();
@@ -370,10 +340,7 @@ class UserProfileController extends ChangeNotifier {
       debugPrint('Error while loading more liked locations: $e');
       debugPrintStack(stackTrace: st);
 
-      _errorMessage = AppErrorMapper.toUserMessage(
-        e,
-        fallback: 'Weitere Locations konnten nicht geladen werden.',
-      );
+      _error = e;
     } finally {
       _isLoadingMoreLiked = false;
       notifyListeners();

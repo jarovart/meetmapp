@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/model/exception/app_exception.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String token;
@@ -39,10 +41,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       final p2 = _p2.text;
 
       if (p1.length < 8) {
-        throw CustomAppException('Passwort sollte mindestens 8 Zeichen haben');
+        throw Atleast8CharPasswordException();
       }
       if (p1 != p2) {
-        throw CustomAppException('Passwörter stimmen nicht überein');
+        throw NotMatchPasswordsException();
       }
 
       await AuthService.resetPassword(token: widget.token, newPassword: p1);
@@ -56,7 +58,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       setState(
         () => _error = AppErrorMapper.toUserMessage(
           e,
-          fallback: 'Fehler beim Passwort zurücksetzen.',
+          context.l10n,
+          fallback: context.l10n.errorPasswordReset,
         ),
       );
     } finally {
@@ -67,7 +70,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Neues Passwort setzen')),
+      appBar: AppBar(title: Text(context.l10n.setNewPassword)),
       body: Center(
         child: SingleChildScrollView(
           child: ConstrainedBox(
@@ -84,13 +87,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           color: Colors.green,
                         ),
                         const SizedBox(height: 12),
-                        const Text('Passwort geändert ✅'),
+                        Text(context.l10n.changedPassword),
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            context.go('/login');
+                            context.go(RouteConfig.loginUrl);
                           },
-                          child: const Text('Jetzt einloggen'),
+                          child: Text(context.l10n.loginNow),
                         ),
                       ],
                     )
@@ -99,8 +102,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       children: [
                         TextField(
                           controller: _p1,
-                          decoration: const InputDecoration(
-                            labelText: 'Neues Passwort',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.newPassword,
                           ),
                           obscureText: true,
                           autofillHints: const [AutofillHints.newPassword],
@@ -109,8 +112,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         const SizedBox(height: 12),
                         TextField(
                           controller: _p2,
-                          decoration: const InputDecoration(
-                            labelText: 'Passwort wiederholen',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.repeatPassword,
                           ),
                           obscureText: true,
                           autofillHints: const [AutofillHints.newPassword],
@@ -135,7 +138,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('Passwort speichern'),
+                                : Text(context.l10n.savePassword),
                           ),
                         ),
                       ],

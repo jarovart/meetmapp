@@ -7,8 +7,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/locationlist_controller.dart';
 import 'package:meetmaap/app/model/response/place_response.dart';
 import 'package:meetmaap/app/service/place_service.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/app/view/util/filterbutton_widget.dart';
 import 'package:meetmaap/app/view/util/locationcard_widget.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class LocationsListPage extends StatelessWidget {
@@ -18,9 +20,10 @@ class LocationsListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final locationListController = context.watch<LocationListController>();
     final locations = locationListController.locations;
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Locations"), centerTitle: true),
+      appBar: AppBar(title: Text(l10n.locations), centerTitle: true),
       backgroundColor: Colors.grey.shade200,
       body: Stack(
         children: [
@@ -30,7 +33,13 @@ class LocationsListPage extends StatelessWidget {
           if (!locationListController.isLoading &&
               locationListController.hasError)
             Center(
-              child: Text('Fehler: ${locationListController.errorMessage}'),
+              child: Text(
+                AppErrorMapper.toUserMessage(
+                  locationListController.error!,
+                  context.l10n,
+                  fallback: l10n.errorCallLocations,
+                ),
+              ),
             ),
 
           if (!locationListController.isLoading && locations.isEmpty)
@@ -42,8 +51,8 @@ class LocationsListPage extends StatelessWidget {
                   Center(
                     child: Text(
                       (locationListController.searchCtrl.text.length <= 3)
-                          ? "Bitte Namen eingeben."
-                          : "Keine Locations gefunden.",
+                          ? l10n.useSearch
+                          : l10n.noLocationsFound,
                     ),
                   ),
                 ],
@@ -106,6 +115,8 @@ class LocationsListPage extends StatelessWidget {
     BuildContext context,
     LocationListController locationListController,
   ) {
+    final l10n = context.l10n;
+
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -119,7 +130,7 @@ class LocationsListPage extends StatelessWidget {
                 textInputAction: TextInputAction.search,
                 onSubmitted: (_) => locationListController.reloadLocations(),
                 decoration: InputDecoration(
-                  hintText: "Suchen...",
+                  hintText: l10n.searching,
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: locationListController.searchCtrl.text.isNotEmpty
                       ? IconButton(
@@ -184,6 +195,7 @@ class LocationsListPage extends StatelessWidget {
     bool isLoadingSuggestions = false;
     String? suggestionsError;
     Timer? debounce;
+    final l10n = context.l10n;
 
     await showDialog(
       context: context,
@@ -244,11 +256,9 @@ class LocationsListPage extends StatelessWidget {
 
                     setLocalState(() {
                       suggestions = [];
-                      suggestionsError = 'Orte konnten nicht geladen werden.';
+                      suggestionsError = l10n.locationCouldNotBeLoaded;
                     });
                   } finally {
-                    if (!ctx.mounted) return;
-
                     setLocalState(() {
                       isLoadingSuggestions = false;
                     });
@@ -267,12 +277,12 @@ class LocationsListPage extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              "Filter",
+                              l10n.filter,
                               style: Theme.of(ctx).textTheme.titleLarge,
                             ),
                           ),
                           IconButton(
-                            tooltip: "Schließen",
+                            tooltip: l10n.close,
                             onPressed: () {
                               debounce?.cancel();
                               Navigator.of(dialogCtx).pop();
@@ -291,7 +301,7 @@ class LocationsListPage extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: FilterButton(
-                                      label: "Startzeit",
+                                      label: l10n.chooseStartdate,
                                       value: dateTimeformatter.format(
                                         tempStart ??
                                             locationListController.resetStart,
@@ -302,7 +312,7 @@ class LocationsListPage extends StatelessWidget {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: FilterButton(
-                                      label: "Ende",
+                                      label: l10n.chooseEnddate,
                                       value: dateTimeformatter.format(
                                         tempEnd ??
                                             locationListController.resetEnd,
@@ -317,7 +327,7 @@ class LocationsListPage extends StatelessWidget {
                               TextField(
                                 controller: placeController,
                                 decoration: InputDecoration(
-                                  labelText: "Ort (z.B. Hamburg)",
+                                  labelText: l10n.places,
                                   border: const OutlineInputBorder(),
                                   suffixIcon: isLoadingSuggestions
                                       ? const Padding(
@@ -409,7 +419,7 @@ class LocationsListPage extends StatelessWidget {
                               const SizedBox(height: 16),
 
                               Text(
-                                "Radius: ${tempRadius.toStringAsFixed(0)} km",
+                                l10n.radiusInput(tempRadius.toStringAsFixed(0)),
                               ),
                               Slider(
                                 value: tempRadius,
@@ -440,7 +450,7 @@ class LocationsListPage extends StatelessWidget {
                                 placeController.clear();
                               });
                             },
-                            child: const Text("Zurücksetzen"),
+                            child: Text(l10n.reset),
                           ),
                           const Spacer(),
                           ElevatedButton(
@@ -461,7 +471,7 @@ class LocationsListPage extends StatelessWidget {
                               Navigator.of(dialogCtx).pop();
                               await locationListController.reloadLocations();
                             },
-                            child: const Text("Anwenden"),
+                            child: Text(l10n.apply),
                           ),
                         ],
                       ),
@@ -488,7 +498,7 @@ class LocationsListPage extends StatelessWidget {
       firstDate: DateTime(now.year - 2),
       lastDate: DateTime(now.year + 5),
     );
-    if (date == null) return null;
+    if (date == null || !context.mounted) return null;
 
     final time = await showTimePicker(
       context: context,

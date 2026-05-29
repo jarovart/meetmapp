@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/controller/locationcreate_controller.dart';
 import 'package:meetmaap/app/model/exception/exception_message.dart';
+import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:meetmaap/extensions/l10n_extension.dart';
 
 class LocationCreatePage extends StatelessWidget {
   final LocationCreateController locationCreateController;
@@ -17,9 +20,12 @@ class LocationCreatePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final formatter = DateFormat('dd.MM.yyyy HH:mm');
+    final l10n = context.l10n;
+
     if (!locationCreateController.loggedIn) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Location erstellen")),
+        appBar: AppBar(title: Text(l10n.createLocation)),
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -29,7 +35,9 @@ class LocationCreatePage extends StatelessWidget {
         Scaffold(
           appBar: AppBar(
             title: Text(
-              "Location erstellen als ${locationCreateController.myProfile!.username}",
+              l10n.createLocationAs(
+                locationCreateController.myProfile!.username,
+              ),
             ),
           ),
 
@@ -44,25 +52,24 @@ class LocationCreatePage extends StatelessWidget {
                   // --- TITLE ---
                   TextFormField(
                     controller: locationCreateController.titleController,
-                    decoration: const InputDecoration(
-                      labelText: "Titel eingeben",
+                    decoration: InputDecoration(
+                      labelText: l10n.enterTitle,
                       border: OutlineInputBorder(),
                     ),
-                    validator: (v) => v == null || v.isEmpty
-                        ? "Titel darf nicht leer sein"
-                        : null,
+                    validator: (v) =>
+                        v == null || v.isEmpty ? l10n.titleNotEmpty : null,
                   ),
                   const SizedBox(height: 16),
 
                   // --- DESCRIPTION ---
                   TextFormField(
                     controller: locationCreateController.descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: "Beschreibung eingeben",
+                    decoration: InputDecoration(
+                      labelText: l10n.enterDescription,
                       border: OutlineInputBorder(),
                     ),
                     validator: (v) =>
-                        v == null || v.isEmpty ? "Beschreibung fehlt" : null,
+                        v == null || v.isEmpty ? l10n.missingDescription : null,
                   ),
                   const SizedBox(height: 16),
 
@@ -70,10 +77,10 @@ class LocationCreatePage extends StatelessWidget {
                   TextFormField(
                     controller: locationCreateController.addressController,
                     decoration: InputDecoration(
-                      labelText: "Adresse eingeben",
+                      labelText: l10n.enterAddress,
                       border: OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        tooltip: "Adresse zurücksetzen",
+                        tooltip: l10n.resetAddress,
                         icon: const Icon(Icons.undo),
                         onPressed: () =>
                             locationCreateController.addressController.text =
@@ -81,7 +88,7 @@ class LocationCreatePage extends StatelessWidget {
                       ),
                     ),
                     validator: (v) =>
-                        v == null || v.isEmpty ? "Adresse fehlt" : null,
+                        v == null || v.isEmpty ? l10n.missingAddress : null,
                   ),
                   const SizedBox(height: 16),
 
@@ -91,10 +98,12 @@ class LocationCreatePage extends StatelessWidget {
                       Expanded(
                         child: Text(
                           locationCreateController.selectedStartDateTime == null
-                              ? "Kein Startdatum gewählt"
-                              : locationCreateController.getDatumAsString(
-                                  locationCreateController
-                                      .selectedStartDateTime!,
+                              ? l10n.noChosedStartdate
+                              : l10n.displayStartdate(
+                                  formatter.format(
+                                    locationCreateController
+                                        .selectedStartDateTime!,
+                                  ),
                                 ),
                           style: const TextStyle(fontSize: 16),
                         ),
@@ -107,7 +116,7 @@ class LocationCreatePage extends StatelessWidget {
                                   dt,
                           context,
                         ),
-                        child: const Text("Startdatum wählen"),
+                        child: Text(l10n.chooseStartdate),
                       ),
                     ],
                   ),
@@ -119,9 +128,12 @@ class LocationCreatePage extends StatelessWidget {
                       Expanded(
                         child: Text(
                           locationCreateController.selectedEndDateTime == null
-                              ? "Kein Enddatum gewählt"
-                              : locationCreateController.getDatumAsString(
-                                  locationCreateController.selectedEndDateTime!,
+                              ? l10n.noChosedEnddate
+                              : l10n.displayEnddate(
+                                  formatter.format(
+                                    locationCreateController
+                                        .selectedEndDateTime!,
+                                  ),
                                 ),
                           style: const TextStyle(fontSize: 16),
                         ),
@@ -133,7 +145,7 @@ class LocationCreatePage extends StatelessWidget {
                               locationCreateController.selectedEndDateTime = dt,
                           context,
                         ),
-                        child: const Text("Enddatum wählen"),
+                        child: Text(l10n.chooseEnddate),
                       ),
                     ],
                   ),
@@ -142,7 +154,11 @@ class LocationCreatePage extends StatelessWidget {
                   if (locationCreateController.hasError)
                     Center(
                       child: Text(
-                        locationCreateController.error,
+                        AppErrorMapper.toUserMessage(
+                          locationCreateController.error!,
+                          l10n,
+                          fallback: l10n.errorCreateLocation,
+                        ),
                         style: const TextStyle(color: Colors.red, fontSize: 16),
                       ),
                     ),
@@ -163,14 +179,13 @@ class LocationCreatePage extends StatelessWidget {
                       return Card(
                         key: ValueKey(locationCreateController.images[index]),
                         child: ListTile(
-                          onTap: () => "",
                           leading: Image.memory(
                             locationCreateController.images[index],
                             height: 80,
                             fit: BoxFit.cover,
                           ),
-                          title: Text("Bild ${index + 1}"),
-                          subtitle: index == 0 ? Text("Thumbnail") : null,
+                          title: Text(l10n.imageNumber(index + 1)),
+                          subtitle: index == 0 ? Text(l10n.thumbnail) : null,
                           trailing: IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () =>
@@ -186,7 +201,7 @@ class LocationCreatePage extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: locationCreateController.addImage,
                     icon: const Icon(Icons.add_a_photo),
-                    label: const Text("Bild hinzufügen"),
+                    label: Text(l10n.addImage),
                   ),
 
                   const SizedBox(height: 16),
@@ -199,10 +214,7 @@ class LocationCreatePage extends StatelessWidget {
                               .getPositionForCopyClipboard(),
                         ),
                       );
-                      ExceptionMessage.showInfo(
-                        context,
-                        "Position has been copied!",
-                      );
+                      ExceptionMessage.showInfo(context, l10n.positionCopied);
                     },
                     child: Container(
                       padding: const EdgeInsets.all(12),
@@ -211,7 +223,7 @@ class LocationCreatePage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        locationCreateController.getPositionAsString(),
+                        getPositionAsString(context, locationCreateController),
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
@@ -223,7 +235,7 @@ class LocationCreatePage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () => save(context),
-                      child: const Text("Location speichern"),
+                      child: Text(l10n.saveLocation),
                     ),
                   ),
                 ],
@@ -238,12 +250,12 @@ class LocationCreatePage extends StatelessWidget {
               absorbing: true,
               child: Container(
                 color: Colors.black.withValues(alpha: 0.35),
-                child: const Center(
+                child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "Loading...",
+                        l10n.loading,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 32,
@@ -298,5 +310,16 @@ class LocationCreatePage extends StatelessWidget {
       final locationBase = locationCreateController.locationBase!;
       if (context.mounted) context.pop(locationBase);
     }
+  }
+
+  String getPositionAsString(
+    BuildContext context,
+    LocationCreateController controller,
+  ) {
+    final point = controller.point;
+    return context.l10n.positionWithCoordinates(
+      point.latitude,
+      point.longitude,
+    );
   }
 }
