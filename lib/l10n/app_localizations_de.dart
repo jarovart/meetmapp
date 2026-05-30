@@ -552,4 +552,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get errorCallMoreUsers => 'Fehler beim Abrufen der weiteren Benutzer.';
+
+  @override
+  String get today => 'Heute';
+
+  @override
+  String get tomorrow => 'Morgen';
+
+  @override
+  String get dayAfterTomorrow => 'Übermorgen';
+
+  @override
+  String get nextWeek => '1 Woche';
+
+  @override
+  String get nextMonth => '1 Monat';
+
+  @override
+  String memberSince(Object date) {
+    return 'Mitglied seit $date';
+  }
 }

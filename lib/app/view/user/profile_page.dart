@@ -253,7 +253,8 @@ class UserProfilePage extends StatelessWidget {
               if (createdAt != null) ...[
                 const SizedBox(height: 6),
                 Text(
-                  "Mitglied seit ${dateFormat.format(createdAt)}",
+                  context.l10n.memberSince(dateFormat.format(createdAt)),
+
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade500),

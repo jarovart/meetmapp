@@ -35,7 +35,8 @@ class MapViewController extends ChangeNotifier {
   LocationFullResponse? _locationToCheck;
 
   RangeValues _selectedRange = const RangeValues(0, 4);
-  final List<String> _dayOptions = [
+
+  List<String> _dayOptions = [
     'Heute',
     'Morgen',
     'Übermorgen',
@@ -77,6 +78,8 @@ class MapViewController extends ChangeNotifier {
   // ─────────────────────────────────────────────
   // STATE MUTATION
   // ─────────────────────────────────────────────
+
+  set dayOptions(List<String> dayOptions) => _dayOptions = dayOptions;
   void centerOnUser() async => await _determinePosition(refreshLocation: true);
 
   void setDateRange(RangeValues values) {

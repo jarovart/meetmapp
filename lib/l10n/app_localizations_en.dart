@@ -543,4 +543,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorCallMoreUsers => 'Error occurs while retrieving more users.';
+
+  @override
+  String get today => 'today';
+
+  @override
+  String get tomorrow => 'tomorrow';
+
+  @override
+  String get dayAfterTomorrow => 'day after tomorrow';
+
+  @override
+  String get nextWeek => 'next week';
+
+  @override
+  String get nextMonth => 'Next month';
+
+  @override
+  String memberSince(Object date) {
+    return 'Member since $date';
+  }
 }

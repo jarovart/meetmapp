@@ -1099,6 +1099,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error occurs while retrieving more users.'**
   String get errorCallMoreUsers;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get today;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'tomorrow'**
+  String get tomorrow;
+
+  /// No description provided for @dayAfterTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'day after tomorrow'**
+  String get dayAfterTomorrow;
+
+  /// No description provided for @nextWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'next week'**
+  String get nextWeek;
+
+  /// No description provided for @nextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get nextMonth;
+
+  /// No description provided for @memberSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Member since {date}'**
+  String memberSince(Object date);
 }
 
 class _AppLocalizationsDelegate

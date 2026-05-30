@@ -166,5 +166,11 @@
   "errorLogout": "Fehler beim Ausloggen.",
   "errorSearch": "Suche fehlgeschlagen.",
   "errorCallUsers": "Fehler beim Abrufen der Benutzer.",
-  "errorCallMoreUsers": "Fehler beim Abrufen der weiteren Benutzer."
+  "errorCallMoreUsers": "Fehler beim Abrufen der weiteren Benutzer.",
+  "today": "Heute",
+  "tomorrow": "Morgen",
+  "dayAfterTomorrow": "Übermorgen",
+  "nextWeek": "1 Woche",
+  "nextMonth": "1 Monat",
+  "memberSince": "Mitglied seit {date}"
 }

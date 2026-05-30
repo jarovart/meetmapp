@@ -27,6 +27,14 @@ class MapPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final mapViewController = context.watch<MapViewController>();
     mapViewController.setOnlyOneLocation(locationToCheck);
+    final l10n = context.l10n;
+    mapViewController.dayOptions = [
+      l10n.today,
+      l10n.tomorrow,
+      l10n.dayAfterTomorrow,
+      l10n.nextWeek,
+      l10n.nextMonth,
+    ];
 
     if (mapViewController.hasError) {
       _showError(context, mapViewController);
@@ -338,7 +346,7 @@ class MapPage extends StatelessWidget {
                 onChanged: mapViewController.onSearchChanged,
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
-                  hintText: 'Suchen...',
+                  hintText: context.l10n.searching,
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,

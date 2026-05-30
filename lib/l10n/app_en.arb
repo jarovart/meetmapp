@@ -171,5 +171,11 @@
   "errorLogout": "Error occurs while logging out.",
   "errorSearch": "Error occurs while searching.",
   "errorCallUsers": "Error occurs while retrieving users.",
-  "errorCallMoreUsers": "Error occurs while retrieving more users."
+  "errorCallMoreUsers": "Error occurs while retrieving more users.",
+  "today": "today",
+  "tomorrow": "tomorrow",
+  "dayAfterTomorrow": "day after tomorrow",
+  "nextWeek": "next week",
+  "nextMonth": "Next month",
+  "memberSince": "Member since {date}"
 }

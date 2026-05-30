@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/extensions/l10n_extension.dart';
 
@@ -106,7 +107,10 @@ class _LocationListTabState extends State<LocationListTab> {
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
               onTap: () {
-                context.push('/locationdetail', extra: locationBase);
+                context.push(
+                  RouteConfig.getLocationUrl(locationBase.id),
+                  extra: locationBase,
+                );
               },
               child: ListTile(
                 leading: locationBase.thumbnailImage != null
