@@ -240,24 +240,28 @@ class UserProfilePage extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 6),
-              Text("@$username", style: Theme.of(context).textTheme.bodyMedium),
+              Text(
+                username,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
               if (email != null && email.isNotEmpty) ...[
                 const SizedBox(height: 6),
                 Text(
                   email,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
                 ),
               ],
               if (createdAt != null) ...[
                 const SizedBox(height: 6),
                 Text(
                   context.l10n.memberSince(dateFormat.format(createdAt)),
-
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade500),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
                 ),
               ],
             ],
@@ -283,7 +287,7 @@ class UserProfilePage extends StatelessWidget {
               aboutMe?.isNotEmpty == true
                   ? aboutMe!
                   : l10n.noDescriptionAvailable,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: TextStyle(color: Theme.of(context).colorScheme.secondary),
             ),
           ],
         ),

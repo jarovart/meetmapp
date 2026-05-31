@@ -18,14 +18,14 @@ class UserCard extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               blurRadius: 10,
               spreadRadius: 2,
               offset: const Offset(2, 3),
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withValues(alpha: 0.06),
             ),
           ],
         ),
@@ -68,7 +68,9 @@ class UserCard extends StatelessWidget {
                     "${userbase.firstName}, ${userbase.lastName}",
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey[700]),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
                   ),
                 ],
               ),

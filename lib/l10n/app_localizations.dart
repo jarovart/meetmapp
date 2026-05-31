@@ -1135,6 +1135,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Member since {date}'**
   String memberSince(Object date);
+
+  /// No description provided for @menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get menu;
 }
 
 class _AppLocalizationsDelegate

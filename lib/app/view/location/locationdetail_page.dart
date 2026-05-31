@@ -148,7 +148,6 @@ class LocationDetailPage extends StatelessWidget {
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                    color: Colors.white,
                                     fontSize: 30,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -158,7 +157,6 @@ class LocationDetailPage extends StatelessWidget {
                                   children: [
                                     const Icon(
                                       Icons.location_on_outlined,
-                                      color: Colors.white70,
                                       size: 18,
                                     ),
                                     const SizedBox(width: 6),
@@ -167,9 +165,7 @@ class LocationDetailPage extends StatelessWidget {
                                         controller.location.address,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Colors.white70,
-                                        ),
+                                        style: const TextStyle(),
                                       ),
                                     ),
                                   ],

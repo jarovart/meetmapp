@@ -17,7 +17,6 @@ class UserListPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.users), centerTitle: true),
-      backgroundColor: Colors.grey.shade200,
       body: Stack(
         children: [
           if (controller.isLoading)
@@ -133,12 +132,6 @@ class UserListPage extends StatelessWidget {
                         )
                       : null,
                   filled: true,
-                  fillColor: const Color.fromARGB(
-                    255,
-                    223,
-                    222,
-                    222,
-                  ).withValues(alpha: 0.8),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,

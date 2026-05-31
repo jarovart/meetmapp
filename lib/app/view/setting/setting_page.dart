@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meetmaap/app/controller/setting_controller.dart';
+import 'package:meetmaap/app/view/model/appliedsettings_model.dart';
 import 'package:meetmaap/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +10,10 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingsController = context.watch<SettingsController>();
+    final appliedSettings = context
+        .select<SettingsController, AppliedAppSettings?>(
+          (controller) => controller.appliedSetting,
+        );
     final l10n = context.l10n;
 
     return Scaffold(
@@ -32,7 +37,7 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             DropdownButton<String?>(
-              value: context.watch<SettingsController>().locale?.languageCode,
+              value: settingsController.locale?.languageCode,
 
               items: const [
                 DropdownMenuItem(value: null, child: Text("System")),
@@ -43,11 +48,17 @@ class SettingsPage extends StatelessWidget {
               ],
 
               onChanged: (value) {
-                context.read<SettingsController>().setLanguage(value);
+                settingsController.changeDraftLanguage(value);
 
                 // später Backend speichern
                 // await settingsApi.saveLanguage(value);
               },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                settingsController.saveSettings();
+              },
+              child: Text(context.l10n.save),
             ),
           ],
         ),

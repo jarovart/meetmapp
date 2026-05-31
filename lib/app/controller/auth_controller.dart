@@ -45,6 +45,18 @@ class AuthController extends ChangeNotifier with WidgetsBindingObserver {
     return false;
   }
 
+  Future<void> loadLoginLocal() async {
+    try {
+      if (await AuthService.isLoggedIn()) {
+        _myProfile = await AuthService.getMyUserProfile();
+        _token = await AuthService.getToken();
+        _lastRefreshAt = DateTime.now();
+      }
+    } catch (e) {
+      debugPrint("Error loading login local: $e");
+    }
+  }
+
   void loadSession(String source) async {
     debugPrint("Authcontroller $source loadsession.");
     await refreshLogin(source);

@@ -172,5 +172,6 @@
   "dayAfterTomorrow": "Übermorgen",
   "nextWeek": "1 Woche",
   "nextMonth": "1 Monat",
-  "memberSince": "Mitglied seit {date}"
+  "memberSince": "Mitglied seit {date}",
+  "menu": "Menü"
 }

@@ -35,15 +35,15 @@ class LocationBottomActions extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         //color: const Color.fromARGB(255, 223, 222, 222).withValues(alpha: 0.7),
         decoration: BoxDecoration(
-          color: Theme.of(
-            context,
-          ).scaffoldBackgroundColor.withValues(red: 1, alpha: 0.3),
-          border: const Border(top: BorderSide(color: Color(0xFFE0E0E0))),
-          boxShadow: const [
+          color: Theme.of(context).cardColor.withValues(alpha: 0.92),
+          border: Border(
+            top: BorderSide(color: Theme.of(context).dividerColor),
+          ),
+          boxShadow: [
             BoxShadow(
               blurRadius: 10,
               offset: Offset(0, -2),
-              color: Color(0x12000000),
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.25),
             ),
           ],
         ),
@@ -51,7 +51,7 @@ class LocationBottomActions extends StatelessWidget {
           children: [
             Expanded(
               child: isLikeJoinAble
-                  ? OutlinedButton.icon(
+                  ? ElevatedButton.icon(
                       onPressed: authController.isLoggedIn ? onLikeTap : null,
                       icon: Icon(
                         isLiked ? Icons.favorite : Icons.favorite_border,

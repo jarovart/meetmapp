@@ -10,19 +10,25 @@ class CenterOnUserButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildFloatingButton();
+    return _buildFloatingButton(context);
   }
 
-  Widget _buildFloatingButton() {
+  Widget _buildFloatingButton(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return FloatingActionButton(
       mini: true,
-      backgroundColor: Colors.blue.withValues(alpha: 0.3),
+      backgroundColor: colors.secondary.withValues(alpha: 0.18),
+      foregroundColor: colors.secondary,
       onPressed: onPressed,
-      child: _buildIcon(),
+      child: _buildIcon(context),
     );
   }
 
-  Widget _buildIcon() {
-    return const Icon(Icons.my_location, color: Colors.blue);
+  Widget _buildIcon(BuildContext context) {
+    return Icon(
+      Icons.my_location,
+      color: Theme.of(context).colorScheme.primary,
+    );
   }
 }

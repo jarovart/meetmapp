@@ -16,9 +16,11 @@ import 'package:meetmaap/app/controller/map_controller.dart';
 import 'package:meetmaap/app/controller/profile_controller.dart';
 import 'package:meetmaap/app/controller/setting_controller.dart';
 import 'package:meetmaap/app/controller/userlist_controller.dart';
+import 'package:meetmaap/app/model/enums/appdesign.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/model/response/userbase_response.dart';
+import 'package:meetmaap/app/view/design/themedesign.dart';
 import 'package:meetmaap/app/view/home_page.dart';
 import 'package:meetmaap/app/view/authentication/forgotpasswordpage.dart';
 import 'package:meetmaap/app/view/authentication/loginpage.dart';
@@ -29,6 +31,7 @@ import 'package:meetmaap/app/view/authentication/verifyemailpage.dart';
 import 'package:meetmaap/app/view/location/edit_mylocation_page.dart';
 import 'package:meetmaap/app/view/location/locationdetail_page.dart';
 import 'package:meetmaap/app/view/map_page.dart';
+import 'package:meetmaap/app/view/model/appliedsettings_model.dart';
 import 'package:meetmaap/app/view/setting/setting_page.dart';
 import 'package:meetmaap/app/view/user/edit_myprofile_page.dart';
 import 'package:meetmaap/app/view/user/userlist_page.dart';
@@ -42,14 +45,20 @@ import 'package:meetmaap/app/view/user/profile_page.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   usePathUrlStrategy();
+
+  final authController = AuthController("main");
+  await authController.loadLoginLocal();
+  final settingsController = SettingsController();
+  await settingsController.loadSettingsLocal();
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => AuthController("(Authcontrollermain)"),
-        ),
+        ChangeNotifierProvider.value(value: authController),
 
         ChangeNotifierProxyProvider<AuthController, HomeController>(
           create: (context) =>
@@ -66,11 +75,12 @@ void main() {
         ),
         ChangeNotifierProvider(create: (_) => LocationListController()),
         ChangeNotifierProvider(create: (_) => UserListController()),
-        ChangeNotifierProvider(create: (_) => SettingsController()),
+        ChangeNotifierProvider.value(value: settingsController),
       ],
-      child: Consumer<SettingsController>(
-        builder: (context, settingsController, _) {
-          return MainApplication(settingsController: settingsController);
+      child: Selector<SettingsController, AppliedAppSettings?>(
+        selector: (_, controller) => controller.appliedSetting,
+        builder: (context, appliedSetting, _) {
+          return MainApplication(setting: appliedSetting);
         },
       ),
     ),
@@ -78,14 +88,14 @@ void main() {
 }
 
 class MainApplication extends StatelessWidget {
-  final SettingsController settingsController;
-  MainApplication({super.key, required this.settingsController});
+  final AppliedAppSettings? setting;
+  MainApplication({super.key, required this.setting});
 
   final GoRouter router = GoRouter(
     routes: [
       // ─────────────────────────────────────────────
       // HomePage Section
-      // ─────────────────────────────────────────────
+      // ────────────────────────────────────────────a─
       GoRoute(
         path: RouteConfig.homePageUrl,
         builder: (context, state) => Consumer2<HomeController, AuthController>(
@@ -332,13 +342,18 @@ class MainApplication extends StatelessWidget {
     return MaterialApp.router(
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.green),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.dark,
+      darkTheme: ThemeDesign.mapDarkTheme(AppDesign.darkPink),
       routerConfig: router,
 
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
 
-      locale: settingsController.locale, // null = Systemsprache verwenden
+      locale: setting?.locale, // null = Systemsprache verwenden
     );
   }
 }

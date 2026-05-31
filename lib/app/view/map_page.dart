@@ -28,6 +28,9 @@ class MapPage extends StatelessWidget {
     final mapViewController = context.watch<MapViewController>();
     mapViewController.setOnlyOneLocation(locationToCheck);
     final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     mapViewController.dayOptions = [
       l10n.today,
       l10n.tomorrow,
@@ -107,14 +110,14 @@ class MapPage extends StatelessWidget {
   ) {
     if (!mapViewController.isOnlyOneLocation) {
       return [
-        _buildTileLayer(),
+        _buildTileLayer(context),
         if (mapViewController.currentPosition != null)
-          _buildMyLocationMarker(mapViewController.currentPosition!),
+          _buildMyLocationMarker(context, mapViewController.currentPosition!),
         _buildLocationsLayer(context, mapViewController),
       ];
     }
     return [
-      _buildTileLayer(),
+      _buildTileLayer(context),
       _buildLocationSoloMarker(
         context,
         mapViewController,
@@ -123,9 +126,15 @@ class MapPage extends StatelessWidget {
     ];
   }
 
-  Widget _buildTileLayer() {
+  Widget _buildTileLayer(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return TileLayer(
-      urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      urlTemplate: isDark
+          ? "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+          : "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      subdomains: isDark ? const ['a', 'b', 'c', 'd'] : const [],
+      retinaMode: isDark ? RetinaMode.isHighDensity(context) as bool? : null,
       tileProvider: CancellableNetworkTileProvider(),
       userAgentPackageName: 'de.jarovart.meetmaap',
     );
@@ -220,14 +229,16 @@ class MapPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMyLocationMarker(LatLng currentPosition) {
+  Widget _buildMyLocationMarker(BuildContext context, LatLng currentPosition) {
+    final colors = Theme.of(context).colorScheme;
+
     return MarkerLayer(
       markers: [
         Marker(
           point: currentPosition,
           width: 60,
           height: 60,
-          child: const Icon(Icons.my_location, color: Colors.blue, size: 40),
+          child: Icon(Icons.my_location, color: colors.primary, size: 40),
         ),
       ],
     );
@@ -297,6 +308,8 @@ class MapPage extends StatelessWidget {
     BuildContext context,
     MapViewController mapViewController,
   ) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final sidePadding = screenWidth * 0.15;
     final topOffset = 15.0;
@@ -313,16 +326,13 @@ class MapPage extends StatelessWidget {
           duration: const Duration(milliseconds: 150),
           decoration: BoxDecoration(
             color: isFocused
-                ? Colors.white.withValues(alpha: 0.95)
-                : const Color.fromARGB(
-                    255,
-                    223,
-                    222,
-                    222,
-                  ).withValues(alpha: 0.7),
+                ? colors.surface.withValues(alpha: 0.95)
+                : colors.surfaceContainerHighest.withValues(alpha: 0.75),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: isFocused ? Colors.blue : Colors.transparent,
+              color: isFocused
+                  ? colors.primary
+                  : colors.outline.withValues(alpha: 0.25),
               width: 1.5,
             ),
             boxShadow: isFocused
@@ -350,10 +360,16 @@ class MapPage extends StatelessWidget {
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
-                  prefixIcon: Icon(Icons.search, color: Colors.grey[700]),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: colors.onSurfaceVariant,
+                  ),
                   suffixIcon: searchController.text.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.close, color: Colors.grey[700]),
+                          icon: Icon(
+                            Icons.close,
+                            color: colors.onSurfaceVariant,
+                          ),
                           onPressed: () {
                             searchController.clear();
                             mapViewController.clearSearchState();
@@ -362,7 +378,7 @@ class MapPage extends StatelessWidget {
                       : null,
                   contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
                 ),
-                style: const TextStyle(color: Colors.black),
+                style: TextStyle(color: colors.onSurface),
               ),
             ),
           ),
@@ -474,7 +490,10 @@ class MapPage extends StatelessWidget {
                         final loc = mapViewController.searchResults[index];
 
                         return ListTile(
-                          leading: Icon(Icons.location_on, color: Colors.green),
+                          leading: Icon(
+                            Icons.location_on,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                           title: Text(loc.title),
                           subtitle: Text(loc.description),
                           onTap: () {
@@ -500,6 +519,8 @@ class MapPage extends StatelessWidget {
     BuildContext context,
     MapViewController mapViewController,
   ) {
+    final theme = Theme.of(context);
+    final colors = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final sidePadding = screenWidth * 0.2; // default padding to get ~60% width
     final fabDiameter = 40.0; // mini FAB diameter
@@ -510,8 +531,6 @@ class MapPage extends StatelessWidget {
     final left = fullWidthMode ? 12.0 : sidePadding;
     final right = fullWidthMode ? 12.0 : sidePadding;
 
-    // Transparent material and reduced height to match GPS button
-
     final sliderWidget = SafeArea(
       top: true,
       child: SizedBox(
@@ -521,11 +540,15 @@ class MapPage extends StatelessWidget {
           child: Center(
             child: SliderTheme(
               data: SliderTheme.of(context).copyWith(
-                showValueIndicator: ShowValueIndicator.onDrag,
-                activeTrackColor: Colors.blue,
-                inactiveTrackColor: Colors.blue.withValues(alpha: 0.3),
-                thumbColor: Colors.blue,
-                overlayColor: Colors.blue.withValues(alpha: 0.15),
+                showValueIndicator: ShowValueIndicator.onlyForDiscrete,
+                activeTrackColor: theme.iconTheme.color,
+                inactiveTrackColor: colors.secondary.withValues(alpha: 0.3),
+                thumbColor: colors.primary,
+                overlayColor: colors.primary.withValues(alpha: 0.15),
+                valueIndicatorColor: theme.cardTheme.color!.withValues(
+                  alpha: 0.2,
+                ),
+                valueIndicatorTextStyle: TextStyle(color: colors.primary),
                 trackHeight: 2,
                 rangeThumbShape: const RoundRangeSliderThumbShape(
                   enabledThumbRadius: 8,

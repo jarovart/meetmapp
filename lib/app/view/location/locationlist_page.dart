@@ -24,7 +24,6 @@ class LocationsListPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.locations), centerTitle: true),
-      backgroundColor: Colors.grey.shade200,
       body: Stack(
         children: [
           if (locationListController.isLoading)
@@ -141,12 +140,6 @@ class LocationsListPage extends StatelessWidget {
                         )
                       : null,
                   filled: true,
-                  fillColor: const Color.fromARGB(
-                    255,
-                    223,
-                    222,
-                    222,
-                  ).withValues(alpha: 0.8),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
@@ -156,12 +149,6 @@ class LocationsListPage extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Material(
-              color: const Color.fromARGB(
-                255,
-                223,
-                222,
-                222,
-              ).withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(16),
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),

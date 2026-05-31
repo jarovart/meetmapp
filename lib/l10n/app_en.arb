@@ -177,5 +177,6 @@
   "dayAfterTomorrow": "day after tomorrow",
   "nextWeek": "next week",
   "nextMonth": "Next month",
-  "memberSince": "Member since {date}"
+  "memberSince": "Member since {date}",
+  "menu": "Menu"
 }

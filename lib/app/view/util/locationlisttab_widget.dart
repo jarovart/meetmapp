@@ -66,6 +66,9 @@ class _LocationListTabState extends State<LocationListTab> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     if (widget.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -102,7 +105,9 @@ class _LocationListTabState extends State<LocationListTab> {
           final locationBase = widget.locations[index];
 
           return Material(
-            color: Colors.white,
+            color: theme.cardTheme.color ?? colors.surface,
+            elevation: 2,
+            shadowColor: theme.shadowColor.withValues(alpha: 0.25),
             borderRadius: BorderRadius.circular(12),
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
@@ -113,6 +118,8 @@ class _LocationListTabState extends State<LocationListTab> {
                 );
               },
               child: ListTile(
+                iconColor: colors.primary,
+                textColor: colors.onSurface,
                 leading: locationBase.thumbnailImage != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
@@ -123,10 +130,18 @@ class _LocationListTabState extends State<LocationListTab> {
                           fit: BoxFit.cover,
                         ),
                       )
-                    : const Icon(Icons.image),
+                    : Icon(Icons.image, color: colors.primary),
 
-                title: Text(locationBase.title),
-                subtitle: Text(locationBase.description),
+                title: Text(
+                  locationBase.title,
+                  style: theme.textTheme.titleMedium,
+                ),
+                subtitle: Text(
+                  locationBase.description,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colors.secondary,
+                  ),
+                ),
               ),
             ),
           );

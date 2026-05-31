@@ -14,6 +14,7 @@ class LocationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final formatter = DateFormat('dd.MM.yyyy HH:mm');
     final l10n = context.l10n;
+    final theme = Theme.of(context);
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -23,14 +24,14 @@ class LocationCard extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               blurRadius: 10,
               spreadRadius: 2,
               offset: const Offset(2, 3),
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withValues(alpha: 0.06),
             ),
           ],
         ),
@@ -73,7 +74,7 @@ class LocationCard extends StatelessWidget {
                     locationbase.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey[700]),
+                    style: TextStyle(color: theme.colorScheme.secondary),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -87,7 +88,9 @@ class LocationCard extends StatelessWidget {
                           children: [
                             Text(
                               locationbase.address,
-                              style: const TextStyle(fontSize: 16),
+                              style: TextStyle(
+                                color: theme.colorScheme.secondary,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -112,6 +115,9 @@ class LocationCard extends StatelessWidget {
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: theme.colorScheme.secondary,
+                              ),
                             ),
                             Text(
                               l10n.displayEnddate(
@@ -119,6 +125,9 @@ class LocationCard extends StatelessWidget {
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: theme.colorScheme.secondary,
+                              ),
                             ),
                           ],
                         ),

@@ -36,6 +36,20 @@ class HomePage extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: const Text(AppConfig.appName),
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+
+            colors: [
+              Theme.of(context).colorScheme.surface,
+
+              Theme.of(context).colorScheme.surfaceContainerHighest,
+            ],
+          ),
+        ),
+      ),
       leading: IconButton(
         icon: Icon(homeController.isMenuOpen ? Icons.close : Icons.menu),
         onPressed: homeController.toggleMenu,
@@ -65,10 +79,12 @@ class HomePage extends StatelessWidget {
       if (loggedIn) context.l10n.logout,
     ];
 
-    return _buildMenuWithItems(items);
+    return _buildMenuWithItems(context, items);
   }
 
-  Widget _buildMenuWithItems(List<String> items) {
+  Widget _buildMenuWithItems(BuildContext context, List<String> items) {
+    final theme = Theme.of(context);
+
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
@@ -78,27 +94,33 @@ class HomePage extends StatelessWidget {
       width: HomeController.menuWidth,
       child: Material(
         elevation: 8,
-        color: Colors.white,
+        color: theme.drawerTheme.backgroundColor ?? theme.colorScheme.surface,
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(16),
                 child: Text(
-                  "Menue",
+                  context.l10n.menu,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
               Expanded(
                 child: ListView.separated(
                   itemCount: items.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  separatorBuilder: (_, _) =>
+                      Divider(height: 1, color: theme.dividerColor),
                   itemBuilder: (context, index) {
                     final label = items[index];
                     return ListTile(
                       title: Text(label),
-                      leading: const Icon(Icons.arrow_right),
+                      leading: Icon(
+                        Icons.arrow_right,
+                        color: theme.primaryColor,
+                      ),
+                      textColor: theme.textTheme.bodyLarge?.color,
+                      iconColor: theme.primaryColor,
                       onTap: () async {
                         // handle navigation for special entries
                         if (label == context.l10n.login) {

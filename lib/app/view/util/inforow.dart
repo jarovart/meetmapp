@@ -19,12 +19,12 @@ class InfoRow extends StatelessWidget {
       childWidgets: [
         Icon(icon, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 12),
-        buildContent(),
+        buildContent(context),
       ],
     );
   }
 
-  Widget buildContent() {
+  Widget buildContent(BuildContext context) {
     if (label == null) {
       return Expanded(child: Text(value, style: const TextStyle(fontSize: 16)));
     }
@@ -35,7 +35,7 @@ class InfoRow extends StatelessWidget {
         children: [
           Text(
             label ?? '',
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            style: TextStyle(color: Theme.of(context).colorScheme.secondary),
           ),
           const SizedBox(height: 2),
           Text(

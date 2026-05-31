@@ -572,4 +572,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String memberSince(Object date) {
     return 'Mitglied seit $date';
   }
+
+  @override
+  String get menu => 'Menü';
 }
