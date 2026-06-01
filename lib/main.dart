@@ -339,15 +339,14 @@ class MainApplication extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final design = setting?.design ?? AppDesign.system;
+
     return MaterialApp.router(
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
-        useMaterial3: true,
-      ),
-      themeMode: ThemeMode.dark,
-      darkTheme: ThemeDesign.mapDarkTheme(AppDesign.darkPink),
+      theme: ThemeDesign.mapLightTheme(AppDesign.lightRose),
+      darkTheme: ThemeDesign.mapDarkTheme(design),
+      themeMode: ThemeDesign.getThemeModeByAppDesign(design),
       routerConfig: router,
 
       localizationsDelegates: AppLocalizations.localizationsDelegates,

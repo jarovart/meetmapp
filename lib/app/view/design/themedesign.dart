@@ -4,6 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:meetmaap/app/model/enums/appdesign.dart';
 
 class ThemeDesign {
+  static ThemeData getThemeByAppDesign(AppDesign design) {
+    return switch (design) {
+      AppDesign.lightRose => mapLightTheme(design),
+      AppDesign.darkGrey => mapDarkTheme(design),
+      AppDesign.darkGold => mapDarkTheme(design),
+      AppDesign.darkPink => mapDarkTheme(design),
+      _ => mapLightTheme(design),
+    };
+  }
+
+  static ThemeMode getThemeModeByAppDesign(AppDesign design) {
+    return switch (design) {
+      AppDesign.lightRose => ThemeMode.light,
+
+      AppDesign.darkGrey ||
+      AppDesign.darkGold ||
+      AppDesign.darkPink => ThemeMode.dark,
+
+      _ => ThemeMode.system,
+    };
+  }
+
   static ThemeData mapDarkTheme(AppDesign design) {
     final accent = switch (design) {
       AppDesign.darkGold => const Color(0xFFFFAF37),
@@ -16,12 +38,16 @@ class ThemeDesign {
       _ => const Color(0xFF797979),
     };
 
+    final backGroundAccent = switch (design) {
+      _ => const Color(0xFF202020),
+    };
+
     return ThemeData(
       appBarTheme: AppBarTheme(
         elevation: 8,
-        shadowColor: Colors.black.withValues(alpha: 0.35),
+        shadowColor: backGroundAccent.withValues(alpha: 0.35),
         surfaceTintColor: Colors.transparent,
-        backgroundColor: const Color(0xFF101010),
+        backgroundColor: backGroundAccent,
         foregroundColor: accent,
       ),
       tabBarTheme: TabBarThemeData(
@@ -46,7 +72,6 @@ class ThemeDesign {
       ),
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: const Color(0xFF101010),
       colorScheme:
           ColorScheme.fromSeed(
             seedColor: accent,
@@ -63,7 +88,10 @@ class ThemeDesign {
       ),
       iconTheme: IconThemeData(color: accent),
 
-      cardTheme: const CardThemeData(color: Color(0xFF1C1C1C)),
+      //background of all pages
+      scaffoldBackgroundColor: const Color(0xFF101010),
+      //infocard background
+      cardTheme: CardThemeData(color: backGroundAccent),
     );
   }
 

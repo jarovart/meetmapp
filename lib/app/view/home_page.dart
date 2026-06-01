@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: const Text(AppConfig.appName),
-      flexibleSpace: Container(
+      /*flexibleSpace: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -44,12 +44,11 @@ class HomePage extends StatelessWidget {
 
             colors: [
               Theme.of(context).colorScheme.surface,
-
               Theme.of(context).colorScheme.surfaceContainerHighest,
             ],
           ),
         ),
-      ),
+      ),*/
       leading: IconButton(
         icon: Icon(homeController.isMenuOpen ? Icons.close : Icons.menu),
         onPressed: homeController.toggleMenu,
@@ -94,7 +93,7 @@ class HomePage extends StatelessWidget {
       width: HomeController.menuWidth,
       child: Material(
         elevation: 8,
-        color: theme.drawerTheme.backgroundColor ?? theme.colorScheme.surface,
+        color: theme.cardTheme.color ?? theme.colorScheme.surface,
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +116,7 @@ class HomePage extends StatelessWidget {
                       title: Text(label),
                       leading: Icon(
                         Icons.arrow_right,
-                        color: theme.primaryColor,
+                        color: theme.colorScheme.secondary,
                       ),
                       textColor: theme.textTheme.bodyLarge?.color,
                       iconColor: theme.primaryColor,

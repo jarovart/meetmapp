@@ -149,6 +149,7 @@ class LocationsListPage extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Material(
+              color: Theme.of(context).cardTheme.color,
               borderRadius: BorderRadius.circular(16),
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),

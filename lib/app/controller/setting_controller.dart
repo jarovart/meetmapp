@@ -22,6 +22,7 @@ class SettingsController extends ChangeNotifier {
   AppDesign get design => _appliedSetting?.design ?? AppDesign.system;
   bool get hasError => _error != null;
   Object? get error => _error;
+  DraftAppSettings get draft => _draftSetting!;
 
   Locale? _locale;
   bool _isDarkMode = false;
@@ -61,6 +62,11 @@ class SettingsController extends ChangeNotifier {
     }
   }
 
+  void changeDraftDesign(AppDesign design) {
+    _draftSetting = _draftSetting!.copyWith(design: design);
+    notifyListeners();
+  }
+
   Future<void> loadSettings() async {
     _init();
     try {
@@ -85,9 +91,12 @@ class SettingsController extends ChangeNotifier {
   // STATE MUTATION
   // ─────────────────────────────────────────────
   void changeDraftLanguage(String? languageCode) {
+    debugPrint("asd: $languageCode");
     _draftSetting = _draftSetting!.copyWith(
-      locale: languageCode != null ? Locale(languageCode!) : null,
+      locale: languageCode != null ? Locale(languageCode) : null,
     );
+
+    debugPrint("asd111: ${_draftSetting?.locale?.countryCode ?? "null"}}");
     notifyListeners();
   }
 
