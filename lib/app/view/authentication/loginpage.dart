@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
@@ -21,7 +22,10 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (loginController.loading) {
-      return const Center(child: CircularProgressIndicator());
+      return Scaffold(
+        appBar: AppBar(title: Text(context.l10n.login)),
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     return Scaffold(
@@ -83,7 +87,10 @@ class LoginPage extends StatelessWidget {
             TextField(
               controller: loginController.userCtrl,
               decoration: InputDecoration(labelText: context.l10n.username),
-              autofillHints: const [AutofillHints.username],
+              autofillHints: const [
+                AutofillHints.username,
+                AutofillHints.email,
+              ],
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 12),
@@ -93,6 +100,7 @@ class LoginPage extends StatelessWidget {
               decoration: InputDecoration(labelText: context.l10n.password),
               autofillHints: const [AutofillHints.password],
               obscureText: true,
+              textInputAction: TextInputAction.done,
               onSubmitted: (_) => _submit(context),
             ),
           ],
@@ -154,6 +162,7 @@ class LoginPage extends StatelessWidget {
 
     if (!context.mounted) return;
     if (loginController.hasErrors) return;
+    TextInput.finishAutofillContext(shouldSave: true);
     if (redirectionUrl == null) {
       context.pop(true);
       return;

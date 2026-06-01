@@ -7,7 +7,6 @@ import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_ti
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meetmaap/app/controller/map_controller.dart';
-import 'package:meetmaap/app/model/exception/exception_message.dart';
 import 'package:meetmaap/app/model/response/locationbase_response.dart';
 import 'package:meetmaap/app/model/response/locationfull_response.dart';
 import 'package:meetmaap/app/view/location/locationdetails_bottomsheet_mobile.dart';
@@ -38,10 +37,6 @@ class MapPage extends StatelessWidget {
       l10n.nextWeek,
       l10n.nextMonth,
     ];
-
-    if (mapViewController.hasError) {
-      _showError(context, mapViewController);
-    }
 
     if (mapViewController.isOnlyOneLocation) {
       return Scaffold(
@@ -649,16 +644,5 @@ class MapPage extends StatelessWidget {
 
     // Mobile Portrait → BottomSheet
     return (Platform.isAndroid || Platform.isIOS) && size.width < size.height;
-  }
-
-  void _showError(BuildContext context, MapViewController controller) {
-    ExceptionMessage.showError(
-      context,
-      AppErrorMapper.toUserMessage(
-        controller.error!,
-        context.l10n,
-        fallback: context.l10n.errorCallLocations,
-      ),
-    );
   }
 }
