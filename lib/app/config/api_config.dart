@@ -3,8 +3,14 @@ import 'dart:io' show Platform;
 
 class ApiConfig {
   static const int _port = 8080;
+  static const String _dev = String.fromEnvironment('dev', defaultValue: '');
 
   static String get baseUrl {
+    debugPrint("api base url: $_dev");
+    return (_dev.isNotEmpty) ? baseUrl1 : 'https://freemoment.de';
+  }
+
+  static String get baseUrl1 {
     // 🌐 Flutter Web
     if (kIsWeb) {
       return 'http://localhost:$_port';
