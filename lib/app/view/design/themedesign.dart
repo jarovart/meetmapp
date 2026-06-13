@@ -4,6 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:meetmaap/app/model/enums/appdesign.dart';
 
 class ThemeDesign {
+  static ThemeData getPreviewThemeByAppDesign(
+    AppDesign design,
+    Brightness platformBrightness,
+  ) {
+    if (design == AppDesign.system) {
+      return platformBrightness == Brightness.dark
+          ? mapDarkTheme(AppDesign.darkGrey)
+          : mapLightTheme(AppDesign.lightRose);
+    }
+
+    return getThemeByAppDesign(design);
+  }
+
   static ThemeData getThemeByAppDesign(AppDesign design) {
     return switch (design) {
       AppDesign.lightRose => mapLightTheme(design),

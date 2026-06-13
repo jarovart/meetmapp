@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:meetmaap/app/model/enums/appdesign.dart';
+import 'package:meetmaap/app/model/enums/language.dart';
+import 'package:meetmaap/app/model/request/settings_request.dart';
 import 'package:meetmaap/app/model/response/settings_response.dart';
 import 'package:meetmaap/app/service/setting_service.dart';
 import 'package:meetmaap/app/view/model/appliedsettings_model.dart';
@@ -14,7 +16,7 @@ class SettingsController extends ChangeNotifier {
 
   DraftAppSettings? _draftSetting;
   AppliedAppSettings? _appliedSetting;
-  SettingResponse? _settingResponse;
+  SettingsResponse? _settingResponse;
   Object? _error;
 
   AppliedAppSettings get appliedSetting => _appliedSetting!;
@@ -67,7 +69,7 @@ class SettingsController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadSettings() async {
+  Future<void> loadSettings({bool forceUpdate = false}) async {
     _init();
     try {
       _settingResponse = await SettingService.loadSettings();
@@ -76,6 +78,12 @@ class SettingsController extends ChangeNotifier {
           locale: _settingResponse!.locale,
           design: _settingResponse!.design,
         );
+        if (forceUpdate) {
+          _appliedSetting = AppliedAppSettings(
+            locale: _draftSetting?.locale,
+            design: _draftSetting?.design ?? AppDesign.system,
+          );
+        }
       }
     } catch (e, st) {
       debugPrint('Error loading settings: $e');
@@ -93,10 +101,12 @@ class SettingsController extends ChangeNotifier {
   void changeDraftLanguage(String? languageCode) {
     debugPrint("asd: $languageCode");
     _draftSetting = _draftSetting!.copyWith(
-      locale: languageCode != null ? Locale(languageCode) : null,
+      locale: languageCode != null && languageCode != LanguageEnum.sys.name
+          ? Locale(languageCode)
+          : null,
     );
 
-    debugPrint("asd111: ${_draftSetting?.locale?.countryCode ?? "null"}}");
+    debugPrint("asd111: ${_draftSetting?.locale?.languageCode}}");
     notifyListeners();
   }
 
@@ -106,7 +116,7 @@ class SettingsController extends ChangeNotifier {
   }
 
   void setLanguage(String? languageCode) {
-    if (languageCode == null) {
+    if (languageCode == null || languageCode == LanguageEnum.sys.name) {
       _locale = null; // Systemsprache
     } else {
       _locale = Locale(languageCode);
@@ -116,10 +126,33 @@ class SettingsController extends ChangeNotifier {
   }
 
   Future<void> saveSettings() async {
-    _appliedSetting = AppliedAppSettings(
+    SettingsRequest settingsRequest = SettingsRequest(
       locale: _draftSetting?.locale,
       design: _draftSetting?.design ?? AppDesign.system,
+      updatedAt: DateTime.now(),
     );
-    notifyListeners();
+    debugPrint(
+      "savesettings draft ${_draftSetting?.locale?.languageCode}, ${_draftSetting?.design}",
+    );
+    try {
+      SettingsResponse settingsResponse = await SettingService.saveSettings(
+        settingsRequest,
+      );
+      _appliedSetting = AppliedAppSettings(
+        locale: settingsResponse.locale,
+        design: settingsResponse.design,
+      );
+
+      debugPrint(
+        "savesettings applied ${_appliedSetting?.locale?.countryCode ?? "null"}, ${_appliedSetting?.design}",
+      );
+    } catch (e, st) {
+      debugPrint('Error while log in profile: $e');
+      debugPrintStack(stackTrace: st);
+
+      _error = e;
+    } finally {
+      notifyListeners();
+    }
   }
 }

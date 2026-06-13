@@ -53,6 +53,7 @@
   "tokenInvalid": "Login Token ist ungültig.",
   "tokenMissing": "Der Token wurde nicht übertragen.",
   "userNotFound": "Benutzer wurde nicht gefunden.",
+  "settingsNotFound": "Nutzereinstellungen wurden nicht gefunden.",
   "usersNotFound": "Es wurden keine Benutzer gefunden.",
   "emailAlreadyExists": "E-Mail existiert bereits.",
   "emailInvalid": "E-Mail ist ungültig.",
@@ -173,5 +174,8 @@
   "nextWeek": "1 Woche",
   "nextMonth": "1 Monat",
   "memberSince": "Mitglied seit {date}",
-  "menu": "Menü"
+  "menu": "Menü",
+  "systemLanguage": "System Sprache",
+  "english": "Englisch",
+  "german": "Deutsch"
 }

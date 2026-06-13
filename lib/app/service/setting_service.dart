@@ -1,34 +1,54 @@
+import 'package:flutter/material.dart';
+import 'package:meetmaap/app/model/request/settings_request.dart';
 import 'package:meetmaap/app/model/response/settings_response.dart';
 import 'package:meetmaap/app/repository/setting_repository.dart';
 import 'package:meetmaap/app/service/authentication_service.dart';
 import 'package:meetmaap/app/service/user_service.dart';
 
 class SettingService {
-  static Future<SettingResponse?> loadLocalSettings() async {
+  static Future<SettingsResponse?> loadLocalSettings() async {
     return await SettingRepository.getLocalSettings();
   }
 
-  static Future<SettingResponse?> loadSettings() async {
-    SettingResponse? settingResponse;
+  static Future<SettingsResponse?> loadSettings() async {
+    SettingsResponse? settingResponse;
     try {
       if (await AuthService.isLoggedIn()) {
         final myProfile = await UserService.fetchMyProfile();
         settingResponse = await SettingRepository.loadSettings(myProfile.id);
       }
     } catch (e) {
+      debugPrint("Error loading settings from backend: $e");
       settingResponse = null;
     }
     final savedSettings = await SettingRepository.getLocalSettings();
-    return chooseNewest(savedSettings, settingResponse);
+    debugPrint("local setting: $savedSettings");
+    debugPrint("backend setting: $settingResponse");
+    final newe = chooseNewest(savedSettings, settingResponse);
+
+    debugPrint("win setting: $newe");
+    return newe;
   }
 
-  static Future<void> saveSettings(SettingResponse settings) async {
-    await SettingRepository.saveSettings(settings);
+  static Future<void> saveLocalSettings(SettingsRequest settings) async {
+    await SettingRepository.saveLocalSettings(settings);
   }
 
-  static SettingResponse? chooseNewest(
-    SettingResponse? localSettings,
-    SettingResponse? backendSettings,
+  static Future<SettingsResponse> saveSettings(SettingsRequest settings) async {
+    final settingsResponse = await SettingRepository.saveLocalSettings(
+      settings,
+    );
+
+    if (await AuthService.isLoggedIn()) {
+      return await SettingRepository.saveSettings(settings);
+    } else {
+      return settingsResponse;
+    }
+  }
+
+  static SettingsResponse? chooseNewest(
+    SettingsResponse? localSettings,
+    SettingsResponse? backendSettings,
   ) {
     if (localSettings == null && backendSettings == null) {
       return null;

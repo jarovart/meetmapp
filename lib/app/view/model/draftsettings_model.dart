@@ -8,9 +8,6 @@ class DraftAppSettings {
   const DraftAppSettings({this.locale, required this.design});
 
   DraftAppSettings copyWith({Locale? locale, AppDesign? design}) {
-    return DraftAppSettings(
-      locale: locale ?? this.locale,
-      design: design ?? this.design,
-    );
+    return DraftAppSettings(locale: locale, design: design ?? this.design);
   }
 }

@@ -62,9 +62,9 @@ class AuthController extends ChangeNotifier with WidgetsBindingObserver {
     await refreshLogin(source);
   }
 
-  Future<void> refreshLogin(String source) async {
+  Future<void> refreshLogin(String source, {bool forceUpdate = false}) async {
     debugPrint("Authcontroller $source refreshLogin before check.");
-    if (_isRefreshCooldownActive()) return;
+    if (!forceUpdate && _isRefreshCooldownActive()) return;
     final localMyProfile = _myProfile;
 
     debugPrint(
@@ -83,9 +83,10 @@ class AuthController extends ChangeNotifier with WidgetsBindingObserver {
           debugPrint(
             "User is logged in on server but not in app, refreshing profile.",
           );
-          _myProfile = await AuthService.getMyUserProfile();
-          _token = await AuthService.getToken();
         }
+        _myProfile = await AuthService.getMyUserProfile();
+        _myProfile ??= await AuthService.fetchMyProfile();
+        _token = await AuthService.getToken();
       } else {
         if (_myProfile != null) {
           debugPrint("User ist not logged in anymore, logging out.");

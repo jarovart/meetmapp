@@ -422,6 +422,12 @@ abstract class AppLocalizations {
   /// **'User not found.'**
   String get userNotFound;
 
+  /// No description provided for @settingsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Usersettings not found.'**
+  String get settingsNotFound;
+
   /// No description provided for @usersNotFound.
   ///
   /// In en, this message translates to:
@@ -1141,6 +1147,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Menu'**
   String get menu;
+
+  /// No description provided for @systemLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'system language'**
+  String get systemLanguage;
+
+  /// No description provided for @english.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// No description provided for @german.
+  ///
+  /// In en, this message translates to:
+  /// **'German'**
+  String get german;
 }
 
 class _AppLocalizationsDelegate

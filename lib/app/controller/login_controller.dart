@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
+import 'package:meetmaap/app/controller/setting_controller.dart';
 import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
 
 class LoginController extends ChangeNotifier {
@@ -41,7 +42,10 @@ class LoginController extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<void> submit(AuthController authController) async {
+  Future<void> submit(
+    AuthController authController,
+    SettingsController settingsController,
+  ) async {
     resetState();
 
     try {
@@ -60,6 +64,7 @@ class LoginController extends ChangeNotifier {
       _loading = false;
       notifyListeners();
     }
+    await settingsController.loadSettings(forceUpdate: true);
   }
 
   Future<void> submitLogout(AuthController authController) async {

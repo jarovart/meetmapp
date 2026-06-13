@@ -121,6 +121,8 @@ class AppErrorMapper {
         return l10n.tokenMissing;
       case 'USER_NOT_FOUND':
         return l10n.userNotFound;
+      case 'SETTINGS_NOT_FOUND':
+        return l10n.settingsNotFound;
       case 'USER_EMAIL_EXISTS':
         return l10n.emailAlreadyExists;
       case 'USER_EMAIL_INVALID':

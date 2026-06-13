@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:meetmaap/app/config/api_config.dart';
+import 'package:meetmaap/app/model/request/settings_request.dart';
 import 'package:meetmaap/app/model/response/settings_response.dart';
 import 'package:meetmaap/app/model/util/api_exception_wrapper.dart';
 import 'package:meetmaap/app/repository/authentication_repository.dart';
@@ -12,13 +14,36 @@ class SettingRepository {
   static final _storage = const FlutterSecureStorage();
   static const String _settingsKey = 'user_settings';
 
-  static Future<void> saveSettings(SettingResponse settings) async {
+  static Future<SettingsResponse> saveLocalSettings(
+    SettingsRequest settings,
+  ) async {
     final json = jsonEncode(settings.toMap());
+    debugPrint("saved prelocal setting: $json");
 
     await _storage.write(key: _settingsKey, value: json);
+    final map = jsonDecode(json);
+    debugPrint("saved local setting: $map");
+    return SettingsResponse.fromMap(map);
   }
 
-  static Future<SettingResponse?> getLocalSettings() async {
+  static Future<SettingsResponse> saveSettings(SettingsRequest settings) async {
+    return ApiExceptionWrapper.guard(() async {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/api/settings/me');
+
+      final headers = await AuthRepository.authHeadersWithException();
+      final response = await http.put(
+        uri,
+        headers: headers,
+        body: jsonEncode(settings.toMap()),
+      );
+
+      final body = ApiResponseHandler.parseJsonObject(response);
+      debugPrint("savesettingresponse $body");
+      return SettingsResponse.fromMap(body);
+    });
+  }
+
+  static Future<SettingsResponse?> getLocalSettings() async {
     final value = await _storage.read(key: _settingsKey);
 
     if (value == null) {
@@ -26,14 +51,14 @@ class SettingRepository {
     }
 
     final map = jsonDecode(value);
-    return SettingResponse.fromMap(map);
+    return SettingsResponse.fromMap(map);
   }
 
   static Future<void> clear() async {
     await _storage.delete(key: _settingsKey);
   }
 
-  static Future<SettingResponse> loadSettings(int id) async {
+  static Future<SettingsResponse> loadSettings(int id) async {
     return ApiExceptionWrapper.guard(() async {
       final uri = Uri.parse('${ApiConfig.baseUrl}/api/settings/me');
 
@@ -41,7 +66,8 @@ class SettingRepository {
       final response = await http.get(uri, headers: headers);
 
       final body = ApiResponseHandler.parseJsonObject(response);
-      return SettingResponse.fromMap(body);
+      debugPrint("loadsettingsresponse: $body");
+      return SettingsResponse.fromMap(body);
     });
   }
 }

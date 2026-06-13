@@ -7,6 +7,7 @@ import 'package:meetmaap/app/controller/home_controller.dart';
 import 'package:meetmaap/app/model/exception/exception_message.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
   final HomeController homeController;
@@ -178,36 +179,40 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildProfileAvatar(BuildContext context) {
-    final myProfile = authController.myProfile;
+    return Consumer<AuthController>(
+      builder: (context, authController, _) {
+        final myProfile = authController.myProfile;
 
-    if (!homeController.loggedIn) {
-      return Padding(
-        padding: const EdgeInsets.only(right: 12.0),
-        child: OutlinedButton.icon(
-          onPressed: () async => _navigateToProfile(context),
-          label: const Text("Login"),
-        ),
-      );
-    }
-    final initials = myProfile?.getInitials ?? "MM";
-    return GestureDetector(
-      onTap: () async => _navigateToProfile(context),
-      child: Padding(
-        padding: EdgeInsets.only(right: 12.0),
-        child: CircleAvatar(
-          radius: 25,
-          backgroundImage:
-              myProfile?.profileImage != null &&
-                  myProfile!.profileImage!.imageUrl.isNotEmpty
-              ? NetworkImage(myProfile.profileImage!.imageUrl)
-              : null,
-          child:
-              (myProfile?.profileImage?.imageUrl == null ||
-                  myProfile!.profileImage!.imageUrl.isEmpty)
-              ? Text(initials, style: const TextStyle(fontSize: 24))
-              : null,
-        ),
-      ),
+        if (!authController.isLoggedIn) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: OutlinedButton.icon(
+              onPressed: () async => _navigateToProfile(context),
+              label: const Text("Login"),
+            ),
+          );
+        }
+        final initials = myProfile?.getInitials ?? "MM";
+        return GestureDetector(
+          onTap: () async => _navigateToProfile(context),
+          child: Padding(
+            padding: EdgeInsets.only(right: 12.0),
+            child: CircleAvatar(
+              radius: 25,
+              backgroundImage:
+                  myProfile?.profileImage != null &&
+                      myProfile!.profileImage!.imageUrl.isNotEmpty
+                  ? NetworkImage(myProfile.profileImage!.imageUrl)
+                  : null,
+              child:
+                  (myProfile?.profileImage?.imageUrl == null ||
+                      myProfile!.profileImage!.imageUrl.isEmpty)
+                  ? Text(initials, style: const TextStyle(fontSize: 24))
+                  : null,
+            ),
+          ),
+        );
+      },
     );
   }
 

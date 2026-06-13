@@ -2,12 +2,14 @@ import 'dart:ui';
 
 import 'package:meetmaap/app/model/enums/appdesign.dart';
 
-class SettingResponse {
+class SettingsResponse {
+  final int? id;
   final Locale? locale;
   final AppDesign design;
   final DateTime updatedAt;
 
-  SettingResponse({
+  SettingsResponse({
+    required this.id,
     required this.locale,
     required this.design,
     required this.updatedAt,
@@ -15,20 +17,28 @@ class SettingResponse {
 
   Map<String, dynamic> toMap() {
     return {
-      "locale": locale?.languageCode ?? "null",
+      "locale": locale?.languageCode.toLowerCase() ?? "sys",
       "design": design.name,
       "updatedAt": updatedAt.toIso8601String(),
     };
   }
 
-  factory SettingResponse.fromMap(Map<String, dynamic> map) {
-    return SettingResponse(
-      locale: map['locale'] == null ? null : Locale(map['locale']),
+  factory SettingsResponse.fromMap(Map<String, dynamic> map) {
+    return SettingsResponse(
+      id: map['id'] as int?,
+      locale: map['locale'] == "SYS"
+          ? null
+          : Locale(map['locale'].toString().toLowerCase()),
       design: AppDesign.values.firstWhere(
-        (e) => e.name == map['design'],
+        (e) => e.name.toUpperCase() == map['design'],
         orElse: () => AppDesign.system,
       ),
       updatedAt: DateTime.parse(map['updatedAt']),
     );
+  }
+
+  @override
+  String toString() {
+    return "SettingsResponse(id: $id, locale: ${locale?.languageCode}, design: ${design.name}, updatedAt: $updatedAt)";
   }
 }

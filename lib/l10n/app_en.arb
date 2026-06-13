@@ -58,6 +58,7 @@
   "tokenInvalid": "The login token is invalid.",
   "tokenMissing": "The token was not transferred.",
   "userNotFound": "User not found.",
+  "settingsNotFound": "Usersettings not found.",
   "usersNotFound": "No users could be found.",
   "emailAlreadyExists": "E-Mail already exists.",
   "emailInvalid": "The E-Mail is invalid.",
@@ -178,5 +179,8 @@
   "nextWeek": "next week",
   "nextMonth": "Next month",
   "memberSince": "Member since {date}",
-  "menu": "Menu"
+  "menu": "Menu",
+  "systemLanguage": "system language",
+  "english": "English",
+  "german": "German"
 }

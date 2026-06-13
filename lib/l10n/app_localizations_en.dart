@@ -182,6 +182,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userNotFound => 'User not found.';
 
   @override
+  String get settingsNotFound => 'Usersettings not found.';
+
+  @override
   String get usersNotFound => 'No users could be found.';
 
   @override
@@ -566,4 +569,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get menu => 'Menu';
+
+  @override
+  String get systemLanguage => 'system language';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get german => 'German';
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +15,7 @@ class EditMyProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final editController = context.watch<EditMyProfileController>();
+    final authController = context.watch<AuthController>();
     final l10n = context.l10n;
 
     if (!editController.isOwnerOfProfile()) {
@@ -36,6 +38,10 @@ class EditMyProfilePage extends StatelessWidget {
                       ? null
                       : () async {
                           await editController.saveProfile();
+                          await authController.refreshLogin(
+                            "editprofilepage",
+                            forceUpdate: true,
+                          );
 
                           if (context.mounted && !editController.hasError) {
                             GoRouter.of(context).pop(true);
