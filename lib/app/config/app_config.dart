@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 
 class AppConfig {
   static const int checkLoginIntervalInSeconds = 30;
-  static const String appName = "MeetMapp";
+  static const String appName = "FreeMoment";
 
   static bool isMobile() {
     if (kIsWeb) return false;

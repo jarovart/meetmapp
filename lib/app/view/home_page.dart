@@ -72,9 +72,9 @@ class HomePage extends StatelessWidget {
       context.l10n.locations,
       if (loggedIn) context.l10n.users,
       context.l10n.friends,
-      context.l10n.favourites,
-      "Test-ShowModal",
-      "Test-SliderGPS",
+      //context.l10n.favourites,
+      //"Test-ShowModal",
+      //"Test-SliderGPS",
       context.l10n.settings,
       if (loggedIn) context.l10n.logout,
     ];
