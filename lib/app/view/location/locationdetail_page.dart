@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:meetmaap/app/config/app_config.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
-import 'package:meetmaap/app/view/util/InfoRow.dart';
+import 'package:meetmaap/app/view/util/inforow.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/app/view/util/gallery_widget.dart';
 import 'package:meetmaap/app/view/util/imageviewer_widget.dart';
