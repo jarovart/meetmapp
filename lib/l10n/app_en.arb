@@ -182,5 +182,6 @@
   "menu": "Menu",
   "systemLanguage": "system language",
   "english": "English",
-  "german": "German"
+  "german": "German",
+  "noPhotoPermission": "No photo permission granted."
 }

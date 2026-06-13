@@ -1165,6 +1165,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'German'**
   String get german;
+
+  /// No description provided for @noPhotoPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'No photo permission granted.'**
+  String get noPhotoPermission;
 }
 
 class _AppLocalizationsDelegate

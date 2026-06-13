@@ -8,7 +8,9 @@ import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
 import 'package:meetmaap/app/view/util/editrow.dart';
 import 'package:meetmaap/app/view/util/infocard.dart';
 import 'package:meetmaap/app/view/util/inforow.dart';
+import 'package:meetmaap/app/view/util/requestphotopermission.dart';
 import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class EditMyLocationPage extends StatelessWidget {
@@ -212,7 +214,8 @@ class EditMyLocationPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         OutlinedButton.icon(
-                          onPressed: editController.addImage,
+                          onPressed: () async =>
+                              pickProfileImage(context, editController),
                           icon: const Icon(Icons.add_a_photo),
                           label: Text(l10n.addImage),
                         ),
@@ -293,5 +296,30 @@ class EditMyLocationPage extends StatelessWidget {
     if (saved && context.mounted && !editController.hasError) {
       GoRouter.of(context).pop(true);
     }
+  }
+
+  Future<void> pickProfileImage(
+    BuildContext context,
+    EditMyLocationController editController,
+  ) async {
+    final hasPermission = await RequestPhotoPermission.requestPhotoPermission();
+
+    if (!hasPermission) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.noPhotoPermission),
+          action: SnackBarAction(
+            label: context.l10n.settings,
+            onPressed: openAppSettings,
+          ),
+        ),
+      );
+
+      return;
+    }
+    if (!context.mounted) return;
+    await editController.addImage();
   }
 }

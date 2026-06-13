@@ -124,14 +124,33 @@ class MapPage extends StatelessWidget {
   Widget _buildTileLayer(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return TileLayer(
-      urlTemplate: isDark
+    return Stack(
+      children: [
+        TileLayer(
+          urlTemplate: /* isDark
           ? "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-          : "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-      subdomains: isDark ? const ['a', 'b', 'c', 'd'] : const [],
-      retinaMode: isDark ? RetinaMode.isHighDensity(context) as bool? : null,
-      tileProvider: CancellableNetworkTileProvider(),
-      userAgentPackageName: 'de.jarovart.meetmaap',
+          :*/
+              "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          //subdomains: isDark ? const ['a', 'b', 'c', 'd'] : const [],
+          //retinaMode: isDark ? RetinaMode.isHighDensity(context) as bool? : null,
+          tileProvider: CancellableNetworkTileProvider(),
+          userAgentPackageName: 'de.jarovart.meetmaap',
+        ),
+        if (Theme.of(context).brightness == Brightness.dark)
+          PolygonLayer(
+            polygons: [
+              Polygon(
+                points: [
+                  const LatLng(-90, -180),
+                  const LatLng(-90, 180),
+                  const LatLng(90, 180),
+                  const LatLng(90, -180),
+                ],
+                color: Colors.black.withValues(alpha: 0.55),
+              ),
+            ],
+          ),
+      ],
     );
   }
 

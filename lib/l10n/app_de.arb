@@ -177,5 +177,6 @@
   "menu": "Menü",
   "systemLanguage": "System Sprache",
   "english": "Englisch",
-  "german": "Deutsch"
+  "german": "Deutsch",
+  "noPhotoPermission": "Kein Fotozugriff wurde erlaubt."
 }

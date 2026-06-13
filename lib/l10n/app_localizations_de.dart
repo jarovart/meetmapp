@@ -587,4 +587,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get german => 'Deutsch';
+
+  @override
+  String get noPhotoPermission => 'Kein Fotozugriff wurde erlaubt.';
 }

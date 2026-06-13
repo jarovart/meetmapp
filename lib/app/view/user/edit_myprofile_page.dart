@@ -5,7 +5,9 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:meetmaap/app/view/util/requestphotopermission.dart';
 import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:meetmaap/app/controller/editmyprofile_controller.dart';
 
@@ -172,6 +174,24 @@ class EditMyProfilePage extends StatelessWidget {
     BuildContext context,
     EditMyProfileController editController,
   ) async {
+    final hasPermission = await RequestPhotoPermission.requestPhotoPermission();
+
+    if (!hasPermission) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.noPhotoPermission),
+          action: SnackBarAction(
+            label: context.l10n.settings,
+            onPressed: openAppSettings,
+          ),
+        ),
+      );
+
+      return;
+    }
+    if (!context.mounted) return;
     final l10n = context.l10n;
     final picked = await editController.imagePicker.pickImage(
       source: ImageSource.gallery,
