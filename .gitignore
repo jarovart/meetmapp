@@ -58,3 +58,4 @@ coverage/
 *.log
 *.tmp
 *.DS_Store
+lib/app/config/dev_config.dart

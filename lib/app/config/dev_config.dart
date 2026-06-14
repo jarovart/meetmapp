@@ -9,6 +9,7 @@ class DevConfig {
   static String? get devUrl {
     // 🌐 Flutter Web
     if (!isDev) {
+      debugPrint("DevConfig is not active, returning null for devUrl");
       return null;
     }
 
