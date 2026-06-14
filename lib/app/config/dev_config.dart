@@ -7,12 +7,9 @@ class DevConfig {
   static const int _port = 8080;
 
   static String? get devUrl {
-    // 🌐 Flutter Web
-    if (!isDev) {
-      debugPrint("DevConfig is not active, returning null for devUrl");
-      return null;
-    }
+    if (!isDev) return null;
 
+    // 🌐 Flutter Web
     if (kIsWeb) {
       return 'http://localhost:$_port';
     }

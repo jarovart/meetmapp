@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/config/app_config.dart';
 import 'package:meetmaap/app/config/appscrollbehavior.dart';
+import 'package:meetmaap/app/config/dev_config.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/controller/edit_mylocation_controller.dart';
@@ -55,6 +56,9 @@ void main() async {
   await authController.loadLoginLocal();
   final settingsController = SettingsController();
   await settingsController.loadSettingsLocal();
+  if (!DevConfig.isDev) {
+    debugPrint("DevConfig is not active, production Api will be used");
+  }
 
   runApp(
     MultiProvider(
