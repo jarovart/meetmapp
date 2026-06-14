@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meetmaap/app/config/app_config.dart';
+import 'package:meetmaap/app/config/appscrollbehavior.dart';
 import 'package:meetmaap/app/config/route_config.dart';
 import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/controller/edit_mylocation_controller.dart';
@@ -348,6 +349,7 @@ class MainApplication extends StatelessWidget {
       darkTheme: ThemeDesign.mapDarkTheme(design),
       themeMode: ThemeDesign.getThemeModeByAppDesign(design),
       routerConfig: router,
+      scrollBehavior: const AppScrollBehavior(),
 
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

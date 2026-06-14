@@ -656,12 +656,6 @@ class MapPage extends StatelessWidget {
   }
 
   bool _useBottomSheetForMobile(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
-    // Web → niemals BottomSheet
-    if (kIsWeb) return false;
-
-    // Mobile Portrait → BottomSheet
-    return (Platform.isAndroid || Platform.isIOS) && size.width < size.height;
+    return MediaQuery.of(context).size.width < 700;
   }
 }
