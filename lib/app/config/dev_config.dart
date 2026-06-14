@@ -6,8 +6,12 @@ class DevConfig {
   static const bool isDev = false;
   static const int _port = 8080;
 
-  static String get devUrl {
+  static String? get devUrl {
     // 🌐 Flutter Web
+    if (!isDev) {
+      return null;
+    }
+
     if (kIsWeb) {
       return 'http://localhost:$_port';
     }

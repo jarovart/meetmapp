@@ -4,6 +4,6 @@ class ApiConfig {
   static const String prodUrl = 'https://freemoment.de';
 
   static String get baseUrl {
-    return (DevConfig.isDev) ? DevConfig.devUrl : prodUrl;
+    return DevConfig.devUrl ?? prodUrl;
   }
 }
