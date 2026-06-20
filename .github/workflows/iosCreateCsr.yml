@@ -1,0 +1,26 @@
+name: iOS Create CSR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-csr:
+    runs-on: macos-15
+
+    steps:
+      - name: Create private key and CSR
+        run: |
+          openssl genrsa -out ios_distribution.key 2048
+
+          openssl req -new \
+            -key ios_distribution.key \
+            -out ios_distribution.csr \
+            -subj "/emailAddress=${{ secrets.APPLE_ID_EMAIL }}, CN=Apple Distribution, C=DE"
+
+      - name: Upload CSR and private key artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-csr-and-private-key
+          path: |
+            ios_distribution.csr
+            ios_distribution.key
