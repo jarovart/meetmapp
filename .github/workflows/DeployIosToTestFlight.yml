@@ -72,10 +72,29 @@ jobs:
       - name: Show signing identities
         run: security find-identity -v -p codesigning
 
-      - name: Build iOS IPA
+      - name: Flutter build iOS without codesign
         run: |
-          flutter build ipa --release \
-            --export-options-plist=ios/exportOptions.plist
+          flutter build ios --release --no-codesign
+      
+      - name: Archive iOS app with manual signing
+        run: |
+          xcodebuild archive \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            DEVELOPMENT_TEAM=${{ secrets.IOS_TEAM }} \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="CastTime App Store"
+      
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist ios/exportOptions.plist \
+            -exportPath build/ios/ipa
 
       - name: Create App Store Connect API key file
         run: |
