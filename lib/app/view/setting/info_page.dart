@@ -47,7 +47,11 @@ class InfoPage extends StatelessWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.tag),
+                      leading: const Icon(
+                        Icons.tag,
+                        color: Colors.red,
+                        size: 32,
+                      ),
                       title: Text(l10n.version),
                       trailing: Text(version),
                     ),
