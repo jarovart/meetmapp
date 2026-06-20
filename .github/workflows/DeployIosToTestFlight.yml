@@ -4,58 +4,87 @@ on:
   workflow_dispatch:
 
 jobs:
-  ios:
+  deploy-ios:
     runs-on: macos-15
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
 
-      - name: Install dependencies
+      - name: Flutter pub get
         run: flutter pub get
 
-      - name: Restore signing files
+      - name: Decode signing files
         run: |
           echo "${{ secrets.IOS_DISTRIBUTION_CER_BASE64 }}" | base64 --decode > distribution.cer
           echo "${{ secrets.IOS_DISTRIBUTION_PRIVATE_KEY_BASE64 }}" | base64 --decode > ios_distribution.key
           echo "${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > profile.mobileprovision
 
-          openssl x509 -in distribution.cer -inform DER -out distribution.pem -outform PEM
+      - name: Create p12 certificate
+        run: |
+          openssl x509 \
+            -in distribution.cer \
+            -inform DER \
+            -out distribution.pem \
+            -outform PEM
+
           openssl pkcs12 -export \
             -out ios_distribution.p12 \
             -inkey ios_distribution.key \
             -in distribution.pem \
             -password pass:${{ secrets.IOS_CERTIFICATE_PASSWORD }}
 
-      - name: Install certificate and profile
+      - name: Install certificate into temporary keychain
         run: |
-          security create-keychain -p "build_password" build.keychain
+          security create-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
           security default-keychain -s build.keychain
-          security unlock-keychain -p "build_password" build.keychain
+          security unlock-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+
           security import ios_distribution.p12 \
             -k build.keychain \
             -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" \
-            -T /usr/bin/codesign
+            -T /usr/bin/codesign \
+            -T /usr/bin/security
+
           security set-key-partition-list \
             -S apple-tool:,apple:,codesign: \
             -s \
-            -k "build_password" \
+            -k "${{ secrets.KEYCHAIN_PASSWORD }}" \
             build.keychain
 
+      - name: Install provisioning profile
+        run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
 
-      - name: Build IPA
-        run: flutter build ipa --release
+          UUID=$(/usr/libexec/PlistBuddy -c 'Print UUID' /dev/stdin <<< "$(security cms -D -i profile.mobileprovision)")
 
-      - name: Upload to TestFlight
+          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
+
+          echo "PROVISIONING_PROFILE_UUID=$UUID" >> $GITHUB_ENV
+
+      - name: Show signing identities
+        run: security find-identity -v -p codesigning
+
+      - name: Build iOS IPA
+        run: |
+          flutter build ipa --release \
+            --export-options-plist=ios/exportOptions.plist
+
+      - name: Create App Store Connect API key file
         run: |
           mkdir -p private_keys
-          echo "${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}" > private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+          cat > private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 <<'EOF'
+          ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          EOF
 
+      - name: Upload IPA to TestFlight
+        run: |
           xcrun altool --upload-app \
             --type ios \
             --file build/ios/ipa/*.ipa \
