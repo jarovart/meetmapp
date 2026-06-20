@@ -38,6 +38,7 @@ jobs:
             -outform PEM
 
           openssl pkcs12 -export \
+            -legacy \
             -out ios_distribution.p12 \
             -inkey ios_distribution.key \
             -in distribution.pem \
