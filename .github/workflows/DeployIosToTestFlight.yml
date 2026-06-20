@@ -16,8 +16,18 @@ jobs:
         with:
           channel: stable
 
-      - name: Flutter pub get
-        run: flutter pub get
+      - name: Prepare iOS project
+        run: |
+          flutter pub get
+          cd ios
+          pod install
+          cd ..
+          ls -la ios
+      
+      - name: Build iOS IPA
+        run: |
+          flutter build ipa --release \
+            --export-options-plist=ios/exportOptions.plist
 
       - name: Decode signing files
         run: |
