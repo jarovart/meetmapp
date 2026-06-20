@@ -52,7 +52,7 @@ class InfoPage extends StatelessWidget {
                         color: Colors.red,
                         size: 32,
                       ),
-                      title: Text(l10n.version),
+                      title: Text("Test"),
                       trailing: Text(version),
                     ),
                     const Divider(height: 1),
