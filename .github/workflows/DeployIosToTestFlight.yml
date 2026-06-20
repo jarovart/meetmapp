@@ -75,11 +75,10 @@ jobs:
           
           echo "Profile Name: $PROFILE_NAME"
           
-          perl -0pi -e 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
-          
+          perl -0pi -e 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj   
           perl -0pi -e 's/(PRODUCT_BUNDLE_IDENTIFIER = de\.jarovart\.casttime;\n)/$1				DEVELOPMENT_TEAM = ${{ secrets.IOS_TEAM }};\n				PROVISIONING_PROFILE_SPECIFIER = "'"$PROFILE_NAME"'";\n/g' ios/Runner.xcodeproj/project.pbxproj
-          perl -0pi -e 's/CODE_SIGN_IDENTITY = .*?;/CODE_SIGN_IDENTITY = "Apple Distribution";/g' ios/Runner.xcodeproj/project.pbxproj
-
+          perl -0pi -e 's/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]" = "iPhone Developer";/"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";/g' ios/Runner.xcodeproj/project.pbxproj
+          
       - name: Show Runner signing config
         run: |
           grep -n "CODE_SIGN_STYLE\|CODE_SIGN_IDENTITY\|DEVELOPMENT_TEAM\|PROVISIONING_PROFILE_SPECIFIER\|PRODUCT_BUNDLE_IDENTIFIER" ios/Runner.xcodeproj/project.pbxproj
