@@ -24,10 +24,24 @@ jobs:
           cd ..
           ls -la ios
       
-      - name: Build iOS IPA
+      - name: Archive iOS app
         run: |
-          flutter build ipa --release \
-            --export-options-plist=ios/exportOptions.plist
+          xcodebuild archive \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            DEVELOPMENT_TEAM=${{ secrets.IOS_TEAM }} \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="CastTime App Store"
+      
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist ios/exportOptions.plist \
+            -exportPath build/ios/ipa
 
       - name: Decode signing files
         run: |
