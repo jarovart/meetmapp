@@ -99,7 +99,8 @@ jobs:
             -scheme Runner \
             -configuration Release \
             -destination "generic/platform=iOS" \
-            -archivePath build/ios/archive/Runner.xcarchive
+            -archivePath build/ios/archive/Runner.xcarchive \
+            DEVELOPMENT_TEAM=${{ secrets.IOS_TEAM }}
       
       - name: Export IPA
         run: |
