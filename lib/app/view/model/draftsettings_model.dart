@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/enums/appdesign.dart';
+import 'package:casttime/app/model/enums/appdesign.dart';
 
 class DraftAppSettings {
   final Locale? locale;

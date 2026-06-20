@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/view/model/designoption.dart';
+import 'package:casttime/app/view/model/designoption.dart';
 
 class DesignTile extends StatelessWidget {
   final DesignOption option;

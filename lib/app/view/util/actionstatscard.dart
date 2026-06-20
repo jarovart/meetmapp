@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/view/util/actionbutton.dart';
-import 'package:meetmaap/app/view/util/infocard.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/view/util/actionbutton.dart';
+import 'package:casttime/app/view/util/infocard.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 
 //TODO: do we need it?
 class ActionStatsCard extends StatelessWidget {

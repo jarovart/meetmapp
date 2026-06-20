@@ -1,5 +1,5 @@
-import 'package:meetmaap/app/model/response/image_response.dart';
-import 'package:meetmaap/app/model/response/userbase_response.dart';
+import 'package:casttime/app/model/response/image_response.dart';
+import 'package:casttime/app/model/response/userbase_response.dart';
 
 class UserFullResponse extends UserBaseResponse {
   final String aboutMe;

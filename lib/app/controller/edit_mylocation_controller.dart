@@ -4,13 +4,13 @@ import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/controller/auth_controller.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/request/updatemylocation_request.dart';
-import 'package:meetmaap/app/model/request/image_request.dart';
-import 'package:meetmaap/app/model/response/locationfull_response.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/service/location_service.dart';
+import 'package:casttime/app/controller/auth_controller.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/app/model/request/updatemylocation_request.dart';
+import 'package:casttime/app/model/request/image_request.dart';
+import 'package:casttime/app/model/response/locationfull_response.dart';
+import 'package:casttime/app/model/response/usermyprofile_response.dart';
+import 'package:casttime/app/service/location_service.dart';
 
 class EditMyLocationController extends ChangeNotifier {
   final AuthController authController;

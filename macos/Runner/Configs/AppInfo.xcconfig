@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = meetmaap
+PRODUCT_NAME = Casttime
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = de.jarovart.meetmaap
+PRODUCT_BUNDLE_IDENTIFIER = de.jarovart.casttime
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2025 de.jarovart. All rights reserved.

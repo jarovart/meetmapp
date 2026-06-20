@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/exception/exception_message.dart';
-import 'package:meetmaap/app/view/util/geolocationbutton_widget.dart';
+import 'package:casttime/app/model/exception/exception_message.dart';
+import 'package:casttime/app/view/util/geolocationbutton_widget.dart';
 
 class TestSliderGps extends StatefulWidget {
   const TestSliderGps({super.key});

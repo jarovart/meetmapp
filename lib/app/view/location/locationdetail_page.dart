@@ -1,16 +1,17 @@
+import 'package:casttime/app/view/util/thumbnail_util.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:meetmaap/app/config/app_config.dart';
-import 'package:meetmaap/app/config/route_config.dart';
-import 'package:meetmaap/app/controller/locationdetails_controller.dart';
-import 'package:meetmaap/app/view/util/inforow.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
-import 'package:meetmaap/app/view/util/gallery_widget.dart';
-import 'package:meetmaap/app/view/util/imageviewer_widget.dart';
-import 'package:meetmaap/app/view/util/infocard.dart';
-import 'package:meetmaap/app/view/util/locationbottomaction.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/config/app_config.dart';
+import 'package:casttime/app/config/route_config.dart';
+import 'package:casttime/app/controller/locationdetails_controller.dart';
+import 'package:casttime/app/view/util/inforow.dart';
+import 'package:casttime/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/app/view/util/gallery_widget.dart';
+import 'package:casttime/app/view/util/imageviewer_widget.dart';
+import 'package:casttime/app/view/util/infocard.dart';
+import 'package:casttime/app/view/util/locationbottomaction.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class LocationDetailPage extends StatelessWidget {
@@ -106,22 +107,12 @@ class LocationDetailPage extends StatelessWidget {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          if (location.thumbnailImage != null)
-                            Hero(
-                              tag: 'location-thumbnail-${location.id}',
-                              child: Image.network(
-                                location.thumbnailImage!.imageUrl,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          else
-                            Container(
-                              color: Colors.grey.shade300,
-                              child: const Icon(
-                                Icons.image_not_supported_outlined,
-                                size: 72,
-                              ),
+                          Hero(
+                            tag: 'location-thumbnail-${location.id}',
+                            child: ThumbnailImage(
+                              imageUrl: location.thumbnailImage?.imageUrl,
                             ),
+                          ),
 
                           DecoratedBox(
                             decoration: BoxDecoration(

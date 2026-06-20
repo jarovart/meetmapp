@@ -1,6 +1,6 @@
-import 'package:meetmaap/app/model/response/status_response.dart';
-import 'package:meetmaap/app/repository/info_repository.dart';
-import 'package:meetmaap/app/service/authentication_service.dart';
+import 'package:casttime/app/model/response/status_response.dart';
+import 'package:casttime/app/repository/info_repository.dart';
+import 'package:casttime/app/service/authentication_service.dart';
 
 class InfoService {
   static Future<StatusResponse> getHealth() async {

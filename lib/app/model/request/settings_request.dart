@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:meetmaap/app/model/enums/appdesign.dart';
-import 'package:meetmaap/app/model/enums/language.dart';
+import 'package:casttime/app/model/enums/appdesign.dart';
+import 'package:casttime/app/model/enums/language.dart';
 
 class SettingsRequest {
   final Locale? locale;

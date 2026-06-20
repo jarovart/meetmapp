@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:meetmaap/app/config/app_config.dart';
-import 'package:meetmaap/app/controller/info_controller.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/config/app_config.dart';
+import 'package:casttime/app/controller/info_controller.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,10 +25,12 @@ class InfoPage extends StatelessWidget {
             children: [
               const SizedBox(height: 8),
 
-              Icon(
-                Icons.public,
-                size: 72,
-                color: Theme.of(context).colorScheme.primary,
+              Center(
+                child: Image.asset(
+                  AppConfig.appIconPath,
+                  width: 72,
+                  height: 72,
+                ),
               ),
 
               const SizedBox(height: 12),

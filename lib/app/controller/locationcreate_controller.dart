@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/request/createlocation_request.dart';
-import 'package:meetmaap/app/model/response/image_response.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/service/image_service.dart';
-import 'package:meetmaap/app/service/location_service.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/app/model/request/createlocation_request.dart';
+import 'package:casttime/app/model/response/image_response.dart';
+import 'package:casttime/app/model/response/locationbase_response.dart';
+import 'package:casttime/app/model/response/usermyprofile_response.dart';
+import 'package:casttime/app/service/image_service.dart';
+import 'package:casttime/app/service/location_service.dart';
 
 class LocationCreateController extends ChangeNotifier {
   final LatLng point;

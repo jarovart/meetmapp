@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/config/route_config.dart';
-import 'package:meetmaap/app/controller/debouncer.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/app/model/response/locationfull_response.dart';
-import 'package:meetmaap/app/service/location_service.dart';
-import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
+import 'package:casttime/app/config/route_config.dart';
+import 'package:casttime/app/controller/debouncer.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/app/model/response/locationbase_response.dart';
+import 'package:casttime/app/model/response/locationfull_response.dart';
+import 'package:casttime/app/service/location_service.dart';
+import 'package:casttime/app/view/util/locationmarker_widget.dart';
 
 class MapViewController extends ChangeNotifier {
   final MapController mapController;

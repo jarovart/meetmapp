@@ -1,5 +1,5 @@
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/model/response/image_response.dart';
+import 'package:casttime/app/model/response/image_response.dart';
 
 class LocationBaseResponse {
   final int id;

@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:meetmaap/app/model/enums/appdesign.dart';
+import 'package:casttime/app/model/enums/appdesign.dart';
 
 import 'package:flutter/material.dart';
 

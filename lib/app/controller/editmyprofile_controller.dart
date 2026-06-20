@@ -2,11 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/request/updatemyprofile_request.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/service/authentication_service.dart';
-import 'package:meetmaap/app/service/user_service.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/app/model/request/updatemyprofile_request.dart';
+import 'package:casttime/app/model/response/usermyprofile_response.dart';
+import 'package:casttime/app/service/authentication_service.dart';
+import 'package:casttime/app/service/user_service.dart';
 
 class EditMyProfileController extends ChangeNotifier {
   String? _username;
@@ -40,6 +40,7 @@ class EditMyProfileController extends ChangeNotifier {
 
   Uint8List? get selectedProfileImageBytes => _selectedProfileImage;
   String? get currentProfileImageUrl => _currentProfileImageUrl;
+  String get username => _username ?? 'CT';
 
   set selectedProfileImage(Uint8List value) => _selectedProfileImage = value;
 

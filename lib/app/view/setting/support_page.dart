@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
-import 'package:meetmaap/l10n/app_localizations.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
+import 'package:casttime/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SupportPage extends StatefulWidget {

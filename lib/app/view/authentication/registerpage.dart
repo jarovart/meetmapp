@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/config/route_config.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/service/authentication_service.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/config/route_config.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/app/service/authentication_service.dart';
+import 'package:casttime/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

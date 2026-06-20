@@ -1,8 +1,9 @@
+import 'package:casttime/app/view/util/thumbnail_util.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/config/route_config.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/config/route_config.dart';
+import 'package:casttime/app/model/response/locationbase_response.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 
 class LocationListTab extends StatefulWidget {
   final String title;
@@ -120,17 +121,13 @@ class _LocationListTabState extends State<LocationListTab> {
               child: ListTile(
                 iconColor: colors.primary,
                 textColor: colors.onSurface,
-                leading: locationBase.thumbnailImage != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          locationBase.thumbnailImage!.imageUrl,
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : Icon(Icons.image, color: colors.primary),
+                leading: ThumbnailImage(
+                  imageUrl: locationBase.thumbnailImage?.imageUrl,
+                  width: 60,
+                  height: 60,
+                  iconSize: 28,
+                  borderRadius: BorderRadius.circular(12),
+                ),
 
                 title: Text(
                   locationBase.title,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
+import 'package:casttime/app/model/response/locationbase_response.dart';
 
 class LocationMarker extends StatelessWidget {
   final LocationBaseResponse location;

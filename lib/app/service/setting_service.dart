@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/request/settings_request.dart';
-import 'package:meetmaap/app/model/response/settings_response.dart';
-import 'package:meetmaap/app/repository/setting_repository.dart';
-import 'package:meetmaap/app/service/authentication_service.dart';
-import 'package:meetmaap/app/service/user_service.dart';
+import 'package:casttime/app/model/request/settings_request.dart';
+import 'package:casttime/app/model/response/settings_response.dart';
+import 'package:casttime/app/repository/setting_repository.dart';
+import 'package:casttime/app/service/authentication_service.dart';
+import 'package:casttime/app/service/user_service.dart';
 
 class SettingService {
   static Future<SettingsResponse?> loadLocalSettings() async {

@@ -1,4 +1,4 @@
-package de.jarovart.meetmaap;
+package de.jarovart.casttime;
 
 import io.flutter.embedding.android.FlutterActivity;
 

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/config/route_config.dart';
-import 'package:meetmaap/app/controller/auth_controller.dart';
-import 'package:meetmaap/app/controller/login_controller.dart';
-import 'package:meetmaap/app/controller/setting_controller.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/config/route_config.dart';
+import 'package:casttime/app/controller/auth_controller.dart';
+import 'package:casttime/app/controller/login_controller.dart';
+import 'package:casttime/app/controller/setting_controller.dart';
+import 'package:casttime/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {

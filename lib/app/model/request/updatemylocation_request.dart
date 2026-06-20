@@ -1,5 +1,5 @@
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/model/request/image_request.dart';
+import 'package:casttime/app/model/request/image_request.dart';
 
 class UpdateMyLocationRequest {
   final int id;

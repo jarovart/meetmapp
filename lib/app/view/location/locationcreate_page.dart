@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:meetmaap/app/controller/auth_controller.dart';
-import 'package:meetmaap/app/controller/locationcreate_controller.dart';
-import 'package:meetmaap/app/model/exception/exception_message.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/controller/auth_controller.dart';
+import 'package:casttime/app/controller/locationcreate_controller.dart';
+import 'package:casttime/app/model/exception/exception_message.dart';
+import 'package:casttime/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 
 class LocationCreatePage extends StatelessWidget {
   final LocationCreateController locationCreateController;

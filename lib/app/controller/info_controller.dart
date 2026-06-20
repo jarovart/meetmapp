@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/response/status_response.dart';
-import 'package:meetmaap/app/service/info_service.dart';
+import 'package:casttime/app/model/response/status_response.dart';
+import 'package:casttime/app/service/info_service.dart';
 
 class InfoController extends ChangeNotifier {
   bool _isLoading = false;

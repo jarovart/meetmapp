@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Meetmaap</string>
+	<string>Casttime</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>meetmaap</string>
+	<string>casttime</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -48,10 +48,10 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
     <string>Die App benötigt deinen Standort, um die Karte zu zentrieren.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>MeetMaap benötigt Zugriff auf deine Fotos, damit du ein Profilbild auswählen kannst.</string>
+	<string>Cast-Time benötigt Zugriff auf deine Fotos, damit du ein Profilbild auswählen kannst.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>MeetMaap benötigt Zugriff auf deine Kamera, damit du ein Profilbild aufnehmen kannst.</string>
+	<string>Cast-Time benötigt Zugriff auf deine Kamera, damit du ein Profilbild aufnehmen kannst.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-<string>MeetMaap benötigt Zugriff auf deine Fotos, um Bilder zu speichern.</string>
+<string>Cast-Time benötigt Zugriff auf deine Fotos, um Bilder zu speichern.</string>
 </dict>
 </plist>

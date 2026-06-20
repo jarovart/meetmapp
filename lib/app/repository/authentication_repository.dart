@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/config/api_config.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/model/util/api_exception_wrapper.dart';
-import 'package:meetmaap/app/repository/user_repository.dart';
-import 'package:meetmaap/app/repository/util/api_response_handler.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/app/config/api_config.dart';
+import 'package:casttime/app/model/response/usermyprofile_response.dart';
+import 'package:casttime/app/model/util/api_exception_wrapper.dart';
+import 'package:casttime/app/repository/user_repository.dart';
+import 'package:casttime/app/repository/util/api_response_handler.dart';
 
 class AuthRepository {
   static final _storage = const FlutterSecureStorage();

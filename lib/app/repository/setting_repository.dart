@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:meetmaap/app/config/api_config.dart';
-import 'package:meetmaap/app/model/request/settings_request.dart';
-import 'package:meetmaap/app/model/response/settings_response.dart';
-import 'package:meetmaap/app/model/util/api_exception_wrapper.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
-import 'package:meetmaap/app/repository/util/api_response_handler.dart';
+import 'package:casttime/app/config/api_config.dart';
+import 'package:casttime/app/model/request/settings_request.dart';
+import 'package:casttime/app/model/response/settings_response.dart';
+import 'package:casttime/app/model/util/api_exception_wrapper.dart';
+import 'package:casttime/app/repository/authentication_repository.dart';
+import 'package:casttime/app/repository/util/api_response_handler.dart';
 
 class SettingRepository {
   static final _storage = const FlutterSecureStorage();

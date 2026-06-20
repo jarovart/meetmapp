@@ -1,7 +1,8 @@
+import 'package:casttime/app/view/util/thumbnail_util.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/config/route_config.dart';
-import 'package:meetmaap/app/model/response/userbase_response.dart';
+import 'package:casttime/app/config/route_config.dart';
+import 'package:casttime/app/model/response/userbase_response.dart';
 
 class UserCard extends StatelessWidget {
   final UserBaseResponse userbase;
@@ -10,6 +11,12 @@ class UserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final initials = ThumbnailImage.buildInitials(
+      firstName: userbase.firstName,
+      lastName: userbase.lastName,
+      username: userbase.username,
+    );
+
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () => context.push(
@@ -17,6 +24,7 @@ class UserCard extends StatelessWidget {
         extra: userbase,
       ),
       child: Container(
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(16),
@@ -29,29 +37,27 @@ class UserCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
+        child: Row(
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-              child: Image.network(
-                userbase.profileImage?.imageUrl ?? '',
-                height: 130,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  height: 130,
-                  color: Colors.grey[300],
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.image_not_supported),
-                ),
-              ),
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
+              backgroundImage: userbase.profileImage?.imageUrl != null
+                  ? NetworkImage(userbase.profileImage!.imageUrl)
+                  : null,
+              child: userbase.profileImage?.imageUrl == null
+                  ? Text(initials)
+                  : null,
             ),
-            Padding(
-              padding: const EdgeInsets.all(12),
+
+            const SizedBox(width: 12),
+
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     userbase.username,
@@ -63,10 +69,11 @@ class UserCard extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
+
                   Text(
-                    "${userbase.firstName}, ${userbase.lastName}",
-                    maxLines: 2,
+                    "${userbase.firstName} ${userbase.lastName}",
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.secondary,

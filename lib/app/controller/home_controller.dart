@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
+import 'package:casttime/app/model/response/usermyprofile_response.dart';
 
 class HomeController extends ChangeNotifier {
   // ─────────────────────────────────────────────

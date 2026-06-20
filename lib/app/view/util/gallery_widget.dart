@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/view/util/imageviewer_widget.dart';
+import 'package:casttime/app/view/util/imageviewer_widget.dart';
 
 class ImageGalleryWidget extends StatefulWidget {
   final bool dragHandle;

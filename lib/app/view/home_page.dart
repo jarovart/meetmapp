@@ -1,12 +1,13 @@
+import 'package:casttime/app/config/dev_config.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meetmaap/app/config/app_config.dart';
-import 'package:meetmaap/app/config/route_config.dart';
-import 'package:meetmaap/app/controller/auth_controller.dart';
-import 'package:meetmaap/app/controller/home_controller.dart';
-import 'package:meetmaap/app/model/exception/exception_message.dart';
-import 'package:meetmaap/app/view/map_page.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/config/app_config.dart';
+import 'package:casttime/app/config/route_config.dart';
+import 'package:casttime/app/controller/auth_controller.dart';
+import 'package:casttime/app/controller/home_controller.dart';
+import 'package:casttime/app/model/exception/exception_message.dart';
+import 'package:casttime/app/view/map_page.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
@@ -37,29 +38,16 @@ class HomePage extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: const Text(AppConfig.appName),
-      /*flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-
-            colors: [
-              Theme.of(context).colorScheme.surface,
-              Theme.of(context).colorScheme.surfaceContainerHighest,
-            ],
-          ),
-        ),
-      ),*/
       leading: IconButton(
         icon: Icon(homeController.isMenuOpen ? Icons.close : Icons.menu),
         onPressed: homeController.toggleMenu,
       ),
-
       actions: [
-        IconButton(
-          icon: Icon(authController.hasToken ? Icons.close : Icons.token),
-          onPressed: () => authController.refreshLogin("appbarbutton"),
-        ),
+        if (DevConfig.isDev)
+          IconButton(
+            icon: Icon(authController.hasToken ? Icons.close : Icons.token),
+            onPressed: () => authController.refreshLogin("appbarbutton"),
+          ),
         _buildProfileAvatar(context),
       ],
     );

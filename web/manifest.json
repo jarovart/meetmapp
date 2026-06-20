@@ -1,6 +1,6 @@
 {
-    "name": "meetmaap",
-    "short_name": "meetmaap",
+    "name": "casttime",
+    "short_name": "casttime",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

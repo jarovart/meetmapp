@@ -1,9 +1,10 @@
+import 'package:casttime/app/view/util/thumbnail_util.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:meetmaap/app/config/route_config.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/config/route_config.dart';
+import 'package:casttime/app/model/response/locationbase_response.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 
 class LocationCard extends StatelessWidget {
   final LocationBaseResponse locationbase;
@@ -37,22 +38,11 @@ class LocationCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-              child: Image.network(
-                locationbase.thumbnailImage?.imageUrl ?? '',
-                height: 130,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  height: 130,
-                  color: Colors.grey[300],
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.image_not_supported),
-                ),
-              ),
+            ThumbnailImage(
+              imageUrl: locationbase.thumbnailImage?.imageUrl,
+              height: 130,
+              width: double.infinity,
+              iconSize: 56,
             ),
             Padding(
               padding: const EdgeInsets.all(12),

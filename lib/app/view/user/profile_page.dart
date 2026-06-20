@@ -1,13 +1,14 @@
+import 'package:casttime/app/view/util/thumbnail_util.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:meetmaap/app/config/route_config.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/config/route_config.dart';
+import 'package:casttime/app/repository/authentication_repository.dart';
+import 'package:casttime/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
-import 'package:meetmaap/app/controller/profile_controller.dart';
-import 'package:meetmaap/app/view/util/locationlisttab_widget.dart';
+import 'package:casttime/app/controller/profile_controller.dart';
+import 'package:casttime/app/view/util/locationlisttab_widget.dart';
 
 class UserProfilePage extends StatelessWidget {
   const UserProfilePage({super.key});
@@ -31,7 +32,6 @@ class UserProfilePage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.profileOf(profileController.displayUsername)),
-          centerTitle: true,
           actions: [
             if (profileController.isMyProfile)
               Padding(
@@ -115,7 +115,7 @@ class UserProfilePage extends StatelessWidget {
                   ],
                   _buildHeader(
                     context,
-                    profileUrl: user.profileImage?.imageUrl ?? '',
+                    profileUrl: user.profileImage?.imageUrl,
                     firstName: user.firstName,
                     lastName: user.lastName,
                     username: user.username,
@@ -212,7 +212,7 @@ class UserProfilePage extends StatelessWidget {
     String? email,
     DateTime? createdAt,
   }) {
-    final initials = _buildInitials(
+    final initials = ThumbnailImage.buildInitials(
       firstName: firstName,
       lastName: lastName,
       username: username,
@@ -273,23 +273,31 @@ class UserProfilePage extends StatelessWidget {
 
   Widget _buildInfoSection(BuildContext context, {required String? aboutMe}) {
     final l10n = context.l10n;
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.aboutMe, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(
-              aboutMe?.isNotEmpty == true
-                  ? aboutMe!
-                  : l10n.noDescriptionAvailable,
-              style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-            ),
-          ],
+    return SizedBox(
+      width: double.infinity,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.aboutMe,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                aboutMe?.isNotEmpty == true
+                    ? aboutMe!
+                    : l10n.noDescriptionAvailable,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -343,28 +351,6 @@ class UserProfilePage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _buildInitials({
-    required String? firstName,
-    required String? lastName,
-    required String? username,
-  }) {
-    String result = '';
-
-    if (firstName != null && firstName.trim().isNotEmpty) {
-      result += firstName.trim()[0];
-    }
-    if (lastName != null && lastName.trim().isNotEmpty) {
-      result += lastName.trim()[0];
-    }
-
-    if (result.isEmpty && username != null && username.trim().isNotEmpty) {
-      final trimmed = username.trim();
-      result = trimmed.length >= 2 ? trimmed.substring(0, 2) : trimmed[0];
-    }
-
-    return result.toUpperCase();
   }
 }
 

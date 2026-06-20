@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:meetmaap/app/config/route_config.dart';
-import 'package:meetmaap/app/controller/locationdetails_controller.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
-import 'package:meetmaap/app/view/util/gallery_widget.dart';
-import 'package:meetmaap/app/view/util/locationbottomaction.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/config/route_config.dart';
+import 'package:casttime/app/controller/locationdetails_controller.dart';
+import 'package:casttime/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/app/view/util/gallery_widget.dart';
+import 'package:casttime/app/view/util/locationbottomaction.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 
 class LocationDetailsContent extends StatelessWidget {
   final LocationDetailsController controller;

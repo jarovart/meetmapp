@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/response/image_response.dart';
-import 'package:meetmaap/app/model/response/userfull_response.dart';
+import 'package:casttime/app/model/response/image_response.dart';
+import 'package:casttime/app/model/response/userfull_response.dart';
 
 class UserMyProfileResponse extends UserFullResponse {
   final String email;

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:meetmaap/app/model/exception/app_exception.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
 
 class ApiExceptionWrapper {
   static Future<T> guard<T>(Future<T> Function() action) async {

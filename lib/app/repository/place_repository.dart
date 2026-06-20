@@ -1,9 +1,9 @@
 import 'package:http/http.dart' as http;
-import 'package:meetmaap/app/config/api_config.dart';
-import 'package:meetmaap/app/model/response/place_response.dart';
-import 'package:meetmaap/app/model/util/api_exception_wrapper.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
-import 'package:meetmaap/app/repository/util/api_response_handler.dart';
+import 'package:casttime/app/config/api_config.dart';
+import 'package:casttime/app/model/response/place_response.dart';
+import 'package:casttime/app/model/util/api_exception_wrapper.dart';
+import 'package:casttime/app/repository/authentication_repository.dart';
+import 'package:casttime/app/repository/util/api_response_handler.dart';
 
 class PlaceRepository {
   static Future<List<PlaceResponse>> fetchSuggestedPlace(

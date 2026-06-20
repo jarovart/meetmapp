@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:meetmaap/app/view/util/arrowbutton_widget.dart';
+import 'package:casttime/app/view/util/arrowbutton_widget.dart';
 
 class ImageGalleryViewer extends StatefulWidget {
   final List<String> imageUrls;

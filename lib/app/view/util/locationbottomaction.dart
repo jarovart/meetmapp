@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/controller/auth_controller.dart';
-import 'package:meetmaap/app/controller/locationdetails_controller.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/controller/auth_controller.dart';
+import 'package:casttime/app/controller/locationdetails_controller.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class LocationBottomActions extends StatelessWidget {

@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/model/response/userbase_response.dart';
-import 'package:meetmaap/app/service/user_service.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/app/model/response/userbase_response.dart';
+import 'package:casttime/app/service/user_service.dart';
 
 class UserListController extends ChangeNotifier {
   UserListController() {
@@ -65,7 +64,10 @@ class UserListController extends ChangeNotifier {
 
   void clearSearchResults() {
     _searchCtrl.clear();
-    loadUsersByQuery();
+    _page = 0;
+    _hasMore = true;
+    users.clear();
+    notifyListeners();
   }
 
   void onSearchChanged(String text) async {
@@ -75,7 +77,7 @@ class UserListController extends ChangeNotifier {
 
     _searchDebounce = Timer(const Duration(milliseconds: 1000), () async {
       if (text.isNotEmpty && text.length < 3) {
-        //clearSearchResults(); //TODO: check bug here
+        clearSearchResults();
         return;
       }
 

@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/controller/auth_controller.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/app/model/response/locationfull_response.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/service/location_service.dart';
-import 'package:meetmaap/app/service/navigation_service.dart';
+import 'package:casttime/app/controller/auth_controller.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/app/model/response/locationbase_response.dart';
+import 'package:casttime/app/model/response/locationfull_response.dart';
+import 'package:casttime/app/model/response/usermyprofile_response.dart';
+import 'package:casttime/app/service/location_service.dart';
+import 'package:casttime/app/service/navigation_service.dart';
 
 class LocationDetailsController extends ChangeNotifier {
   final AuthController authController;

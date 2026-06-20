@@ -5,18 +5,18 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/config/api_config.dart';
-import 'package:meetmaap/app/model/enums/locationtype_enum.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/request/updatemylocation_request.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/app/model/request/createlocation_request.dart';
-import 'package:meetmaap/app/model/response/locationfull_response.dart';
-import 'package:meetmaap/app/model/response/slicelist_response.dart';
-import 'package:meetmaap/app/model/util/api_exception_wrapper.dart';
-import 'package:meetmaap/app/model/util/locationbounds.dart';
-import 'package:meetmaap/app/repository/util/api_response_handler.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
+import 'package:casttime/app/config/api_config.dart';
+import 'package:casttime/app/model/enums/locationtype_enum.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/app/model/request/updatemylocation_request.dart';
+import 'package:casttime/app/model/response/locationbase_response.dart';
+import 'package:casttime/app/model/request/createlocation_request.dart';
+import 'package:casttime/app/model/response/locationfull_response.dart';
+import 'package:casttime/app/model/response/slicelist_response.dart';
+import 'package:casttime/app/model/util/api_exception_wrapper.dart';
+import 'package:casttime/app/model/util/locationbounds.dart';
+import 'package:casttime/app/repository/util/api_response_handler.dart';
+import 'package:casttime/app/repository/authentication_repository.dart';
 
 class LocationRepository {
   static final Map<int, LocationFullResponse> _fullLocationCache = {};
@@ -195,7 +195,7 @@ class LocationRepository {
 
       final response = await http.get(
         uri,
-        headers: {'User-Agent': 'meetmaap-app/1.0 (contact@meetmaap.app)'},
+        headers: {'User-Agent': 'casttime-app/1.0 (info@jarovart.de)'},
       );
 
       return ApiResponseHandler.parseJsonObject(response);

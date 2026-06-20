@@ -1,4 +1,4 @@
-import 'package:meetmaap/app/config/api_config.dart';
+import 'package:casttime/app/config/api_config.dart';
 
 class ImageUtils {
   static String toAbsolute(String url) {

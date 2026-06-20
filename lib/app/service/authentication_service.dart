@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/repository/authentication_repository.dart';
-import 'package:meetmaap/app/repository/user_repository.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/app/model/response/usermyprofile_response.dart';
+import 'package:casttime/app/repository/authentication_repository.dart';
+import 'package:casttime/app/repository/user_repository.dart';
+import 'package:casttime/app/view/util/app_errormessage_mapper.dart';
 
 class AuthService {
   static Future<bool> isLoggedIn() async {

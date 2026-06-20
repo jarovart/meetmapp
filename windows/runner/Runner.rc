@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "de.jarovart" "\0"
-            VALUE "FileDescription", "meetmaap" "\0"
+            VALUE "FileDescription", "Meet up with other people!" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "meetmaap" "\0"
+            VALUE "InternalName", "casttime" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 de.jarovart. All rights reserved." "\0"
-            VALUE "OriginalFilename", "meetmaap.exe" "\0"
-            VALUE "ProductName", "meetmaap" "\0"
+            VALUE "OriginalFilename", "Casttime.exe" "\0"
+            VALUE "ProductName", "Casttime" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

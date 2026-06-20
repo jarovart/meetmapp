@@ -1,12 +1,12 @@
 import 'package:flutter_map/flutter_map.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/request/createlocation_request.dart';
-import 'package:meetmaap/app/model/request/updatemylocation_request.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/app/model/response/locationfull_response.dart';
-import 'package:meetmaap/app/model/response/slicelist_response.dart';
-import 'package:meetmaap/app/model/util/locationbounds.dart';
-import 'package:meetmaap/app/repository/location_repository.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/app/model/request/createlocation_request.dart';
+import 'package:casttime/app/model/request/updatemylocation_request.dart';
+import 'package:casttime/app/model/response/locationbase_response.dart';
+import 'package:casttime/app/model/response/locationfull_response.dart';
+import 'package:casttime/app/model/response/slicelist_response.dart';
+import 'package:casttime/app/model/util/locationbounds.dart';
+import 'package:casttime/app/repository/location_repository.dart';
 
 /// Ergebnis-Typ für Location-Abfragen
 class LocationService {

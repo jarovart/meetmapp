@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meetmaap/app/controller/auth_controller.dart';
-import 'package:meetmaap/app/controller/setting_controller.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
+import 'package:casttime/app/controller/auth_controller.dart';
+import 'package:casttime/app/controller/setting_controller.dart';
+import 'package:casttime/app/model/response/usermyprofile_response.dart';
 
 class LoginController extends ChangeNotifier {
   // ─────────────────────────────────────────────

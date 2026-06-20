@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:meetmaap/app/model/exception/app_exception.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
 
 class ApiResponseHandler {
   static void ensureSuccess(http.Response response) {

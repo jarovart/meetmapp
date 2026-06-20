@@ -4,13 +4,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/controller/locationlist_controller.dart';
-import 'package:meetmaap/app/model/response/place_response.dart';
-import 'package:meetmaap/app/service/place_service.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
-import 'package:meetmaap/app/view/util/filterbutton_widget.dart';
-import 'package:meetmaap/app/view/util/locationcard_widget.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/controller/locationlist_controller.dart';
+import 'package:casttime/app/model/response/place_response.dart';
+import 'package:casttime/app/service/place_service.dart';
+import 'package:casttime/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/app/view/util/filterbutton_widget.dart';
+import 'package:casttime/app/view/util/locationcard_widget.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class LocationsListPage extends StatelessWidget {

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/controller/debouncer.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/app/model/response/userbase_response.dart';
-import 'package:meetmaap/app/model/response/userfull_response.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/service/authentication_service.dart';
-import 'package:meetmaap/app/service/user_service.dart';
+import 'package:casttime/app/controller/debouncer.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/app/model/response/locationbase_response.dart';
+import 'package:casttime/app/model/response/userbase_response.dart';
+import 'package:casttime/app/model/response/userfull_response.dart';
+import 'package:casttime/app/model/response/usermyprofile_response.dart';
+import 'package:casttime/app/service/authentication_service.dart';
+import 'package:casttime/app/service/user_service.dart';
 
 class UserProfileController extends ChangeNotifier {
   final String? _username;

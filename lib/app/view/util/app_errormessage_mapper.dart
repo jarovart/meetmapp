@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:http/http.dart';
-import 'package:meetmaap/app/model/exception/app_exception.dart';
-import 'package:meetmaap/l10n/app_localizations.dart';
+import 'package:casttime/app/model/exception/app_exception.dart';
+import 'package:casttime/l10n/app_localizations.dart';
 
 class AppErrorMapper {
   static bool isForbiddenException(Object error) {

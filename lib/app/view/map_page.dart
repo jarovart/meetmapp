@@ -6,15 +6,15 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:meetmaap/app/controller/map_controller.dart';
-import 'package:meetmaap/app/model/response/locationbase_response.dart';
-import 'package:meetmaap/app/model/response/locationfull_response.dart';
-import 'package:meetmaap/app/view/location/locationdetails_bottomsheet_mobile.dart';
-import 'package:meetmaap/app/view/location/locationdetails_generaldialog_nomobile.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
-import 'package:meetmaap/app/view/util/locationmarker_widget.dart';
-import 'package:meetmaap/app/view/util/geolocationbutton_widget.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/controller/map_controller.dart';
+import 'package:casttime/app/model/response/locationbase_response.dart';
+import 'package:casttime/app/model/response/locationfull_response.dart';
+import 'package:casttime/app/view/location/locationdetails_bottomsheet_mobile.dart';
+import 'package:casttime/app/view/location/locationdetails_generaldialog_nomobile.dart';
+import 'package:casttime/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/app/view/util/locationmarker_widget.dart';
+import 'package:casttime/app/view/util/geolocationbutton_widget.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 import 'package:provider/provider.dart';
 
 class MapPage extends StatelessWidget {
@@ -132,7 +132,7 @@ class MapPage extends StatelessWidget {
           //subdomains: isDark ? const ['a', 'b', 'c', 'd'] : const [],
           //retinaMode: isDark ? RetinaMode.isHighDensity(context) as bool? : null,
           tileProvider: CancellableNetworkTileProvider(),
-          userAgentPackageName: 'de.jarovart.meetmaap',
+          userAgentPackageName: 'de.jarovart.casttime',
         ),
         if (Theme.of(context).brightness == Brightness.dark)
           PolygonLayer(

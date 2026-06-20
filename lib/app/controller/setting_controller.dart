@@ -1,13 +1,13 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:meetmaap/app/model/enums/appdesign.dart';
-import 'package:meetmaap/app/model/enums/language.dart';
-import 'package:meetmaap/app/model/request/settings_request.dart';
-import 'package:meetmaap/app/model/response/settings_response.dart';
-import 'package:meetmaap/app/service/setting_service.dart';
-import 'package:meetmaap/app/view/model/appliedsettings_model.dart';
-import 'package:meetmaap/app/view/model/draftsettings_model.dart';
+import 'package:casttime/app/model/enums/appdesign.dart';
+import 'package:casttime/app/model/enums/language.dart';
+import 'package:casttime/app/model/request/settings_request.dart';
+import 'package:casttime/app/model/response/settings_response.dart';
+import 'package:casttime/app/service/setting_service.dart';
+import 'package:casttime/app/view/model/appliedsettings_model.dart';
+import 'package:casttime/app/view/model/draftsettings_model.dart';
 
 class SettingsController extends ChangeNotifier {
   // ─────────────────────────────────────────────

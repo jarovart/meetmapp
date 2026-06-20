@@ -1,5 +1,5 @@
-import 'package:meetmaap/app/model/response/place_response.dart';
-import 'package:meetmaap/app/repository/place_repository.dart';
+import 'package:casttime/app/model/response/place_response.dart';
+import 'package:casttime/app/repository/place_repository.dart';
 
 class PlaceService {
   static Future<List<PlaceResponse>> suggestPlaces(

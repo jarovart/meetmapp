@@ -1,6 +1,6 @@
-# 📍 MeetMapp – Location-Based Event & Meet-Up App
+# 📍 Casttime – Location-Based Event & Meet-Up App
 
-MeetMapp ist eine moderne Location-App, mit der Nutzer Orte entdecken, eigene Events erstellen und sich mit anderen Menschen treffen können. Die App besteht aus einem **Flutter-Frontend** (iOS / Android / Web / Windows) und einem **Spring Boot Backend** für Authentifizierung, Datenverwaltung und APIs.
+Casttime ist eine moderne Location-App, mit der Nutzer Orte entdecken, eigene Events erstellen und sich mit anderen Menschen treffen können. Die App besteht aus einem **Flutter-Frontend** (iOS / Android / Web / Windows) und einem **Spring Boot Backend** für Authentifizierung, Datenverwaltung und APIs.
 
 ---
 
@@ -79,7 +79,7 @@ http://localhost:8080
 ### 2️⃣ Flutter App starten
 
 ```bash
-cd meetmapp
+cd casttime
 flutter pub get
 flutter run
 ```

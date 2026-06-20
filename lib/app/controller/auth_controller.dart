@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/config/app_config.dart';
-import 'package:meetmaap/app/model/response/usermyprofile_response.dart';
-import 'package:meetmaap/app/service/authentication_service.dart';
+import 'package:casttime/app/config/app_config.dart';
+import 'package:casttime/app/model/response/usermyprofile_response.dart';
+import 'package:casttime/app/service/authentication_service.dart';
 
 class AuthController extends ChangeNotifier with WidgetsBindingObserver {
   UserMyProfileResponse? _myProfile;

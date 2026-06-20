@@ -1,15 +1,16 @@
+import 'package:casttime/app/view/util/thumbnail_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:meetmaap/app/controller/auth_controller.dart';
-import 'package:meetmaap/app/view/util/app_errormessage_mapper.dart';
-import 'package:meetmaap/app/view/util/requestphotopermission.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
+import 'package:casttime/app/controller/auth_controller.dart';
+import 'package:casttime/app/view/util/app_errormessage_mapper.dart';
+import 'package:casttime/app/view/util/requestphotopermission.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:meetmaap/app/controller/editmyprofile_controller.dart';
+import 'package:casttime/app/controller/editmyprofile_controller.dart';
 
 class EditMyProfilePage extends StatelessWidget {
   const EditMyProfilePage({super.key});
@@ -136,6 +137,11 @@ class EditMyProfilePage extends StatelessWidget {
     EditMyProfileController editController,
   ) {
     final l10n = context.l10n;
+    final initials = ThumbnailImage.buildInitials(
+      firstName: editController.firstNameCtrl.text,
+      lastName: editController.lastNameCtrl.text,
+      username: editController.username,
+    );
 
     return Column(
       children: [
@@ -143,7 +149,7 @@ class EditMyProfilePage extends StatelessWidget {
           radius: 52,
           backgroundImage: editController.previewImageProvider,
           child: editController.previewImageProvider == null
-              ? Text("FM", style: const TextStyle(fontSize: 24))
+              ? Text(initials, style: const TextStyle(fontSize: 24))
               : null,
         ),
         const SizedBox(height: 12),

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:meetmaap/app/controller/setting_controller.dart';
-import 'package:meetmaap/app/model/enums/appdesign.dart';
-import 'package:meetmaap/app/model/enums/language.dart';
-import 'package:meetmaap/app/view/design/themedesign.dart';
-import 'package:meetmaap/app/view/model/designoption.dart';
-import 'package:meetmaap/app/view/model/draftsettings_model.dart';
-import 'package:meetmaap/app/view/model/languageoption.dart';
-import 'package:meetmaap/app/view/util/designtile.dart';
-import 'package:meetmaap/app/view/util/editrow.dart';
-import 'package:meetmaap/app/view/util/infocard.dart';
-import 'package:meetmaap/extensions/l10n_extension.dart';
-import 'package:meetmaap/l10n/app_localizations.dart';
+import 'package:casttime/app/controller/setting_controller.dart';
+import 'package:casttime/app/model/enums/appdesign.dart';
+import 'package:casttime/app/model/enums/language.dart';
+import 'package:casttime/app/view/design/themedesign.dart';
+import 'package:casttime/app/view/model/designoption.dart';
+import 'package:casttime/app/view/model/draftsettings_model.dart';
+import 'package:casttime/app/view/model/languageoption.dart';
+import 'package:casttime/app/view/util/designtile.dart';
+import 'package:casttime/app/view/util/editrow.dart';
+import 'package:casttime/app/view/util/infocard.dart';
+import 'package:casttime/extensions/l10n_extension.dart';
+import 'package:casttime/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
