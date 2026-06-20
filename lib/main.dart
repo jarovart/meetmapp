@@ -55,7 +55,7 @@ void main() async {
 
   usePathUrlStrategy();
 
-  final authController = AuthController("main");
+  final authController = AuthController("main!");
   await authController.loadLoginLocal();
   final settingsController = SettingsController();
   await settingsController.loadSettingsLocal();
