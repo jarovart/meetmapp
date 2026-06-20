@@ -108,10 +108,13 @@ jobs:
             -exportPath build/ios/ipa
 
       - name: Create App Store Connect API key file
+        env:
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
         run: |
           mkdir -p private_keys
-          printf '%s' "${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}" > private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
-
+          printf '%s\n' "$APP_STORE_CONNECT_PRIVATE_KEY" > "private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+    
       - name: Upload IPA to TestFlight
         run: |
           xcrun altool --upload-app \
