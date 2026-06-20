@@ -69,6 +69,22 @@ jobs:
           cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
           echo "PROVISIONING_PROFILE_UUID=$UUID" >> $GITHUB_ENV
 
+      - name: Configure Runner signing
+        run: |
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< "$(security cms -D -i profile.mobileprovision)")
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< "$(security cms -D -i profile.mobileprovision)")
+      
+          echo "Profile UUID: $PROFILE_UUID"
+          echo "Profile Name: $PROFILE_NAME"
+      
+          perl -0pi -e 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
+          perl -0pi -e 's/DEVELOPMENT_TEAM = [A-Z0-9]+;/DEVELOPMENT_TEAM = ${{ secrets.IOS_TEAM }};/g' ios/Runner.xcodeproj/project.pbxproj
+          perl -0pi -e 's/PROVISIONING_PROFILE_SPECIFIER = .*?;/PROVISIONING_PROFILE_SPECIFIER = "'"$PROFILE_NAME"'";/g' ios/Runner.xcodeproj/project.pbxproj
+
+      - name: Show Runner signing config
+        run: |
+          grep -n "CODE_SIGN_STYLE\|DEVELOPMENT_TEAM\|PROVISIONING_PROFILE_SPECIFIER\|PRODUCT_BUNDLE_IDENTIFIER" ios/Runner.xcodeproj/project.pbxproj
+
       - name: Show signing identities
         run: security find-identity -v -p codesigning
 
@@ -76,16 +92,14 @@ jobs:
         run: |
           flutter build ios --release --no-codesign
       
-      - name: Archive iOS app with automatic signing
+      - name: Archive iOS app
         run: |
           xcodebuild archive \
             -workspace ios/Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -destination "generic/platform=iOS" \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            DEVELOPMENT_TEAM=${{ secrets.IOS_TEAM }} \
-            CODE_SIGN_STYLE=Automatic
+            -archivePath build/ios/archive/Runner.xcarchive
       
       - name: Export IPA
         run: |
@@ -97,9 +111,7 @@ jobs:
       - name: Create App Store Connect API key file
         run: |
           mkdir -p private_keys
-          cat > private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 <<'EOF'
-          ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
-          EOF
+          printf '%s' "${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}" > private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
 
       - name: Upload IPA to TestFlight
         run: |
