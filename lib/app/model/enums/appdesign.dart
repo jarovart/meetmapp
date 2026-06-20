@@ -1,1 +1,10 @@
-enum AppDesign { system, lightRose, darkGrey, darkPink, darkGold, custom }
+enum AppDesign {
+  system,
+  lightBlack,
+  lightRose,
+  lightWine,
+  darkWhite,
+  darkPink,
+  darkGold,
+  custom,
+}

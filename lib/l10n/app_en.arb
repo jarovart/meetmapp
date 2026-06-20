@@ -183,5 +183,24 @@
   "systemLanguage": "system language",
   "english": "English",
   "german": "German",
-  "noPhotoPermission": "No photo permission granted."
-}
+  "noPhotoPermission": "No photo permission granted.",
+  "support": "Support",
+  "info": "Info", 
+  "aboutApp": "About {apptitle}",
+  "aboutAppText": "{apptitle} brings people together through shared activities and exciting places.\nCreate meetups, discover events, and connect with new people nearby.",
+  "info": "Info",
+  "version": "Version",
+  "serverVersion": "Server Version",
+  "server": "Server",
+  "database": "Database",
+  "online": "Online",
+  "offline": "Offline",
+  "homepage": "HomePage",
+  "howToSupport": "How can we help you?",
+  "sendEmail": "Write us an email or send a direct message to support.",
+  "writeEmail": "Write an Email",
+  "openMailProgramm": "Opens your email application with a pre-filled subject.",
+  "contactSupport": "Contact Support",
+  "messageSent": "Message sent successfully.",
+  "messageFailed": "Message could not be sent."
+  }

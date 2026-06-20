@@ -157,8 +157,18 @@ class SettingsPage extends StatelessWidget {
   List<DesignOption> createDesignOptions(AppLocalizations l10n) {
     return [
       DesignOption(
+        design: AppDesign.lightBlack,
+        label: 'Light Black',
+        icon: Icons.light_mode_outlined,
+      ),
+      DesignOption(
         design: AppDesign.lightRose,
         label: 'Light Rose',
+        icon: Icons.light_mode_outlined,
+      ),
+      DesignOption(
+        design: AppDesign.lightWine,
+        label: 'Light Wine',
         icon: Icons.light_mode_outlined,
       ),
       DesignOption(

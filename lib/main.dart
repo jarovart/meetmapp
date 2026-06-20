@@ -10,6 +10,7 @@ import 'package:meetmaap/app/controller/auth_controller.dart';
 import 'package:meetmaap/app/controller/edit_mylocation_controller.dart';
 import 'package:meetmaap/app/controller/editmyprofile_controller.dart';
 import 'package:meetmaap/app/controller/home_controller.dart';
+import 'package:meetmaap/app/controller/info_controller.dart';
 import 'package:meetmaap/app/controller/locationcreate_controller.dart';
 import 'package:meetmaap/app/controller/locationdetails_controller.dart';
 import 'package:meetmaap/app/controller/locationlist_controller.dart';
@@ -34,7 +35,9 @@ import 'package:meetmaap/app/view/location/edit_mylocation_page.dart';
 import 'package:meetmaap/app/view/location/locationdetail_page.dart';
 import 'package:meetmaap/app/view/map_page.dart';
 import 'package:meetmaap/app/view/model/appliedsettings_model.dart';
+import 'package:meetmaap/app/view/setting/info_page.dart';
 import 'package:meetmaap/app/view/setting/setting_page.dart';
+import 'package:meetmaap/app/view/setting/support_page.dart';
 import 'package:meetmaap/app/view/user/edit_myprofile_page.dart';
 import 'package:meetmaap/app/view/user/userlist_page.dart';
 import 'package:meetmaap/extensions/l10n_extension.dart';
@@ -322,6 +325,20 @@ class MainApplication extends StatelessWidget {
         path: RouteConfig.settingsUrl,
         builder: (context, state) => const SettingsPage(),
       ),
+      GoRoute(
+        path: RouteConfig.supportUrl,
+        builder: (context, state) => const SupportPage(),
+      ),
+      GoRoute(
+        path: RouteConfig.infoUrl,
+        builder: (context, state) {
+          final isLoggedIn = context.read<AuthController>().isLoggedIn;
+          return ChangeNotifierProvider(
+            create: (_) => InfoController()..load(isLoggedIn),
+            child: const InfoPage(),
+          );
+        },
+      ),
 
       // ─────────────────────────────────────────────
       // Testing Section
@@ -349,7 +366,7 @@ class MainApplication extends StatelessWidget {
     return MaterialApp.router(
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
-      theme: ThemeDesign.mapLightTheme(AppDesign.lightRose),
+      theme: ThemeDesign.mapLightTheme(design),
       darkTheme: ThemeDesign.mapDarkTheme(design),
       themeMode: ThemeDesign.getThemeModeByAppDesign(design),
       routerConfig: router,

@@ -1171,6 +1171,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No photo permission granted.'**
   String get noPhotoPermission;
+
+  /// No description provided for @support.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get support;
+
+  /// No description provided for @info.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get info;
+
+  /// No description provided for @aboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About {apptitle}'**
+  String aboutApp(Object apptitle);
+
+  /// No description provided for @aboutAppText.
+  ///
+  /// In en, this message translates to:
+  /// **'{apptitle} brings people together through shared activities and exciting places.\nCreate meetups, discover events, and connect with new people nearby.'**
+  String aboutAppText(Object apptitle);
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
+
+  /// No description provided for @serverVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Server Version'**
+  String get serverVersion;
+
+  /// No description provided for @server.
+  ///
+  /// In en, this message translates to:
+  /// **'Server'**
+  String get server;
+
+  /// No description provided for @database.
+  ///
+  /// In en, this message translates to:
+  /// **'Database'**
+  String get database;
+
+  /// No description provided for @online.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get online;
+
+  /// No description provided for @offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offline;
+
+  /// No description provided for @homepage.
+  ///
+  /// In en, this message translates to:
+  /// **'HomePage'**
+  String get homepage;
+
+  /// No description provided for @howToSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'How can we help you?'**
+  String get howToSupport;
+
+  /// No description provided for @sendEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Write us an email or send a direct message to support.'**
+  String get sendEmail;
+
+  /// No description provided for @writeEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Write an Email'**
+  String get writeEmail;
+
+  /// No description provided for @openMailProgramm.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens your email application with a pre-filled subject.'**
+  String get openMailProgramm;
+
+  /// No description provided for @contactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Support'**
+  String get contactSupport;
+
+  /// No description provided for @messageSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Message sent successfully.'**
+  String get messageSent;
+
+  /// No description provided for @messageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Message could not be sent.'**
+  String get messageFailed;
 }
 
 class _AppLocalizationsDelegate

@@ -27,8 +27,6 @@ class MapPage extends StatelessWidget {
     final mapViewController = context.watch<MapViewController>();
     mapViewController.setOnlyOneLocation(locationToCheck);
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
 
     mapViewController.dayOptions = [
       l10n.today,

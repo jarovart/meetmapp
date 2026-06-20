@@ -76,6 +76,8 @@ class HomePage extends StatelessWidget {
       //"Test-ShowModal",
       //"Test-SliderGPS",
       context.l10n.settings,
+      context.l10n.support,
+      context.l10n.info,
       if (loggedIn) context.l10n.logout,
     ];
 
@@ -146,6 +148,14 @@ class HomePage extends StatelessWidget {
                         } else if (label == context.l10n.settings) {
                           homeController.toggleMenu();
                           context.push(RouteConfig.settingsUrl);
+                          return;
+                        } else if (label == context.l10n.support) {
+                          homeController.toggleMenu();
+                          context.push(RouteConfig.supportUrl);
+                          return;
+                        } else if (label == context.l10n.info) {
+                          homeController.toggleMenu();
+                          context.push(RouteConfig.infoUrl);
                           return;
                         } else if (label == context.l10n.logout) {
                           homeController.toggleMenu();

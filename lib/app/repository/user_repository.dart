@@ -148,7 +148,7 @@ class UserRepository {
     required int pageSize,
   }) async {
     return ApiExceptionWrapper.guard(() async {
-      final headers = await AuthRepository.authHeadersWithException();
+      final headers = await AuthRepository.authHeaders();
       final uri = Uri.parse(
         '${ApiConfig.baseUrl}/api/users/$userId/locations/created?page=$page&size=$pageSize',
       );
@@ -169,7 +169,7 @@ class UserRepository {
     required int pageSize,
   }) async {
     return ApiExceptionWrapper.guard(() async {
-      final headers = await AuthRepository.authHeadersWithException();
+      final headers = await AuthRepository.authHeaders();
 
       final uri = Uri.parse(
         '${ApiConfig.baseUrl}/api/users/$userId/locations/joined?page=$page&size=$pageSize',

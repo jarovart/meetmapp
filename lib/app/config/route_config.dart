@@ -15,6 +15,8 @@ class RouteConfig {
   static const String forgotPasswordUrl = "/forgotpassword";
   static const String resetPasswordUrl = "/resetpassword";
   static const String settingsUrl = "/settings";
+  static const String supportUrl = "/support";
+  static const String infoUrl = "/info";
 
   // ─────────────────────────────────────────────
   // Testing Section

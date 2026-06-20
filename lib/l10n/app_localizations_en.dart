@@ -581,4 +581,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noPhotoPermission => 'No photo permission granted.';
+
+  @override
+  String get support => 'Support';
+
+  @override
+  String get info => 'Info';
+
+  @override
+  String aboutApp(Object apptitle) {
+    return 'About $apptitle';
+  }
+
+  @override
+  String aboutAppText(Object apptitle) {
+    return '$apptitle brings people together through shared activities and exciting places.\nCreate meetups, discover events, and connect with new people nearby.';
+  }
+
+  @override
+  String get version => 'Version';
+
+  @override
+  String get serverVersion => 'Server Version';
+
+  @override
+  String get server => 'Server';
+
+  @override
+  String get database => 'Database';
+
+  @override
+  String get online => 'Online';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get homepage => 'HomePage';
+
+  @override
+  String get howToSupport => 'How can we help you?';
+
+  @override
+  String get sendEmail =>
+      'Write us an email or send a direct message to support.';
+
+  @override
+  String get writeEmail => 'Write an Email';
+
+  @override
+  String get openMailProgramm =>
+      'Opens your email application with a pre-filled subject.';
+
+  @override
+  String get contactSupport => 'Contact Support';
+
+  @override
+  String get messageSent => 'Message sent successfully.';
+
+  @override
+  String get messageFailed => 'Message could not be sent.';
 }
