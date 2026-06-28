@@ -4,11 +4,13 @@ on:
   push:
     branches: [ staging ]
   workflow_dispatch:
-
+  
+env:
+  APP_PATH: ${{ vars.APP_PATH }}
+  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: FreemomentEnvironments
 
     steps:
       - name: Checkout code
@@ -33,7 +35,7 @@ jobs:
           username: ${{ secrets.STRATO_USER }}
           key: ${{ secrets.STRATO_SSH_KEY }}
           source: build/web/*
-          target: ${{ vars.APP_PATH }}/web
+          target: ${{ env.APP_PATH }}/web
           strip_components: 2
           rm: true
 
