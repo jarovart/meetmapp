@@ -91,6 +91,12 @@ jobs:
       - name: Flutter build iOS without codesign
         run: |
           flutter build ios --release --no-codesign
+
+      - name: Show Flutter build version
+        run: |
+          grep "FLUTTER_BUILD_NAME\|FLUTTER_BUILD_NUMBER" ios/Flutter/Generated.xcconfig
+          /usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" build/ios/iphoneos/Runner.app/Info.plist
+          /usr/libexec/PlistBuddy -c "Print CFBundleVersion" build/ios/iphoneos/Runner.app/Info.plist
       
       - name: Archive iOS app
         run: |
