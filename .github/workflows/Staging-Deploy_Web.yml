@@ -1,10 +1,13 @@
-name: Deploy Flutter Web to Strato
+name: Deploy Flutter Web to Strato (Staging)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ staging ]
   workflow_dispatch:
-
+  
+env:
+  APP_PATH: ${{ vars.APP_PATH }}
+  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -32,7 +35,7 @@ jobs:
           username: ${{ secrets.STRATO_USER }}
           key: ${{ secrets.STRATO_SSH_KEY }}
           source: build/web/*
-          target: /opt/casttime4me/web
+          target: ${{ env.APP_PATH }}/web
           strip_components: 2
           rm: true
 

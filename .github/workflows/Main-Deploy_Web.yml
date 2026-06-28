@@ -1,8 +1,8 @@
-name: Deploy Flutter Web to Strato
+name: Deploy Flutter Web to Strato (Main)
 
 on:
   push:
-    branches: [ staging ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.STRATO_USER }}
           key: ${{ secrets.STRATO_SSH_KEY }}
           source: build/web/*
-          target: /opt/freemoment/web
+          target: /opt/casttime4me/web
           strip_components: 2
           rm: true
 
