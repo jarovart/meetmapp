@@ -11,6 +11,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Show pubspec version
+        run: grep "^version:" pubspec.yaml
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
