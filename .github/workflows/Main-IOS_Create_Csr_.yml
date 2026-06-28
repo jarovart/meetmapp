@@ -1,4 +1,4 @@
-name: iOS Create CSR (Main)
+name: iOS Create CSR
 
 on:
   workflow_dispatch:
