@@ -1,4 +1,4 @@
-name: Deploy Flutter Web to Strato
+name: Deploy Flutter Web to Strato (Staging)
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: FreemomentEnvironments
 
     steps:
       - name: Checkout code
@@ -32,7 +33,7 @@ jobs:
           username: ${{ secrets.STRATO_USER }}
           key: ${{ secrets.STRATO_SSH_KEY }}
           source: build/web/*
-          target: /opt/freemoment/web
+          target: ${{ vars.APP_PATH }}/web
           strip_components: 2
           rm: true
 
