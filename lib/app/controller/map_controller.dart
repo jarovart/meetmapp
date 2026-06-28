@@ -298,6 +298,16 @@ class MapViewController extends ChangeNotifier {
     });
   }
 
+  void closeSearch() {
+    _searchDebounce?.cancel();
+    _searchController.clear();
+    _searchResults.clear();
+    _searchError = null;
+    _isSearchLoading = false;
+    _searchFocusNode.unfocus();
+    notifyListeners();
+  }
+
   // ─────────────────────────────────────────────
   // API CALL BEHAVIOR
   // ─────────────────────────────────────────────

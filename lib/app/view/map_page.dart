@@ -61,6 +61,7 @@ class MapPage extends StatelessWidget {
                   initialZoom: 6.0,
                   onMapEvent: (event) {
                     if (event is MapEventTap) {
+                      mapViewController.closeSearch();
                       mapViewController.selectLocation(null);
                     } else if (event is MapEventLongPress) {
                       mapViewController.selectLocation(null);
@@ -333,7 +334,7 @@ class MapPage extends StatelessWidget {
       right: sidePadding,
       top: topOffset,
       child: SafeArea(
-        top: false,
+        bottom: false,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           decoration: BoxDecoration(
@@ -382,10 +383,7 @@ class MapPage extends StatelessWidget {
                             Icons.close,
                             color: colors.onSurfaceVariant,
                           ),
-                          onPressed: () {
-                            searchController.clear();
-                            mapViewController.clearSearchState();
-                          },
+                          onPressed: mapViewController.closeSearch,
                         )
                       : null,
                   contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -424,8 +422,8 @@ class MapPage extends StatelessWidget {
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
-              mapViewController.clearSearchResults();
-              mapViewController.searchController.clear();
+              FocusManager.instance.primaryFocus?.unfocus();
+              mapViewController.closeSearch();
             },
             child: Container(color: Colors.black.withValues(alpha: 0.25)),
           ),
@@ -545,6 +543,7 @@ class MapPage extends StatelessWidget {
 
     final sliderWidget = SafeArea(
       top: true,
+      bottom: false,
       child: SizedBox(
         height: fabDiameter,
         child: Material(

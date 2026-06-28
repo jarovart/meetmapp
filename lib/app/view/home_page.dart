@@ -25,6 +25,7 @@ class HomePage extends StatelessWidget {
     authController.refreshLogin("(homepage start)");
     return Scaffold(
       appBar: _buildAppBar(context),
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           MapPage(),
