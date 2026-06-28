@@ -1,4 +1,4 @@
-name: Deploy Flutter Web to Strato
+name: Deploy Flutter Web to Strato (Main)
 
 on:
   push:
