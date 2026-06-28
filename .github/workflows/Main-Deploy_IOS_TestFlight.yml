@@ -18,6 +18,7 @@ jobs:
 
       - name: Prepare iOS project
         run: |
+          flutter clean
           flutter pub get
           cd ios
           pod install
