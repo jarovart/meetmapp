@@ -1,4 +1,4 @@
-name: Deploy Android to Google Play (Main)
+name: Deploy Android to Google Play
 
 on:
   #push:
@@ -10,13 +10,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+
+      - name: Flutter version
+        run: flutter --version
 
       - name: Install dependencies
         run: flutter pub get
@@ -37,7 +46,7 @@ jobs:
       - name: Build Android App Bundle
         run: flutter build appbundle --release
 
-      - name: Upload to Google Play internal testing
+      - name: Upload to Google Play Internal Testing
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
