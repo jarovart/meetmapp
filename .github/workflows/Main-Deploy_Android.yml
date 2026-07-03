@@ -1,4 +1,4 @@
-name: Deploy Android to Google Play
+name: Deploy Android to Google Play (Main)
 
 on:
   #push:
