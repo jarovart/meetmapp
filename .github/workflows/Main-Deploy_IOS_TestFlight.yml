@@ -93,7 +93,7 @@ jobs:
 
       - name: Flutter build iOS without codesign
         run: |
-          flutter build ios --release --no-codesign
+          flutter build ios --release --no-codesign --dart-define=API_URL=https://casttime4.me
 
       - name: Show Flutter build version
         run: |
