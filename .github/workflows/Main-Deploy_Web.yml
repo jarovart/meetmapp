@@ -22,8 +22,7 @@ jobs:
         run: flutter pub get
 
       - name: Build web
-        run: flutter build web --release \
-          --dart-define=API_URL=https://casttime4.me
+        run: flutter build web --release --dart-define=API_URL=https://casttime4.me
 
       - name: Upload web build
         uses: appleboy/scp-action@v0.1.7
