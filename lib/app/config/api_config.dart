@@ -1,9 +1,12 @@
 import 'package:casttime/app/config/dev_config.dart';
 
 class ApiConfig {
-  static const String prodUrl = 'https://freemoment.de';
+  static String _prodUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'https://casttime4.me',
+  );
 
   static String get baseUrl {
-    return DevConfig.devUrl ?? prodUrl;
+    return DevConfig.devUrl ?? _prodUrl;
   }
 }
