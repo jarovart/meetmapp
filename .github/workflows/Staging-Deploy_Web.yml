@@ -25,7 +25,8 @@ jobs:
         run: flutter pub get
 
       - name: Build web
-        run: flutter build web --release
+        run: flutter build web --release \
+          --dart-define=API_URL=https://freemoment.de
 
       - name: Upload web build
         uses: appleboy/scp-action@v0.1.7
