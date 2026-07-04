@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.STRATO_USER }}
           key: ${{ secrets.STRATO_SSH_KEY }}
           source: build/web/*
-          target: /opt/casttime4me/web
+          target: /opt/casttime/web
           strip_components: 2
           rm: true
 
