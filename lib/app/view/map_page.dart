@@ -163,7 +163,7 @@ class MapPage extends StatelessWidget {
 
     return Stack(
       children: [
-        _buildDateSliderAndGps(context, mapViewController),
+        //_buildDateSliderAndGps(context, mapViewController),
         _buildSearchResults(context, mapViewController),
         _buildSearchBar(context, mapViewController),
       ],
