@@ -60,6 +60,10 @@ void main() async {
   runApp(
     MaterialApp(
       home: const MapPage(),
+      title: AppConfig.appName,
+      debugShowCheckedModeBanner: false,
+      //routerConfig: router,
+      scrollBehavior: const AppScrollBehavior(),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: null, // null system language
