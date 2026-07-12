@@ -202,5 +202,6 @@
   "openMailProgramm": "Opens your email application with a pre-filled subject.",
   "contactSupport": "Contact Support",
   "messageSent": "Message sent successfully.",
-  "messageFailed": "Message could not be sent."
+  "messageFailed": "Message could not be sent.",
+  "errorForbidden": "This action is not allowed."
   }

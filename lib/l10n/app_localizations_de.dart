@@ -478,7 +478,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noDescriptionAvailable => 'Keine Beschreibung vorhanden.';
 
   @override
-  String get enterNameSearch => 'Please enter a name in the search bar.';
+  String get enterNameSearch => 'Bitte einen Namen in der Suche eingeben.';
 
   @override
   String get reload => 'Neu laden';
@@ -534,12 +534,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noGpsAndNoFilterLocation => 'Keine GPS-Positionen verfügbar.';
 
   @override
-  String get errorCallLocations =>
-      'Fehler beim Abrufen der weiteren Locations.';
+  String get errorCallLocations => 'Fehler beim Abrufen der Locations.';
 
   @override
   String get errorCallMoreLocations =>
-      'Error occurs while retrieving more locations.';
+      'Fehler beim Abrufen der weiteren Locations.';
 
   @override
   String get errorLogin => 'Fehler beim Einloggen.';
@@ -650,4 +649,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get messageFailed => 'Nachricht konnte nicht gesendet werden.';
+
+  @override
+  String get errorForbidden => 'Diese Aktion ist nicht erlaubt.';
 }

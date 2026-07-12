@@ -1279,6 +1279,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Message could not be sent.'**
   String get messageFailed;
+
+  /// No description provided for @errorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is not allowed.'**
+  String get errorForbidden;
 }
 
 class _AppLocalizationsDelegate

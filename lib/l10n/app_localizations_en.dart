@@ -641,4 +641,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get messageFailed => 'Message could not be sent.';
+
+  @override
+  String get errorForbidden => 'This action is not allowed.';
 }

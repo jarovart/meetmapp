@@ -1,3 +1,5 @@
+import 'package:casttime/program/app/dependency_injection.dart';
+import 'package:casttime/program/presentation/pages/map_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -33,7 +35,6 @@ import 'package:casttime/app/view/authentication/resetpasswordpage.dart';
 import 'package:casttime/app/view/authentication/verifyemailpage.dart';
 import 'package:casttime/app/view/location/edit_mylocation_page.dart';
 import 'package:casttime/app/view/location/locationdetail_page.dart';
-import 'package:casttime/app/view/map_page.dart';
 import 'package:casttime/app/view/model/appliedsettings_model.dart';
 import 'package:casttime/app/view/setting/info_page.dart';
 import 'package:casttime/app/view/setting/setting_page.dart';
@@ -54,7 +55,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   usePathUrlStrategy();
+  setupDependencies();
 
+  runApp(
+    MaterialApp(
+      home: const MapPage(),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: null, // null system language
+    ),
+  );
+}
+
+void mains2() async {
   final authController = AuthController("main!");
   await authController.loadLoginLocal();
   final settingsController = SettingsController();
@@ -126,7 +139,7 @@ class MainApplication extends StatelessWidget {
               c.selectLocation(loc);
               return c;
             },
-            child: MapPage(locationToCheck: loc),
+            child: MapPage(), //locationToCheck: loc),
           );
         },
       ),

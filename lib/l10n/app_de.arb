@@ -144,7 +144,7 @@
   "joinedLocations": "Beigetreten Locations",
   "likedLocations": "Gefällt mir-Locations",
   "noDescriptionAvailable": "Keine Beschreibung vorhanden.",
-  "addNameSearch": "Bitte einen Namen in der Suche eingeben.",
+  "enterNameSearch": "Bitte einen Namen in der Suche eingeben.",
   "reload": "Neu laden",
   "noEntriesAvailable": "Keine Einträge vorhanden",
   "invalidLocationId": "Ungültige Location id",
@@ -162,7 +162,7 @@
   "deniedLocationPermission": "Standort-Berechtigung verweigert",
   "noGpsAndNoFilterLocation": "Keine GPS-Positionen verfügbar.",
   "errorCallLocations": "Fehler beim Abrufen der Locations.",
-  "errorCallLocations": "Fehler beim Abrufen der weiteren Locations.",
+  "errorCallMoreLocations": "Fehler beim Abrufen der weiteren Locations.",
   "errorLogin": "Fehler beim Einloggen.",
   "errorLogout": "Fehler beim Ausloggen.",
   "errorSearch": "Suche fehlgeschlagen.",
@@ -197,5 +197,6 @@
   "openMailProgramm": "Öffnet dein Mailprogramm mit vorausgefülltem Betreff.",
   "contactSupport": "Support kontaktieren",
   "messageSent": "Nachricvht wurde gesendet",
-  "messageFailed": "Nachricht konnte nicht gesendet werden."
+  "messageFailed": "Nachricht konnte nicht gesendet werden.",
+  "errorForbidden": "Diese Aktion ist nicht erlaubt."
 }
