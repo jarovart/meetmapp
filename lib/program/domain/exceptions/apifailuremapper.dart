@@ -2,10 +2,13 @@ import 'package:casttime/program/core/apierror_dto.dart';
 import 'package:casttime/program/core/failure/appfailure.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 
 @lazySingleton
 class ApiFailureMapper {
-  const ApiFailureMapper();
+  const ApiFailureMapper(this._logger);
+
+  final Logger _logger;
 
   AppFailure map(Object error, StackTrace stackTrace) {
     if (error is! DioException) {
@@ -41,6 +44,11 @@ class ApiFailureMapper {
   AppFailure _mapResponseFailure(DioException exception, String? requestId) {
     final statusCode = exception.response?.statusCode;
     final errorDto = _parseErrorDto(exception.response?.data);
+    _logger.e(
+      "API Fehler",
+      error: errorDto,
+      //stackTrace: errorDto?.message ?? '',
+    );
 
     return switch (statusCode) {
       400 => ValidationFailure(

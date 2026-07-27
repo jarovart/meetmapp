@@ -9,6 +9,7 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:casttime/program/app/di/appbanner_cubit.dart' as _i973;
 import 'package:casttime/program/app/di/logger_module.dart' as _i868;
 import 'package:casttime/program/app/di/network_module.dart' as _i222;
 import 'package:casttime/program/app/di/storage_module.dart' as _i682;
@@ -48,6 +49,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => storageModule.sharedPreferences,
       preResolve: true,
     );
+    gh.lazySingleton<_i973.AppBannerCubit>(() => _i973.AppBannerCubit());
     gh.lazySingleton<_i974.Logger>(() => loggerModule.logger());
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => storageModule.provideFlutterSecureStorage(),
@@ -55,14 +57,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i751.LoggingInterceptor>(
       () => _i751.LoggingInterceptor(),
     );
-    gh.lazySingleton<_i201.ApiFailureMapper>(
-      () => const _i201.ApiFailureMapper(),
-    );
     gh.lazySingleton<_i503.TokenStorage>(
       () => _i699.SecureTokenStorage(gh<_i558.FlutterSecureStorage>()),
     );
     gh.lazySingleton<_i959.AuthInterceptor>(
       () => _i959.AuthInterceptor(gh<_i503.TokenStorage>()),
+    );
+    gh.lazySingleton<_i201.ApiFailureMapper>(
+      () => _i201.ApiFailureMapper(gh<_i974.Logger>()),
     );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.dio(

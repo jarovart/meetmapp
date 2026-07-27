@@ -1,6 +1,10 @@
 import 'package:casttime/program/app/dependency_injection.dart';
+import 'package:casttime/program/app/di/appbanner_cubit.dart';
+import 'package:casttime/program/app/router/app_router.dart';
+import 'package:casttime/program/presentation/bloc/mapbloc.dart';
 import 'package:casttime/program/presentation/pages/map_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
@@ -55,9 +59,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   usePathUrlStrategy();
-  setupDependencies();
+  await setupDependencies();
 
-  runApp(
+  runApp(CasttimeApp());
+  /*runApp(
     MaterialApp(
       home: const MapPage(),
       title: AppConfig.appName,
@@ -68,7 +73,46 @@ void main() async {
       supportedLocales: AppLocalizations.supportedLocales,
       locale: null, // null system language
     ),
-  );
+  );*/
+}
+
+class CasttimeApp extends StatelessWidget {
+  const CasttimeApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final design = AppDesign.system;
+    return MultiBlocProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LocationListController()),
+        ChangeNotifierProvider(create: (_) => AuthController("initmain")),
+        ChangeNotifierProvider(
+          create: (_) => MapViewController(mapController: MapController()),
+        ),
+        /*BlocProvider<AuthBloc>.value(
+          value: getIt<AuthBloc>()
+            ..add(const AuthStatusRequested()),
+        ),*/
+        BlocProvider<AppBannerCubit>.value(value: getIt<AppBannerCubit>()),
+        BlocProvider<MapBloc>.value(value: getIt<MapBloc>()),
+      ],
+      child: MaterialApp.router(
+        //home: const MapPage(),
+        title: AppConfig.appName,
+        debugShowCheckedModeBanner: false,
+        routerConfig: appRouter,
+        //routerConfig: router,
+        scrollBehavior: const AppScrollBehavior(),
+
+        theme: ThemeDesign.mapLightTheme(design),
+        darkTheme: ThemeDesign.mapDarkTheme(design),
+        themeMode: ThemeDesign.getThemeModeByAppDesign(design),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: null, // null system language
+      ),
+    );
+  }
 }
 
 void mains2() async {

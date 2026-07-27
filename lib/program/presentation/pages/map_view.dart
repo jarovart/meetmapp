@@ -79,29 +79,6 @@ class MapView extends StatelessWidget {
                 ],
               ),
 
-              Positioned(
-                top: MediaQuery.of(context).padding.top + 12,
-                left: 16,
-                right: 16,
-                child: SearchBar(
-                  hintText: 'Suche',
-                  onChanged: (value) {
-                    context.read<MapBloc>().add(MapSearchChanged(value));
-                  },
-                ),
-              ),
-
-              Positioned(
-                right: 16,
-                bottom: 120,
-                child: FloatingActionButton.small(
-                  onPressed: () {
-                    context.read<MapBloc>().add(MapCenterOnUserRequested());
-                  },
-                  child: const Icon(Icons.my_location),
-                ),
-              ),
-
               if (state.isLoading)
                 const Positioned(
                   top: 120,
