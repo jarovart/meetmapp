@@ -1,0 +1,102 @@
+import 'package:casttime/app/presentation/banner/appbanner_cubit.dart';
+import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
+import 'package:casttime/features/map/presentation/bloc/map_event.dart';
+import 'package:casttime/features/map/presentation/bloc/map_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+
+class MapView extends StatelessWidget {
+  const MapView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final mapController = MapController();
+
+    return Scaffold(
+      body: BlocConsumer<MapBloc, MapState>(
+        listenWhen: (previous, current) {
+          return previous.failure != current.failure && current.failure != null;
+        },
+        listener: (context, state) {
+          final failure = state.failure!;
+          context.read<AppBannerCubit>().showFailure(failure);
+          context.read<MapBloc>().add(MapStarted());
+        },
+        builder: (context, state) {
+          return Stack(
+            children: [
+              FlutterMap(
+                mapController: mapController,
+                options: MapOptions(
+                  initialCenter: state.center,
+                  initialZoom: state.zoom,
+                  onMapReady: () {
+                    context.read<MapBloc>().add(MapStarted());
+                  },
+                  onMapEvent: (event) {
+                    if (event is MapEventMoveEnd ||
+                        event is MapEventDoubleTapZoomEnd) {
+                      final bounds = mapController.camera.visibleBounds;
+                      debugPrint("Bounds changed: $bounds");
+                      context.read<MapBloc>().add(
+                        MapBoundsChanged(bounds: bounds),
+                      );
+                    }
+                  },
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    tileProvider: CancellableNetworkTileProvider(),
+                    userAgentPackageName: 'de.jarovart.casttime',
+                  ),
+                  MarkerLayer(
+                    markers: state.locations.map((location) {
+                      return Marker(
+                        point: location.position,
+                        width: 48,
+                        height: 48,
+                        child: GestureDetector(
+                          onTap: () {
+                            context.read<MapBloc>().add(
+                              MapLocationSelected(location),
+                            );
+                          },
+                          child: const Icon(Icons.location_on, size: 40),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+
+              if (state.status == LocationLoadStatus.loading)
+                const Positioned(
+                  top: 120,
+                  left: 0,
+                  right: 0,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+
+              if (state.selectedLocation != null)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Text("selected") /*LocationBottomSheet(
+                    location: state.selectedLocation!,
+                    onClose: () {
+                      context.read<MapBloc>().add(MapLocationDeselected());
+                    },
+                  ),*/,
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}

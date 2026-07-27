@@ -1,59 +1,17 @@
-import 'package:casttime/program/app/dependency_injection.dart';
-import 'package:casttime/program/app/di/appbanner_cubit.dart';
-import 'package:casttime/program/app/router/app_router.dart';
-import 'package:casttime/program/presentation/bloc/mapbloc.dart';
-import 'package:casttime/program/presentation/pages/map_page.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:go_router/go_router.dart';
 import 'package:casttime/app/config/app_config.dart';
 import 'package:casttime/app/config/appscrollbehavior.dart';
-import 'package:casttime/app/config/dev_config.dart';
-import 'package:casttime/app/config/route_config.dart';
-import 'package:casttime/app/controller/auth_controller.dart';
-import 'package:casttime/app/controller/edit_mylocation_controller.dart';
-import 'package:casttime/app/controller/editmyprofile_controller.dart';
-import 'package:casttime/app/controller/home_controller.dart';
-import 'package:casttime/app/controller/info_controller.dart';
-import 'package:casttime/app/controller/locationcreate_controller.dart';
-import 'package:casttime/app/controller/locationdetails_controller.dart';
-import 'package:casttime/app/controller/locationlist_controller.dart';
-import 'package:casttime/app/controller/login_controller.dart';
-import 'package:casttime/app/controller/map_controller.dart';
-import 'package:casttime/app/controller/profile_controller.dart';
-import 'package:casttime/app/controller/setting_controller.dart';
-import 'package:casttime/app/controller/userlist_controller.dart';
-import 'package:casttime/app/model/enums/appdesign.dart';
-import 'package:casttime/app/model/response/locationbase_response.dart';
-import 'package:casttime/app/model/response/locationfull_response.dart';
-import 'package:casttime/app/model/response/userbase_response.dart';
-import 'package:casttime/app/view/design/themedesign.dart';
-import 'package:casttime/app/view/home_page.dart';
-import 'package:casttime/app/view/authentication/forgotpasswordpage.dart';
-import 'package:casttime/app/view/authentication/loginpage.dart';
-import 'package:casttime/app/view/authentication/registercheckemailpage.dart';
-import 'package:casttime/app/view/authentication/registerpage.dart';
-import 'package:casttime/app/view/authentication/resetpasswordpage.dart';
-import 'package:casttime/app/view/authentication/verifyemailpage.dart';
-import 'package:casttime/app/view/location/edit_mylocation_page.dart';
-import 'package:casttime/app/view/location/locationdetail_page.dart';
-import 'package:casttime/app/view/model/appliedsettings_model.dart';
-import 'package:casttime/app/view/setting/info_page.dart';
-import 'package:casttime/app/view/setting/setting_page.dart';
-import 'package:casttime/app/view/setting/support_page.dart';
-import 'package:casttime/app/view/user/edit_myprofile_page.dart';
-import 'package:casttime/app/view/user/userlist_page.dart';
-import 'package:casttime/extensions/l10n_extension.dart';
+import 'package:casttime/app/di/injection.dart';
+import 'package:casttime/app/navigation/app_router.dart';
+import 'package:casttime/app/presentation/banner/appbanner_cubit.dart';
+import 'package:casttime/app/theme/appdesign.dart';
+import 'package:casttime/app/theme/themedesign.dart';
+import 'package:casttime/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:casttime/features/auth/presentation/bloc/auth_event.dart';
+import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
 import 'package:casttime/l10n/app_localizations.dart';
-import 'package:casttime/testexample/testshowmodal.dart';
-import 'package:casttime/testexample/testslidergps.dart';
-import 'package:casttime/app/view/location/locationlist_page.dart';
-import 'package:casttime/app/view/location/locationcreate_page.dart';
-import 'package:casttime/app/view/user/profile_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -84,15 +42,14 @@ class CasttimeApp extends StatelessWidget {
     final design = AppDesign.system;
     return MultiBlocProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => LocationListController()),
-        ChangeNotifierProvider(create: (_) => AuthController("initmain")),
-        ChangeNotifierProvider(
+        //ChangeNotifierProvider(create: (_) => LocationListController()),
+        //ChangeNotifierProvider(create: (_) => AuthController("initmain")),
+        /*ChangeNotifierProvider(
           create: (_) => MapViewController(mapController: MapController()),
-        ),
-        /*BlocProvider<AuthBloc>.value(
-          value: getIt<AuthBloc>()
-            ..add(const AuthStatusRequested()),
         ),*/
+        BlocProvider<AuthBloc>.value(
+          value: getIt<AuthBloc>()..add(AuthStatusRequested()),
+        ),
         BlocProvider<AppBannerCubit>.value(value: getIt<AppBannerCubit>()),
         BlocProvider<MapBloc>.value(value: getIt<MapBloc>()),
       ],
@@ -101,7 +58,6 @@ class CasttimeApp extends StatelessWidget {
         title: AppConfig.appName,
         debugShowCheckedModeBanner: false,
         routerConfig: appRouter,
-        //routerConfig: router,
         scrollBehavior: const AppScrollBehavior(),
 
         theme: ThemeDesign.mapLightTheme(design),
@@ -115,6 +71,7 @@ class CasttimeApp extends StatelessWidget {
   }
 }
 
+/*
 void mains2() async {
   final authController = AuthController("main!");
   await authController.loadLoginLocal();
@@ -438,5 +395,4 @@ class MainApplication extends StatelessWidget {
 
       locale: setting?.locale, // null = Systemsprache verwenden
     );
-  }
-}
+  }*/
