@@ -32,20 +32,6 @@ class MapSliderChanged extends MapEvent {
   });
 }
 
-class MapSliderRangeSelected extends MapEvent {
-  final LatLngBounds bounds;
-  final RangeValues rangeValues;
-  final DateTime startDate;
-  final DateTime endDate;
-
-  MapSliderRangeSelected({
-    required this.bounds,
-    required this.rangeValues,
-    required this.startDate,
-    required this.endDate,
-  });
-}
-
 class MapSearchQueryDebounced extends MapEvent {
   final String query;
 

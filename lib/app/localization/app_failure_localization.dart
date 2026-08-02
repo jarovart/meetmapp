@@ -13,6 +13,7 @@ extension AppFailureLocalization on AppFailure {
       ValidationFailure() => l10n.invalidInput,
       ConflictFailure(:final code) => _localizeConflict(code, l10n),
       InvalidSearchQueryFailure() => l10n.errorSearch,
+      InvalidDateRangeFailure() => l10n.infoEnddateBeforeStartdate,
       UnexpectedFailure() => l10n.unknownError,
     };
   }

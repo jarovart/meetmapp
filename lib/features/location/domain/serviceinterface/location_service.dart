@@ -10,4 +10,9 @@ abstract interface class LocationService {
   });
   Future<AppResult<Location>> fetchLocation({required int id});
   Future<AppResult<LatLng>> getCurrentUserPosition();
+  Future<AppResult<List<Location>>> fetchLocationsWithDateRange(
+    LatLngBounds bounds,
+    DateTime startDate,
+    DateTime endDate,
+  );
 }

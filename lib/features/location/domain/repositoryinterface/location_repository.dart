@@ -8,6 +8,12 @@ abstract interface class LocationRepository {
   Future<AppResult<List<Location>>> searchLocations(String query);
 
   Future<AppResult<Location>> createLocation(Location location);
+
+  Future<AppResult<List<Location>>> fetchLocationsWithDateRange(
+    LatLngBounds bounds,
+    DateTime startDate,
+    DateTime endDate,
+  );
 }
 
 class CreateLocationCommand {}

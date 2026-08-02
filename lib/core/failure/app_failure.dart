@@ -56,3 +56,7 @@ final class UnexpectedFailure extends AppFailure {
 final class InvalidSearchQueryFailure extends AppFailure {
   const InvalidSearchQueryFailure();
 }
+
+final class InvalidDateRangeFailure extends AppFailure {
+  const InvalidDateRangeFailure();
+}

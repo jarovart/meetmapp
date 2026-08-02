@@ -14,6 +14,7 @@ class LocationServiceImpl implements LocationService {
 
   LocationServiceImpl(this.repository);
 
+  @override
   Future<AppResult<List<Location>>> searchLocations(String rawQuery) async {
     final query = rawQuery.trim();
 
@@ -24,6 +25,7 @@ class LocationServiceImpl implements LocationService {
     return repository.searchLocations(query);
   }
 
+  @override
   Future<AppResult<List<Location>>> fetchLocationsInView({
     required LatLngBounds bounds,
   }) async {
@@ -31,12 +33,27 @@ class LocationServiceImpl implements LocationService {
     return repository.fetchLocationsInView(bounds);
   }
 
+  @override
   Future<AppResult<Location>> fetchLocation({required int id}) async {
     return Future.value(const Failure(InvalidSearchQueryFailure()));
   }
 
+  @override
   Future<AppResult<LatLng>> getCurrentUserPosition() async {
     // geolocator hier oder eigener LocationService
     throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<List<Location>>> fetchLocationsWithDateRange(
+    LatLngBounds bounds,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    if (startDate.compareTo(endDate) > 0) {
+      return Future.value(const Failure(InvalidDateRangeFailure()));
+    }
+
+    return repository.fetchLocationsWithDateRange(bounds, startDate, endDate);
   }
 }

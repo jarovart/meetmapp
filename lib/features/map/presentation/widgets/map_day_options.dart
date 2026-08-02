@@ -1,4 +1,27 @@
-// map_day_options.dart – reine UI-Helper, kein Bloc-Bezug
+import 'package:casttime/app/localization/l10n_extension.dart';
+import 'package:flutter/material.dart';
+
+List<String> getDayOptionLabels(BuildContext context) {
+  final l10n = context.l10n;
+  return [
+    l10n.today,
+    l10n.tomorrow,
+    l10n.dayAfterTomorrow,
+    l10n.nextWeek,
+    l10n.nextMonth,
+  ];
+}
+
+List<String> dayOptionLabels(BuildContext context) {
+  final l10n = context.l10n;
+  return [
+    l10n.today,
+    l10n.tomorrow,
+    l10n.dayAfterTomorrow,
+    l10n.nextWeek,
+    l10n.nextMonth,
+  ];
+}
 
 DateTime dateFromDayOptionIndex(int index) {
   final now = DateTime.now();

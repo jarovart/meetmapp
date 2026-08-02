@@ -123,6 +123,52 @@ class _LocationApi implements LocationApi {
     return _value;
   }
 
+  @override
+  Future<List<LocationBaseResponseDTO>> fetchLocationsWithDateRange(
+    double minLat,
+    double maxLat,
+    double minLng,
+    double maxLng,
+    String startDate,
+    String endDate,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'minLat': minLat,
+      r'maxLat': maxLat,
+      r'minLng': minLng,
+      r'maxLng': maxLng,
+      r'rangeStart': startDate,
+      r'rangeEnd': endDate,
+    };
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<List<LocationBaseResponseDTO>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/locations/withinWithTime',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<LocationBaseResponseDTO> _value;
+    try {
+      _value = _result.data!
+          .map(
+            (dynamic i) =>
+                LocationBaseResponseDTO.fromJson(i as Map<String, dynamic>),
+          )
+          .toList();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

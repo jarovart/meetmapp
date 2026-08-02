@@ -46,6 +46,30 @@ class LocationRepositoryImpl implements LocationRepository {
     );
   }
 
+  @override
+  Future<AppResult<List<Location>>> fetchLocationsWithDateRange(
+    LatLngBounds bounds,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final minLat = bounds.southWest.latitude;
+    final maxLat = bounds.northEast.latitude;
+    final minLng = bounds.southWest.longitude;
+    final maxLng = bounds.northEast.longitude;
+
+    return _execute(
+      request: () => _api.fetchLocationsWithDateRange(
+        minLat,
+        maxLat,
+        minLng,
+        maxLng,
+        startDate.toIso8601String(),
+        endDate.toIso8601String(),
+      ),
+      map: (dtos) => dtos.map((dto) => dto.toDomain()).toList(),
+    );
+  }
+
   Future<AppResult<Domain>> _execute<Dto, Domain>({
     required Future<Dto> Function() request,
     required Domain Function(Dto dto) map,

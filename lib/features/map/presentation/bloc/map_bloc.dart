@@ -13,13 +13,11 @@ import 'package:latlong2/latlong.dart';
 class MapBloc extends Bloc<MapEvent, MapState> {
   final LocationService locationService;
   Timer? _searchDebounce;
-  Timer? _sliderDebounce;
 
   MapBloc(this.locationService) : super(MapState.initial()) {
     on<MapStarted>(_onStarted);
     on<MapBoundsChanged>(_onBoundsChanged);
     on<MapSliderChanged>(_onSliderChanged);
-    on<MapSliderRangeSelected>(_onSliderRangeSelected);
     on<MapSearchChanged>(_onSearchChanged);
     on<MapSearchQueryDebounced>(_onSearchQueryDebounced);
     on<MapLocationSelected>(_onLocationSelected);
@@ -52,9 +50,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     Emitter<MapState> emit,
   ) async {
     emit(state.copyWith(bounds: event.bounds, clearFailure: true));
-    final result = await locationService.fetchLocationsInView(
-      bounds: event.bounds,
+
+    final result = await locationService.fetchLocationsWithDateRange(
+      event.bounds,
+      state.startDate,
+      state.endDate,
     );
+
     switch (result) {
       case Success<List<Location>>(:final data):
         emit(
@@ -64,7 +66,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             clearFailure: true,
           ),
         );
-
       case Failure<List<Location>>(:final failure):
         emit(
           state.copyWith(status: LocationLoadStatus.failure, failure: failure),
@@ -123,27 +124,11 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         clearFailure: true,
       ),
     );
-    _sliderDebounce?.cancel();
-    _sliderDebounce = Timer(const Duration(milliseconds: 400), () {
-      if (!isClosed) {
-        add(
-          MapSliderRangeSelected(
-            startDate: event.startDate,
-            endDate: event.endDate,
-            rangeValues: event.rangeValues,
-            bounds: event.bounds,
-          ),
-        );
-      }
-    });
-  }
 
-  Future<void> _onSliderRangeSelected(
-    MapSliderRangeSelected event,
-    Emitter<MapState> emit,
-  ) async {
-    final result = await locationService.fetchLocationsInView(
-      bounds: event.bounds,
+    final result = await locationService.fetchLocationsWithDateRange(
+      event.bounds,
+      event.startDate,
+      event.endDate,
     );
     switch (result) {
       case Success<List<Location>>(:final data):

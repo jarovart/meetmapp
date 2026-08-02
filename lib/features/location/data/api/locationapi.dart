@@ -26,4 +26,14 @@ abstract class LocationApi {
   Future<LocationBaseResponseDTO> createLocation(
     @Body() CreateLocationRequestDto request,
   );
+
+  @GET('/api/locations/withinWithTime')
+  Future<List<LocationBaseResponseDTO>> fetchLocationsWithDateRange(
+    @Query("minLat") double minLat,
+    @Query("maxLat") double maxLat,
+    @Query("minLng") double minLng,
+    @Query("maxLng") double maxLng,
+    @Query("rangeStart") String startDate,
+    @Query("rangeEnd") String endDate,
+  );
 }
