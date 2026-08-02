@@ -150,7 +150,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     emit(
       state.copyWith(
         selectedLocation: event.location,
-        center: event.location.position,
+        currentPosition: event.location.position,
         zoom: 15,
       ),
     );
@@ -160,7 +160,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     MapLocationDeselected event,
     Emitter<MapState> emit,
   ) {
-    emit(state.copyWith(clearSelectedLocation: true));
+    emit(
+      state.copyWith(clearSelectedLocation: true),
+    ); //mapViewController.closeSearch();
   }
 
   Future<void> _onCenterOnUserRequested(
@@ -171,7 +173,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
     switch (result) {
       case Success<LatLng>(:final data):
-        emit(state.copyWith(center: data, zoom: 15, clearFailure: true));
+        emit(
+          state.copyWith(currentPosition: data, zoom: 15, clearFailure: true),
+        );
       case Failure<LatLng>(:final failure):
         emit(
           state.copyWith(status: LocationLoadStatus.failure, failure: failure),

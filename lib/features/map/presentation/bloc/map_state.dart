@@ -11,7 +11,7 @@ class MapState {
   final DateTime startDate;
   final DateTime endDate;
   final RangeValues rangeValues;
-  final LatLng center;
+  final LatLng? currentPosition;
   final LatLngBounds bounds;
   final double zoom;
   final LocationLoadStatus status;
@@ -24,7 +24,7 @@ class MapState {
     required this.startDate,
     required this.endDate,
     required this.rangeValues,
-    required this.center,
+    required this.currentPosition,
     required this.bounds,
     required this.zoom,
     this.status = LocationLoadStatus.initial,
@@ -41,7 +41,7 @@ class MapState {
       startDate: now,
       endDate: now.add(Duration(days: 1)),
       rangeValues: RangeValues(0, 4),
-      center: LatLng(51.1657, 10.4515), // Deutschland
+      currentPosition: null, // Deutschland
       bounds: LatLngBounds(LatLng(51.1657, 10.4515), LatLng(51.1657, 10.4515)),
       zoom: 6,
     );
@@ -55,7 +55,7 @@ class MapState {
     DateTime? startDate,
     DateTime? endDate,
     RangeValues? rangeValues,
-    LatLng? center,
+    LatLng? currentPosition,
     LatLngBounds? bounds,
     double? zoom,
     LocationLoadStatus? status,
@@ -71,7 +71,7 @@ class MapState {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       rangeValues: rangeValues ?? this.rangeValues,
-      center: center ?? this.center,
+      currentPosition: currentPosition ?? this.currentPosition,
       bounds: bounds ?? this.bounds,
       zoom: zoom ?? this.zoom,
       status: status ?? this.status,
