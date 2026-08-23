@@ -9,7 +9,6 @@ abstract interface class LocationService {
     required LatLngBounds bounds,
   });
   Future<AppResult<Location>> fetchLocation({required int id});
-  Future<AppResult<LatLng>> getCurrentUserPosition();
   Future<AppResult<List<Location>>> fetchLocationsWithDateRange(
     LatLngBounds bounds,
     DateTime startDate,

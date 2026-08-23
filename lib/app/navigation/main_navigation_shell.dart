@@ -17,7 +17,7 @@ class MainNavigationShell extends StatelessWidget {
     if (index == 0 && isReclicked) {
       // enum adding
       debugPrint("map center function");
-      context.read<MapBloc>().add(MapCenterOnUserRequested());
+      context.read<MapBloc>().add(MapGeoLocationChanged());
       return;
     }
 

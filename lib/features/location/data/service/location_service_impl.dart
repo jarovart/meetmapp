@@ -18,7 +18,7 @@ class LocationServiceImpl implements LocationService {
   Future<AppResult<List<Location>>> searchLocations(String rawQuery) async {
     final query = rawQuery.trim();
 
-    if (query.length < 2) {
+    if (query.length < 3) {
       return Future.value(const Failure(InvalidSearchQueryFailure()));
     }
 
@@ -36,12 +36,6 @@ class LocationServiceImpl implements LocationService {
   @override
   Future<AppResult<Location>> fetchLocation({required int id}) async {
     return Future.value(const Failure(InvalidSearchQueryFailure()));
-  }
-
-  @override
-  Future<AppResult<LatLng>> getCurrentUserPosition() async {
-    // geolocator hier oder eigener LocationService
-    throw UnimplementedError();
   }
 
   @override

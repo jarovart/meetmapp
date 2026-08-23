@@ -4,44 +4,61 @@ import 'package:bloc/bloc.dart';
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/domain/serviceinterface/location_service.dart';
+import 'package:casttime/features/map/domain/service/location_permission_service.dart';
 import 'package:casttime/features/map/presentation/bloc/map_event.dart';
 import 'package:casttime/features/map/presentation/bloc/map_state.dart';
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 import 'package:latlong2/latlong.dart';
 
 @lazySingleton
 class MapBloc extends Bloc<MapEvent, MapState> {
   final LocationService locationService;
+  final LocationPermissionService permissionService;
   Timer? _searchDebounce;
 
-  MapBloc(this.locationService) : super(MapState.initial()) {
-    on<MapStarted>(_onStarted);
+  MapBloc(this.locationService, this.permissionService)
+    : super(MapState.initial()) {
+    on<MapStarted>(_onMapStarted);
     on<MapBoundsChanged>(_onBoundsChanged);
     on<MapSliderChanged>(_onSliderChanged);
     on<MapSearchChanged>(_onSearchChanged);
     on<MapSearchQueryDebounced>(_onSearchQueryDebounced);
     on<MapLocationSelected>(_onLocationSelected);
     on<MapLocationDeselected>(_onLocationDeselected);
-    on<MapCenterOnUserRequested>(_onCenterOnUserRequested);
+    on<MapGeoLocationChanged>(_onGeoLocationChanged);
     on<LocationsRequested>(_onLocationsRequested);
   }
 
-  Future<void> _onStarted(MapStarted event, Emitter<MapState> emit) async {
-    emit(
-      state.copyWith(status: LocationLoadStatus.loading, clearFailure: true),
-    );
+  Future<void> _onMapStarted(MapStarted event, Emitter<MapState> emit) async {
+    final permissionResult = await permissionService.requestPermission();
+    debugPrint('onMapStarted: permission result = $permissionResult');
 
-    try {
-      //final locations = await locationService.fetchInitialLocations(LatLngBounds(, corner2));
-      List<Location> locations = [];
-      emit(
-        state.copyWith(
-          status: LocationLoadStatus.success,
-          locations: locations,
-        ),
-      );
-    } catch (e) {
-      emit(state.copyWith(status: LocationLoadStatus.failure));
+    switch (permissionResult) {
+      case Success<LocationPermission>():
+        add(MapGeoLocationChanged());
+      case Failure<LocationPermission>(:final failure):
+        emit(
+          state.copyWith(status: LocationLoadStatus.failure, failure: failure),
+        ); // abgelehnt, bei Welt-Zoom bleiben
+    }
+  }
+
+  Future<void> _onGeoLocationChanged(
+    MapGeoLocationChanged event,
+    Emitter<MapState> emit,
+  ) async {
+    debugPrint('onGeoLocationChanged: fetching position');
+    final positionResult = await permissionService.getCurrentPosition();
+    debugPrint('onGeoLocationChanged: position result = $positionResult');
+    switch (positionResult) {
+      case Success<LatLng>(:final data):
+        debugPrint('onGeoLocationChanged: emitting currentPosition = $data');
+        emit(state.copyWith(currentPosition: data, zoom: 13));
+      case Failure<LatLng>():
+        debugPrint('onGeoLocationChanged: FAILED to get position');
+        break; // GPS-Fix fehlgeschlagen, bei Welt-Zoom bleiben
     }
   }
 
@@ -163,24 +180,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     emit(
       state.copyWith(clearSelectedLocation: true),
     ); //mapViewController.closeSearch();
-  }
-
-  Future<void> _onCenterOnUserRequested(
-    MapCenterOnUserRequested event,
-    Emitter<MapState> emit,
-  ) async {
-    final result = await locationService.getCurrentUserPosition();
-
-    switch (result) {
-      case Success<LatLng>(:final data):
-        emit(
-          state.copyWith(currentPosition: data, zoom: 15, clearFailure: true),
-        );
-      case Failure<LatLng>(:final failure):
-        emit(
-          state.copyWith(status: LocationLoadStatus.failure, failure: failure),
-        );
-    }
   }
 
   Future<void> _onLocationsRequested(

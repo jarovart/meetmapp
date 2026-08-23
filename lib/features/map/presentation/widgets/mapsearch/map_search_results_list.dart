@@ -272,7 +272,15 @@ class _EmptyState extends StatelessWidget {
           Icon(Icons.search_off, size: 28, color: colors.onSurfaceVariant),
           const SizedBox(height: 8),
           Text(
-            "context.l10n.errorSearch(query)", // TODO: passende l10n-Methode
+            context.l10n.searchNoLocationsTitle,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            context.l10n.searchNoLocationsDescription,
             textAlign: TextAlign.center,
             style: Theme.of(
               context,

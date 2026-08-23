@@ -644,4 +644,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorForbidden => 'This action is not allowed.';
+
+  @override
+  String get searchNoLocationsTitle => 'No locations found';
+
+  @override
+  String get searchNoLocationsDescription => 'Try a different search term.';
 }

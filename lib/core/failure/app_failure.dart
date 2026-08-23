@@ -60,3 +60,19 @@ final class InvalidSearchQueryFailure extends AppFailure {
 final class InvalidDateRangeFailure extends AppFailure {
   const InvalidDateRangeFailure();
 }
+
+final class LocationPermissionDeniedFailure extends AppFailure {
+  const LocationPermissionDeniedFailure({super.requestId, super.cause});
+}
+
+final class LocationPermissionDeniedForeverFailure extends AppFailure {
+  const LocationPermissionDeniedForeverFailure({super.requestId, super.cause});
+}
+
+final class LocationServiceDisabledFailure extends AppFailure {
+  const LocationServiceDisabledFailure({super.requestId, super.cause});
+}
+
+final class LocationTimeoutFailure extends AppFailure {
+  const LocationTimeoutFailure({super.requestId, super.cause});
+}

@@ -14,6 +14,7 @@ import 'package:casttime/app/di/modules/network_module.dart' as _i585;
 import 'package:casttime/app/di/modules/storage_module.dart' as _i587;
 import 'package:casttime/app/presentation/banner/appbanner_cubit.dart' as _i711;
 import 'package:casttime/core/failure/api_failure_mapper.dart' as _i993;
+import 'package:casttime/core/failure/geolocation_failure_mapper.dart' as _i455;
 import 'package:casttime/core/network/auth_interceptor.dart' as _i938;
 import 'package:casttime/core/network/logging_interceptor.dart' as _i994;
 import 'package:casttime/core/storage/secure_token_storage.dart' as _i137;
@@ -37,6 +38,10 @@ import 'package:casttime/features/location/domain/repositoryinterface/location_r
     as _i310;
 import 'package:casttime/features/location/domain/serviceinterface/location_service.dart'
     as _i283;
+import 'package:casttime/features/map/data/service/location_permission_service_impl.dart'
+    as _i977;
+import 'package:casttime/features/map/domain/service/location_permission_service.dart'
+    as _i418;
 import 'package:casttime/features/map/presentation/bloc/map_bloc.dart' as _i197;
 import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
@@ -74,6 +79,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i993.ApiFailureMapper>(
       () => _i993.ApiFailureMapper(gh<_i974.Logger>()),
     );
+    gh.lazySingleton<_i455.LocationFailureMapper>(
+      () => _i455.LocationFailureMapper(gh<_i974.Logger>()),
+    );
     gh.lazySingleton<_i938.AuthInterceptor>(
       () => _i938.AuthInterceptor(gh<_i511.TokenStorage>()),
     );
@@ -85,6 +93,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i976.AuthService>(
       () => _i555.AuthServiceImpl(gh<_i357.AuthRepository>()),
+    );
+    gh.lazySingleton<_i418.LocationPermissionService>(
+      () =>
+          _i977.GeolocatorPermissionService(gh<_i455.LocationFailureMapper>()),
     );
     gh.lazySingleton<_i511.LocationApi>(
       () => networkModule.provideLocationApi(gh<_i361.Dio>()),
@@ -102,7 +114,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i449.LocationServiceImpl(gh<_i310.LocationRepository>()),
     );
     gh.lazySingleton<_i197.MapBloc>(
-      () => _i197.MapBloc(gh<_i283.LocationService>()),
+      () => _i197.MapBloc(
+        gh<_i283.LocationService>(),
+        gh<_i418.LocationPermissionService>(),
+      ),
     );
     return this;
   }

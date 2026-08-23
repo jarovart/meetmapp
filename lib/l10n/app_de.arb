@@ -198,5 +198,7 @@
   "contactSupport": "Support kontaktieren",
   "messageSent": "Nachricvht wurde gesendet",
   "messageFailed": "Nachricht konnte nicht gesendet werden.",
-  "errorForbidden": "Diese Aktion ist nicht erlaubt."
+  "errorForbidden": "Diese Aktion ist nicht erlaubt.",
+  "searchNoLocationsTitle": "Keine Locations gefunden",
+  "searchNoLocationsDescription": "Versuche einen anderen Suchbegriff."
 }

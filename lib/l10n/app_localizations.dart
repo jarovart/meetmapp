@@ -1285,6 +1285,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This action is not allowed.'**
   String get errorForbidden;
+
+  /// No description provided for @searchNoLocationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No locations found'**
+  String get searchNoLocationsTitle;
+
+  /// No description provided for @searchNoLocationsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term.'**
+  String get searchNoLocationsDescription;
 }
 
 class _AppLocalizationsDelegate

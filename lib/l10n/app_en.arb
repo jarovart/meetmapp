@@ -203,5 +203,7 @@
   "contactSupport": "Contact Support",
   "messageSent": "Message sent successfully.",
   "messageFailed": "Message could not be sent.",
-  "errorForbidden": "This action is not allowed."
+  "errorForbidden": "This action is not allowed.",
+  "searchNoLocationsTitle": "No locations found",
+  "searchNoLocationsDescription": "Try a different search term."
   }

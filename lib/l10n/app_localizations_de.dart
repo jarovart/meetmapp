@@ -652,4 +652,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get errorForbidden => 'Diese Aktion ist nicht erlaubt.';
+
+  @override
+  String get searchNoLocationsTitle => 'Keine Locations gefunden';
+
+  @override
+  String get searchNoLocationsDescription =>
+      'Versuche einen anderen Suchbegriff.';
 }

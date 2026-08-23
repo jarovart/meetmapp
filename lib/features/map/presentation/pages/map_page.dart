@@ -58,19 +58,28 @@ class _MapPageState extends State<MapPage> {
 
   Widget buildMap(BuildContext context, double dockWidth) {
     return BlocConsumer<MapBloc, MapState>(
-      listenWhen: (previous, current) {
-        return previous.failure != current.failure && current.failure != null;
-      },
+      listenWhen: (previous, current) =>
+          (previous.failure != current.failure && current.failure != null) ||
+          previous.currentPosition != current.currentPosition,
       listener: (context, state) {
-        final failure = state.failure!;
-        context.read<AppBannerCubit>().showFailure(failure);
-        context.read<MapBloc>().add(MapStarted());
+        /*if (state.failure != null) {
+          context.read<AppBannerCubit>().showFailure(state.failure!);
+          context.read<MapBloc>().add(MapStarted());
+          return;
+        }*/
+
+        if (state.currentPosition != null) {
+          mapController.move(state.currentPosition!, state.zoom);
+        }
       },
       buildWhen: (previous, current) =>
           previous.locations != current.locations ||
-          previous.selectedLocation != current.selectedLocation,
+          previous.selectedLocation != current.selectedLocation ||
+          previous.currentPosition != current.currentPosition,
       builder: (context, state) {
-        debugPrint("map call blocconsumer");
+        debugPrint(
+          "map call blocconsumer with ${state.currentPosition ?? '0.0'}",
+        );
         final mapBloc = context.read<MapBloc>();
 
         return FlutterMap(
@@ -78,9 +87,7 @@ class _MapPageState extends State<MapPage> {
           options: MapOptions(
             initialCenter: state.currentPosition ?? LatLng(51.1657, 10.4515),
             initialZoom: state.zoom,
-            onMapReady: () {
-              mapBloc.add(MapStarted());
-            },
+            onMapReady: () => mapBloc.add(MapStarted()),
             onMapEvent: (event) {
               if (event is MapEventTap) {
                 mapBloc.add(MapLocationDeselected());
@@ -102,8 +109,8 @@ class _MapPageState extends State<MapPage> {
           ),
           children: [
             _buildTileLayer(),
-            if (mapBloc.state.currentPosition != null)
-              _buildMyLocationMarker(context, mapBloc.state.currentPosition!),
+            if (state.currentPosition != null)
+              _buildMyLocationMarker(context, state.currentPosition!),
             _buildLocationsLayer(context),
           ],
         );

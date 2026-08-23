@@ -46,6 +46,6 @@ class MapLocationSelected extends MapEvent {
 
 class MapLocationDeselected extends MapEvent {}
 
-class MapCenterOnUserRequested extends MapEvent {}
+class MapGeoLocationChanged extends MapEvent {}
 
 class LocationsRequested extends MapEvent {}
