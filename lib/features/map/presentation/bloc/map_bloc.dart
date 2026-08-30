@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:casttime/app/presentation/util/load_status.dart';
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/domain/serviceinterface/location_service.dart';
@@ -28,7 +29,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     on<MapLocationSelected>(_onLocationSelected);
     on<MapLocationDeselected>(_onLocationDeselected);
     on<MapGeoLocationChanged>(_onGeoLocationChanged);
-    on<LocationsRequested>(_onLocationsRequested);
   }
 
   Future<void> _onMapStarted(MapStarted event, Emitter<MapState> emit) async {
@@ -40,7 +40,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         add(MapGeoLocationChanged());
       case Failure<LocationPermission>(:final failure):
         emit(
-          state.copyWith(status: LocationLoadStatus.failure, failure: failure),
+          state.copyWith(status: LoadStatus.failure, failure: failure),
         ); // abgelehnt, bei Welt-Zoom bleiben
     }
   }
@@ -78,15 +78,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       case Success<List<Location>>(:final data):
         emit(
           state.copyWith(
-            status: LocationLoadStatus.success,
+            status: LoadStatus.success,
             locations: data,
             clearFailure: true,
           ),
         );
       case Failure<List<Location>>(:final failure):
-        emit(
-          state.copyWith(status: LocationLoadStatus.failure, failure: failure),
-        );
+        emit(state.copyWith(status: LoadStatus.failure, failure: failure));
     }
   }
 
@@ -104,27 +102,23 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   ) async {
     if (event.query.isEmpty) {
       emit(
-        state.copyWith(status: LocationLoadStatus.initial, locations: const []),
+        state.copyWith(status: LoadStatus.initial, searchLocations: const []),
       );
       return;
     }
-    emit(
-      state.copyWith(status: LocationLoadStatus.loading, clearFailure: true),
-    );
+    emit(state.copyWith(status: LoadStatus.loading, clearFailure: true));
     final result = await locationService.searchLocations(event.query);
     switch (result) {
       case Success<List<Location>>(:final data):
         emit(
           state.copyWith(
-            status: LocationLoadStatus.success,
-            locations: data,
+            status: LoadStatus.success,
+            searchLocations: data,
             clearFailure: true,
           ),
         );
       case Failure<List<Location>>(:final failure):
-        emit(
-          state.copyWith(status: LocationLoadStatus.failure, failure: failure),
-        );
+        emit(state.copyWith(status: LoadStatus.failure, failure: failure));
     }
   }
 
@@ -137,7 +131,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         startDate: event.startDate,
         endDate: event.endDate,
         rangeValues: event.rangeValues,
-        status: LocationLoadStatus.loading,
+        status: LoadStatus.loading,
         clearFailure: true,
       ),
     );
@@ -151,15 +145,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       case Success<List<Location>>(:final data):
         emit(
           state.copyWith(
-            status: LocationLoadStatus.success,
+            status: LoadStatus.success,
             locations: data,
             clearFailure: true,
           ),
         );
       case Failure<List<Location>>(:final failure):
-        emit(
-          state.copyWith(status: LocationLoadStatus.failure, failure: failure),
-        );
+        emit(state.copyWith(status: LoadStatus.failure, failure: failure));
     }
   }
 
@@ -168,7 +160,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       state.copyWith(
         selectedLocation: event.location,
         currentPosition: event.location.position,
-        zoom: 15,
+        zoom: event.zoom,
       ),
     );
   }
@@ -180,33 +172,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     emit(
       state.copyWith(clearSelectedLocation: true),
     ); //mapViewController.closeSearch();
-  }
-
-  Future<void> _onLocationsRequested(
-    LocationsRequested event,
-    Emitter<MapState> emit,
-  ) async {
-    emit(
-      state.copyWith(status: LocationLoadStatus.loading, clearFailure: true),
-    );
-
-    final result = await locationService.fetchLocation(id: 0);
-
-    switch (result) {
-      case Success<Location>(:final data):
-        emit(
-          state.copyWith(
-            status: LocationLoadStatus.success,
-            locations: [data],
-            clearFailure: true,
-          ),
-        );
-
-      case Failure<Location>(:final failure):
-        emit(
-          state.copyWith(status: LocationLoadStatus.failure, failure: failure),
-        );
-    }
   }
 
   @override

@@ -1,0 +1,158 @@
+import 'package:casttime/app/localization/app_failure_localization.dart';
+import 'package:casttime/app/localization/l10n_extension.dart';
+import 'package:casttime/app/navigation/util/route_config.dart';
+import 'package:casttime/features/image/presentation/widgets/gallery_widget.dart';
+import 'package:casttime/features/location/presentation/bloc/locationdetail_bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+
+class LocationDetailsContent extends StatelessWidget {
+  final ScrollController? scrollController;
+  final bool dragHandle;
+
+  const LocationDetailsContent({
+    this.scrollController,
+    this.dragHandle = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final detailsBloc = context.watch<LocationDetailBloc>();
+    final formatter = DateFormat('dd.MM.yyyy HH:mm');
+    final location = detailsBloc.state.location!;
+    final state = detailsBloc.state;
+    List<String> imageUrls = []; // controller.imageUrls; todo
+    final l10n = context.l10n;
+
+    return Material(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              controller: scrollController,
+              children: [
+                if (dragHandle) const SizedBox(height: 8),
+                if (dragHandle)
+                  // Drag-Handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                if (state.failure != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      state.failure!.localizedMessage(l10n),
+                      /*AppErrorMapper.toUserMessage(
+                        controller.error!,
+                        l10n,
+                        fallback: l10n.locationCouldNotBeLoaded,
+                      ),*/
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        location.title,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                    ),
+
+                    if (true /*controller.canOpenInNewPage todo*/ ) ...[
+                      const SizedBox(width: 16),
+                      OutlinedButton.icon(
+                        onPressed: () async => context.push(
+                          RouteConfig.getLocationUrl(location.id),
+                          extra: location,
+                        ),
+                        label: Text(l10n.openLocation),
+                      ),
+                    ],
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+                Text(
+                  location.description,
+                  style: const TextStyle(fontSize: 16),
+                ),
+
+                const SizedBox(height: 12),
+                Text(location.address, style: const TextStyle(fontSize: 16)),
+
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 22,
+                  runSpacing: 8,
+                  children: [
+                    Text(
+                      l10n.displayStartdate(
+                        formatter.format(location.startDateTime),
+                      ),
+                    ),
+                    Text(
+                      l10n.displayEnddate(
+                        formatter.format(location.endDateTime),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 22,
+                  runSpacing: 8,
+                  children: [
+                    Text(location.position.latitude.toString()),
+                    Text(location.position.longitude.toString()),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 22,
+                  runSpacing: 8,
+                  children: [
+                    Text(l10n.createdBy),
+                    Text(location.createdUsername),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                ImageGalleryWidget(
+                  imageUrls: imageUrls,
+                  dragHandle: dragHandle,
+                ),
+              ],
+            ),
+          ),
+
+          /*LocationBottomActions( todo: artem
+            isLikeJoinAble: controller.isLikeJoinAble,
+            isLiked: controller.isLiked,
+            isJoined: controller.isJoined,
+            likeCount: controller.likedUserCount,
+            joinCount: controller.joinedUserCount,
+            onLikeTap: controller.toggleLike,
+            onJoinTap: controller.toggleJoin,
+          ),*/
+        ],
+      ),
+    );
+  }
+}

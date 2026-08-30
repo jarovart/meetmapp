@@ -1,3 +1,4 @@
+import 'package:casttime/app/presentation/util/load_status.dart';
 import 'package:casttime/core/failure/app_failure.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapState {
+  final List<Location> searchLocations;
   final List<Location> locations;
   final Location? selectedLocation;
   final String searchQuery;
@@ -14,10 +16,11 @@ class MapState {
   final LatLng? currentPosition;
   final LatLngBounds bounds;
   final double zoom;
-  final LocationLoadStatus status;
+  final LoadStatus status;
   final AppFailure? failure;
 
   const MapState({
+    required this.searchLocations,
     required this.locations,
     required this.selectedLocation,
     required this.searchQuery,
@@ -27,7 +30,7 @@ class MapState {
     required this.currentPosition,
     required this.bounds,
     required this.zoom,
-    this.status = LocationLoadStatus.initial,
+    this.status = LoadStatus.initial,
     this.failure,
   });
 
@@ -35,6 +38,7 @@ class MapState {
     final now = DateTime.now();
 
     return MapState(
+      searchLocations: [],
       locations: [],
       selectedLocation: null,
       searchQuery: '',
@@ -48,6 +52,7 @@ class MapState {
   }
 
   MapState copyWith({
+    List<Location>? searchLocations,
     List<Location>? locations,
     Location? selectedLocation,
     bool clearSelectedLocation = false,
@@ -58,11 +63,12 @@ class MapState {
     LatLng? currentPosition,
     LatLngBounds? bounds,
     double? zoom,
-    LocationLoadStatus? status,
+    LoadStatus? status,
     AppFailure? failure,
     bool clearFailure = false,
   }) {
     return MapState(
+      searchLocations: searchLocations ?? this.searchLocations,
       locations: locations ?? this.locations,
       selectedLocation: clearSelectedLocation
           ? null
@@ -79,5 +85,3 @@ class MapState {
     );
   }
 }
-
-enum LocationLoadStatus { initial, loading, success, failure }

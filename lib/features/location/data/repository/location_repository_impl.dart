@@ -1,7 +1,10 @@
 import 'package:casttime/core/failure/api_failure_mapper.dart';
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/features/location/data/api/locationapi.dart';
-import 'package:casttime/features/location/data/mapper/location_mapper.dart';
+import 'package:casttime/features/location/data/mapper/location_detail_dto_mapper.dart';
+import 'package:casttime/features/location/data/mapper/location_dto_mapper.dart';
+import 'package:casttime/features/location/data/mapper/location_request_mapper.dart';
+import 'package:casttime/features/location/domain/model/location_detail.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:flutter/foundation.dart';
@@ -31,6 +34,14 @@ class LocationRepositoryImpl implements LocationRepository {
   }
 
   @override
+  Future<AppResult<LocationDetail>> fetchFullLocation(int id) {
+    return _execute(
+      request: () => _api.fetchFullLocation(id),
+      map: (dto) => dto.toDomain(),
+    );
+  }
+
+  @override
   Future<AppResult<List<Location>>> searchLocations(String query) {
     return _execute(
       request: () => _api.searchLocations(query),
@@ -39,9 +50,9 @@ class LocationRepositoryImpl implements LocationRepository {
   }
 
   @override
-  Future<AppResult<Location>> createLocation(Location location) {
+  Future<AppResult<Location>> createLocation(LocationDetail location) {
     return _execute(
-      request: () => _api.createLocation(location.fromDomain()),
+      request: () => _api.createLocation(location.toCreateRequest()),
       map: (dto) => dto.toDomain(),
     );
   }
@@ -81,5 +92,38 @@ class LocationRepositoryImpl implements LocationRepository {
       debugPrint("repository error: $error");
       return Failure(_failureMapper.map(error, stackTrace));
     }
+  }
+
+  @override
+  Future<AppResult<void>> join(int locationId) {
+    return _execute(request: () => _api.join(locationId), map: (_) => {});
+  }
+
+  @override
+  Future<AppResult<void>> like(int locationId) {
+    return _execute(request: () => _api.like(locationId), map: (_) => {});
+  }
+
+  @override
+  Future<AppResult<void>> unjoin(int locationId) {
+    return _execute(request: () => _api.unjoin(locationId), map: (_) => {});
+  }
+
+  @override
+  Future<AppResult<void>> unlike(int locationId) {
+    return _execute(request: () => _api.unlike(locationId), map: (_) => {});
+  }
+
+  @override
+  Future<AppResult<bool>> isJoined(int locationId) {
+    return _execute(
+      request: () => _api.isJoined(locationId),
+      map: (dto) => dto,
+    );
+  }
+
+  @override
+  Future<AppResult<bool>> isLiked(int locationId) {
+    return _execute(request: () => _api.isLiked(locationId), map: (dto) => dto);
   }
 }

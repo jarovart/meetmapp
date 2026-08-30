@@ -1,7 +1,7 @@
-import 'package:casttime/features/location/data/dto/response/image_response_dto.dart';
+import 'package:casttime/features/image/data/dto/image_response_dto.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'location_baseresponse_dto.g.dart';
+part 'location_base_response_dto.g.dart';
 
 @JsonSerializable()
 class LocationBaseResponseDTO {

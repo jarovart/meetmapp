@@ -34,10 +34,13 @@ import 'package:casttime/features/location/data/repository/location_repository_i
     as _i113;
 import 'package:casttime/features/location/data/service/location_service_impl.dart'
     as _i449;
+import 'package:casttime/features/location/domain/model/location.dart' as _i96;
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart'
     as _i310;
 import 'package:casttime/features/location/domain/serviceinterface/location_service.dart'
     as _i283;
+import 'package:casttime/features/location/presentation/bloc/locationdetail_bloc.dart'
+    as _i312;
 import 'package:casttime/features/map/data/service/location_permission_service_impl.dart'
     as _i977;
 import 'package:casttime/features/map/domain/service/location_permission_service.dart'
@@ -112,6 +115,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i283.LocationService>(
       () => _i449.LocationServiceImpl(gh<_i310.LocationRepository>()),
+    );
+    gh.factory<_i312.LocationDetailBloc>(
+      () => _i312.LocationDetailBloc(
+        gh<_i283.LocationService>(),
+        gh<_i96.Location>(),
+      ),
     );
     gh.lazySingleton<_i197.MapBloc>(
       () => _i197.MapBloc(

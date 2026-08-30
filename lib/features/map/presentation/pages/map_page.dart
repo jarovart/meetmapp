@@ -1,9 +1,12 @@
 import 'package:casttime/app/presentation/banner/appbanner_cubit.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
+import 'package:casttime/features/location/presentation/widgets/locationdetail/bottomsheet_mobile.dart';
+import 'package:casttime/features/location/presentation/widgets/locationdetail/generaldialog_nomobile.dart';
 import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
 import 'package:casttime/features/map/presentation/bloc/map_event.dart';
 import 'package:casttime/features/map/presentation/bloc/map_state.dart';
-import 'package:casttime/features/map/presentation/widgets/debouncer.dart';
+import 'package:casttime/features/map/presentation/util/debouncer.dart';
+import 'package:casttime/features/map/presentation/util/map_camera_util.dart';
 import 'package:casttime/features/map/presentation/widgets/location_marker.dart';
 import 'package:casttime/features/map/presentation/widgets/mapsearch/map_search_dismiss_barrier.dart';
 import 'package:casttime/features/map/presentation/widgets/mapsearch/map_search_overlay.dart';
@@ -23,6 +26,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   late final MapController mapController;
+  late final MapCameraUtil mapCameraUtil;
   late final TileProvider tileProvider;
   late final Debouncer debouncer;
 
@@ -30,6 +34,7 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
     mapController = MapController();
+    mapCameraUtil = MapCameraUtil(mapController);
     tileProvider = CancellableNetworkTileProvider();
     debouncer = Debouncer(delay: const Duration(milliseconds: 450));
   }
@@ -57,64 +62,102 @@ class _MapPageState extends State<MapPage> {
   }
 
   Widget buildMap(BuildContext context, double dockWidth) {
-    return BlocConsumer<MapBloc, MapState>(
-      listenWhen: (previous, current) =>
-          (previous.failure != current.failure && current.failure != null) ||
-          previous.currentPosition != current.currentPosition,
-      listener: (context, state) {
-        /*if (state.failure != null) {
-          context.read<AppBannerCubit>().showFailure(state.failure!);
-          context.read<MapBloc>().add(MapStarted());
-          return;
-        }*/
+    return MultiBlocListener(
+      listeners: [
+        // error handling
+        BlocListener<MapBloc, MapState>(
+          listenWhen: (previous, current) =>
+              (previous.failure != current.failure && current.failure != null),
+          listener: (context, state) {
+            context.read<AppBannerCubit>().showFailure(state.failure!);
+            context.read<MapBloc>().add(MapStarted());
+          },
+        ),
+        // gps moving handling
+        BlocListener<MapBloc, MapState>(
+          listenWhen: (previous, current) =>
+              previous.currentPosition != current.currentPosition &&
+              current.currentPosition != null,
+          listener: (context, state) {
+            mapController.move(state.currentPosition!, state.zoom);
+            context.read<MapBloc>().add(
+              MapBoundsChanged(bounds: mapController.camera.visibleBounds),
+            );
+          },
+        ),
+        BlocListener<MapBloc, MapState>(
+          listenWhen: (previous, current) =>
+              previous.selectedLocation != current.selectedLocation &&
+              current.selectedLocation != null,
+          listener: (context, state) {
+            final location = state.selectedLocation!;
+            final isMobileSheetOpen = _useBottomSheetForMobile(context);
+            mapCameraUtil.shiftTargetForView(
+              location.position,
+              isMobileSheetOpen,
+            );
 
-        if (state.currentPosition != null) {
-          mapController.move(state.currentPosition!, state.zoom);
-        }
-      },
-      buildWhen: (previous, current) =>
-          previous.locations != current.locations ||
-          previous.selectedLocation != current.selectedLocation ||
-          previous.currentPosition != current.currentPosition,
-      builder: (context, state) {
-        debugPrint(
-          "map call blocconsumer with ${state.currentPosition ?? '0.0'}",
-        );
-        final mapBloc = context.read<MapBloc>();
+            final show = isMobileSheetOpen
+                ? LocationDetailsBottomSheet.show(context, location: location)
+                : LocationDetailsGeneralDialog.show(
+                    context,
+                    location: location,
+                  );
 
-        return FlutterMap(
-          mapController: mapController,
-          options: MapOptions(
-            initialCenter: state.currentPosition ?? LatLng(51.1657, 10.4515),
-            initialZoom: state.zoom,
-            onMapReady: () => mapBloc.add(MapStarted()),
-            onMapEvent: (event) {
-              if (event is MapEventTap) {
-                mapBloc.add(MapLocationDeselected());
-              } else if (event is MapEventMoveEnd ||
-                  event is MapEventDoubleTapZoomEnd) {
-                final bounds = mapController.camera.visibleBounds;
-                debugPrint("Bounds changed: $bounds");
-                mapBloc.add(MapBoundsChanged(bounds: bounds));
-              } else if (event is MapEventScrollWheelZoom) {
-                debouncer.run(
-                  () => mapBloc.add(
-                    MapBoundsChanged(
-                      bounds: mapController.camera.visibleBounds,
-                    ),
-                  ),
-                );
+            show.then((_) {
+              if (context.mounted) {
+                mapCameraUtil.restoreCenterAfterShift();
+                context.read<MapBloc>().add(MapLocationDeselected());
               }
-            },
-          ),
-          children: [
-            _buildTileLayer(),
-            if (state.currentPosition != null)
-              _buildMyLocationMarker(context, state.currentPosition!),
-            _buildLocationsLayer(context),
-          ],
-        );
-      },
+            });
+          },
+        ),
+      ],
+      child: BlocBuilder<MapBloc, MapState>(
+        buildWhen: (previous, current) =>
+            previous.locations != current.locations ||
+            previous.selectedLocation != current.selectedLocation ||
+            previous.currentPosition != current.currentPosition,
+        builder: (context, state) {
+          debugPrint(
+            "map call blocconsumer with ${state.currentPosition ?? '0.0'}",
+          );
+          final mapBloc = context.read<MapBloc>();
+
+          return FlutterMap(
+            mapController: mapController,
+            options: MapOptions(
+              initialCenter: state.currentPosition ?? LatLng(51.1657, 10.4515),
+              initialZoom: state.zoom,
+              onMapReady: () => mapBloc.add(MapStarted()),
+              onMapEvent: (event) {
+                if (event is MapEventTap) {
+                  mapBloc.add(MapLocationDeselected());
+                } else if (event is MapEventMoveEnd ||
+                    event is MapEventDoubleTapZoomEnd) {
+                  final bounds = mapController.camera.visibleBounds;
+                  debugPrint("Bounds changed: $bounds");
+                  mapBloc.add(MapBoundsChanged(bounds: bounds));
+                } else if (event is MapEventScrollWheelZoom) {
+                  debouncer.run(
+                    () => mapBloc.add(
+                      MapBoundsChanged(
+                        bounds: mapController.camera.visibleBounds,
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+            children: [
+              _buildTileLayer(),
+              if (state.currentPosition != null)
+                _buildMyLocationMarker(context, state.currentPosition!),
+              _buildLocationsLayer(context),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -159,7 +202,11 @@ class _MapPageState extends State<MapPage> {
                 child: LocationMarker(
                   location: loc,
                   isSelected: mapBloc.state.selectedLocation?.id == loc.id,
-                  onTap: () => _onLocationTapped(context, loc),
+                  onTap: () => _onLocationTapped(
+                    context,
+                    loc,
+                    mapController.camera.zoom,
+                  ),
                 ),
               ),
             )
@@ -174,15 +221,20 @@ class _MapPageState extends State<MapPage> {
             location: winningLocation,
             isSelected:
                 mapBloc.state.selectedLocation?.id == winningLocation.id,
-            onTap: () => _onLocationTapped(context, winningLocation),
+            onTap: () => _onLocationTapped(
+              context,
+              winningLocation,
+              mapController.camera.zoom,
+            ),
           );
         },
       ),
     );
   }
 
-  void _onLocationTapped(BuildContext context, Location location) {
+  void _onLocationTapped(BuildContext context, Location location, double zoom) {
     debugPrint("location tapped: ${location.title}");
+    context.read<MapBloc>().add(MapLocationSelected(location, zoom: zoom));
   }
 
   Location pickBestLocationFromCluster(List<Marker> markers) {
@@ -232,5 +284,9 @@ class _MapPageState extends State<MapPage> {
     }
 
     return score;
+  }
+
+  bool _useBottomSheetForMobile(BuildContext context) {
+    return MediaQuery.of(context).size.width < 700;
   }
 }

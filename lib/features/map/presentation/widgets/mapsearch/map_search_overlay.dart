@@ -39,8 +39,9 @@ class MapSearchOverlayState extends State<MapSearchOverlay> {
 
   void _selectLocation(Location location) {
     context.read<MapBloc>()
-      ..add(MapLocationSelected(location))
-      ..add(MapSearchChanged('')); //TODO remove
+      ..add(MapSearchChanged('')) //TODO remove
+      ..add(MapLocationSelected(location));
+
     _focusNode.unfocus();
   }
 

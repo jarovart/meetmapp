@@ -1,4 +1,5 @@
 import 'package:casttime/app/localization/l10n_extension.dart';
+import 'package:casttime/app/presentation/util/load_status.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
 import 'package:casttime/features/map/presentation/bloc/map_state.dart';
@@ -15,7 +16,7 @@ class SearchResultsList extends StatelessWidget {
     return BlocBuilder<MapBloc, MapState>(
       buildWhen: (prev, curr) =>
           prev.searchQuery != curr.searchQuery ||
-          prev.locations != curr.locations ||
+          prev.searchLocations != curr.searchLocations ||
           prev.status != curr.status,
       builder: (context, state) {
         final showResults = state.searchQuery.isNotEmpty;
@@ -75,16 +76,17 @@ class _ResultsCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: switch (state.status) {
-        LocationLoadStatus.loading when state.locations.isEmpty =>
-          _LoadingState(colors: colors),
-        LocationLoadStatus.success when state.locations.isEmpty => _EmptyState(
+        LoadStatus.loading when state.searchLocations.isEmpty => _LoadingState(
+          colors: colors,
+        ),
+        LoadStatus.success when state.searchLocations.isEmpty => _EmptyState(
           colors: colors,
           query: state.searchQuery,
         ),
-        LocationLoadStatus.failure => _ErrorState(colors: colors),
+        LoadStatus.failure => _ErrorState(colors: colors),
         _ => _ResultsListView(
-          locations: state.locations,
-          isRefreshing: state.status == LocationLoadStatus.loading,
+          locations: state.searchLocations,
+          isRefreshing: state.status == LoadStatus.loading,
           onLocationTap: onLocationTap,
         ),
       },

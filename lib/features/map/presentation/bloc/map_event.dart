@@ -40,12 +40,11 @@ class MapSearchQueryDebounced extends MapEvent {
 
 class MapLocationSelected extends MapEvent {
   final Location location;
+  final double? zoom;
 
-  MapLocationSelected(this.location);
+  MapLocationSelected(this.location, {this.zoom});
 }
 
 class MapLocationDeselected extends MapEvent {}
 
 class MapGeoLocationChanged extends MapEvent {}
-
-class LocationsRequested extends MapEvent {}

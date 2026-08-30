@@ -3,19 +3,19 @@ import 'package:json_annotation/json_annotation.dart';
 part 'createlocation_requestdto.g.dart';
 
 @JsonSerializable()
-class CreateLocationRequestDto {
+class CreateLocationRequestDTO {
   final String title;
   final double latitude;
   final double longitude;
 
-  CreateLocationRequestDto({
+  CreateLocationRequestDTO({
     required this.title,
     required this.latitude,
     required this.longitude,
   });
 
-  factory CreateLocationRequestDto.fromJson(Map<String, dynamic> json) =>
-      _$CreateLocationRequestDtoFromJson(json);
+  factory CreateLocationRequestDTO.fromJson(Map<String, dynamic> json) =>
+      _$CreateLocationRequestDTOFromJson(json);
 
-  Map<String, dynamic> toJson() => _$CreateLocationRequestDtoToJson(this);
+  Map<String, dynamic> toJson() => _$CreateLocationRequestDTOToJson(this);
 }

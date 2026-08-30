@@ -1,8 +1,8 @@
 import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
 import 'package:casttime/features/map/presentation/bloc/map_event.dart';
 import 'package:casttime/features/map/presentation/bloc/map_state.dart';
-import 'package:casttime/features/map/presentation/widgets/debouncer.dart';
-import 'package:casttime/features/map/presentation/widgets/map_day_options.dart';
+import 'package:casttime/features/map/presentation/util/debouncer.dart';
+import 'package:casttime/features/map/presentation/util/map_day_options.dart';
 import 'package:casttime/features/map/presentation/widgets/mapslider/map_slider_daterange.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

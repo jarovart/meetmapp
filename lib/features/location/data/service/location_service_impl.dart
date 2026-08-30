@@ -1,12 +1,12 @@
 import 'package:casttime/core/failure/app_failure.dart';
 import 'package:casttime/core/result/app_result.dart';
+import 'package:casttime/features/location/domain/model/location_detail.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/domain/serviceinterface/location_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:injectable/injectable.dart';
-import 'package:latlong2/latlong.dart';
 
 @LazySingleton(as: LocationService)
 class LocationServiceImpl implements LocationService {
@@ -34,8 +34,8 @@ class LocationServiceImpl implements LocationService {
   }
 
   @override
-  Future<AppResult<Location>> fetchLocation({required int id}) async {
-    return Future.value(const Failure(InvalidSearchQueryFailure()));
+  Future<AppResult<LocationDetail>> fetchLocationDetail(int id) async {
+    return await repository.fetchFullLocation(id);
   }
 
   @override
@@ -49,5 +49,35 @@ class LocationServiceImpl implements LocationService {
     }
 
     return repository.fetchLocationsWithDateRange(bounds, startDate, endDate);
+  }
+
+  @override
+  Future<AppResult<void>> like(int locationId) async {
+    return await repository.like(locationId);
+  }
+
+  @override
+  Future<AppResult<void>> unlike(int locationId) async {
+    return await repository.unlike(locationId);
+  }
+
+  @override
+  Future<AppResult<void>> join(int locationId) async {
+    return await repository.join(locationId);
+  }
+
+  @override
+  Future<AppResult<void>> unjoin(int locationId) async {
+    return await repository.unjoin(locationId);
+  }
+
+  @override
+  Future<AppResult<bool>> isLiked(int locationId) async {
+    return await repository.isLiked(locationId);
+  }
+
+  @override
+  Future<AppResult<bool>> isJoined(int locationId) async {
+    return await repository.isJoined(locationId);
   }
 }
