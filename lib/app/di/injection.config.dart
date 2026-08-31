@@ -116,10 +116,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i283.LocationService>(
       () => _i449.LocationServiceImpl(gh<_i310.LocationRepository>()),
     );
-    gh.factory<_i312.LocationDetailBloc>(
-      () => _i312.LocationDetailBloc(
+    gh.factoryParam<_i312.LocationDetailBloc, _i96.Location, dynamic>(
+      (initialLocation, _) => _i312.LocationDetailBloc(
         gh<_i283.LocationService>(),
-        gh<_i96.Location>(),
+        initialLocation,
       ),
     );
     gh.lazySingleton<_i197.MapBloc>(

@@ -13,6 +13,7 @@ class LocationDetailsContent extends StatelessWidget {
   final bool dragHandle;
 
   const LocationDetailsContent({
+    super.key,
     this.scrollController,
     this.dragHandle = false,
   });
@@ -21,7 +22,7 @@ class LocationDetailsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final detailsBloc = context.watch<LocationDetailBloc>();
     final formatter = DateFormat('dd.MM.yyyy HH:mm');
-    final location = detailsBloc.state.location!;
+    final location = detailsBloc.state.location;
     final state = detailsBloc.state;
     List<String> imageUrls = []; // controller.imageUrls; todo
     final l10n = context.l10n;

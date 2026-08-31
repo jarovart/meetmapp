@@ -14,8 +14,10 @@ import 'package:injectable/injectable.dart';
 @injectable
 class LocationDetailBloc
     extends Bloc<LocationDetailEvent, LocationDetailState> {
-  LocationDetailBloc(this._locationService, Location initialLocation)
-    : super(LocationDetailState.initial(initialLocation)) {
+  LocationDetailBloc(
+    this._locationService,
+    @factoryParam Location initialLocation,
+  ) : super(LocationDetailState.initial(initialLocation)) {
     on<LocationDetailRequested>(_onRequested);
     on<LocationLikeToggled>(_onLikeToggled);
     on<LocationLikeSynced>(_onLikeSynced);

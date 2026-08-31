@@ -3,7 +3,7 @@ import 'package:casttime/app/presentation/util/load_status.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/presentation/bloc/locationdetail_bloc.dart';
 import 'package:casttime/features/location/presentation/bloc/locationdetail_event.dart';
-import 'package:casttime/features/location/presentation/widgets/locationdetail/content.dart';
+import 'package:casttime/features/location/presentation/widgets/locationdetail/location_details_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,6 +19,7 @@ class LocationDetailsBottomSheet extends StatelessWidget {
   }) {
     return showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       enableDrag: true,
@@ -30,7 +31,7 @@ class LocationDetailsBottomSheet extends StatelessWidget {
       builder: (_) {
         return BlocProvider(
           create: (_) =>
-              getIt<LocationDetailBloc>()
+              getIt<LocationDetailBloc>(param1: location)
                 ..add(LocationDetailRequested(location: location)),
           child: LocationDetailsBottomSheet(canOpenInNewPage: canOpenInNewPage),
         );
