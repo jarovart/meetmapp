@@ -1,0 +1,149 @@
+import 'package:casttime/app/localization/l10n_extension.dart';
+import 'package:casttime/app/navigation/util/route_config.dart';
+import 'package:casttime/features/image/presentation/widgets/thumbnail_image_util.dart';
+import 'package:casttime/features/location/domain/model/location.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+class LocationListTab extends StatefulWidget {
+  final String title;
+  final List<Location> locations;
+  final bool isLoading;
+  final VoidCallback onRetry;
+  final Future<void> Function()? onLoadMore;
+  final bool isLoadingMore;
+  final bool hasMore;
+
+  const LocationListTab({
+    required this.title,
+    required this.locations,
+    required this.isLoading,
+    required this.onRetry,
+    this.onLoadMore,
+    this.isLoadingMore = false,
+    this.hasMore = true,
+  });
+
+  @override
+  State<LocationListTab> createState() => _LocationListTabState();
+}
+
+class _LocationListTabState extends State<LocationListTab> {
+  bool _loadMoreTriggered = false;
+
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification is! ScrollUpdateNotification &&
+        notification is! OverscrollNotification) {
+      return false;
+    }
+
+    final metrics = notification.metrics;
+
+    final isScrollable = metrics.maxScrollExtent > 0;
+    final isNearBottom = metrics.extentAfter < 200;
+
+    final shouldLoadMore =
+        isScrollable &&
+        isNearBottom &&
+        widget.hasMore &&
+        !widget.isLoadingMore &&
+        !_loadMoreTriggered;
+
+    if (shouldLoadMore) {
+      _loadMoreTriggered = true;
+      widget.onLoadMore?.call().whenComplete(() {
+        if (mounted) {
+          _loadMoreTriggered = false;
+        }
+      });
+    }
+
+    if (metrics.extentAfter >= 200) {
+      _loadMoreTriggered = false;
+    }
+
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    if (widget.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final l10n = context.l10n;
+
+    if (widget.locations.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(l10n.noEntriesAvailable),
+            const SizedBox(height: 12),
+            OutlinedButton(onPressed: widget.onRetry, child: Text(l10n.reload)),
+          ],
+        ),
+      );
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: _handleScrollNotification,
+      child: ListView.separated(
+        key: PageStorageKey(widget.title),
+        padding: const EdgeInsets.all(16),
+        itemCount: widget.locations.length + (widget.isLoadingMore ? 1 : 0),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          if (index >= widget.locations.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final locationBase = widget.locations[index];
+
+          return Material(
+            color: theme.cardTheme.color ?? colors.surface,
+            elevation: 2,
+            shadowColor: theme.shadowColor.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                context.push(
+                  RouteConfig.getLocationUrl(locationBase.id),
+                  extra: locationBase,
+                );
+              },
+              child: ListTile(
+                iconColor: colors.primary,
+                textColor: colors.onSurface,
+                leading: ThumbnailImage(
+                  imageUrl: locationBase.thumbnailImage?.imageUrl,
+                  width: 60,
+                  height: 60,
+                  iconSize: 28,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+
+                title: Text(
+                  locationBase.title,
+                  style: theme.textTheme.titleMedium,
+                ),
+                subtitle: Text(
+                  locationBase.description,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colors.secondary,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

@@ -9,6 +9,7 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'package:casttime/app/di/modules/logger_module.dart' as _i186;
 import 'package:casttime/app/di/modules/network_module.dart' as _i585;
 import 'package:casttime/app/di/modules/storage_module.dart' as _i587;
@@ -19,6 +20,7 @@ import 'package:casttime/core/network/auth_interceptor.dart' as _i938;
 import 'package:casttime/core/network/logging_interceptor.dart' as _i994;
 import 'package:casttime/core/storage/secure_token_storage.dart' as _i137;
 import 'package:casttime/core/storage/token_storage.dart' as _i511;
+import 'package:casttime/features/auth/data/api/auth_api.dart' as _i401;
 import 'package:casttime/features/auth/data/repository/auth_repository_impl.dart'
     as _i17;
 import 'package:casttime/features/auth/data/service/auth_service_impl.dart'
@@ -27,25 +29,63 @@ import 'package:casttime/features/auth/domain/repository/auth_repository.dart'
     as _i357;
 import 'package:casttime/features/auth/domain/service/auth_service.dart'
     as _i976;
-import 'package:casttime/features/auth/presentation/bloc/auth_bloc.dart'
-    as _i453;
-import 'package:casttime/features/location/data/api/locationapi.dart' as _i511;
+import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart'
+    as _i713;
+import 'package:casttime/features/location/data/api/location_api.dart' as _i507;
+import 'package:casttime/features/location/data/api/place_api.dart' as _i8;
 import 'package:casttime/features/location/data/repository/location_repository_impl.dart'
     as _i113;
+import 'package:casttime/features/location/data/repository/place_repository_impl.dart'
+    as _i256;
 import 'package:casttime/features/location/data/service/location_service_impl.dart'
     as _i449;
+import 'package:casttime/features/location/data/service/place_service_impl.dart'
+    as _i881;
 import 'package:casttime/features/location/domain/model/location.dart' as _i96;
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart'
     as _i310;
+import 'package:casttime/features/location/domain/repositoryinterface/place_repository.dart'
+    as _i702;
 import 'package:casttime/features/location/domain/serviceinterface/location_service.dart'
     as _i283;
+import 'package:casttime/features/location/domain/serviceinterface/place_service.dart'
+    as _i911;
+import 'package:casttime/features/location/domain/util/location_bounds_calculator.dart'
+    as _i794;
 import 'package:casttime/features/location/presentation/bloc/locationdetail_bloc.dart'
     as _i312;
+import 'package:casttime/features/location/presentation/bloc/locationlist_bloc.dart'
+    as _i981;
+import 'package:casttime/features/location/presentation/bloc/place_suggestion_cubit.dart'
+    as _i266;
+import 'package:casttime/features/location/presentation/util/sheet_size_memory.dart'
+    as _i223;
 import 'package:casttime/features/map/data/service/location_permission_service_impl.dart'
     as _i977;
 import 'package:casttime/features/map/domain/service/location_permission_service.dart'
     as _i418;
 import 'package:casttime/features/map/presentation/bloc/map_bloc.dart' as _i197;
+import 'package:casttime/features/profile/data/api/profile_api.dart' as _i523;
+import 'package:casttime/features/profile/data/repository/profile_repository_impl.dart'
+    as _i610;
+import 'package:casttime/features/profile/data/service/profile_service_impl.dart'
+    as _i420;
+import 'package:casttime/features/profile/domain/model/location_list_type.dart'
+    as _i607;
+import 'package:casttime/features/profile/domain/repository/profile_repository.dart'
+    as _i751;
+import 'package:casttime/features/profile/domain/service/profile_service.dart'
+    as _i434;
+import 'package:casttime/features/profile/presentation/bloc/profile_bloc.dart'
+    as _i930;
+import 'package:casttime/features/profile/presentation/cubit/created_locations_cubit.dart'
+    as _i582;
+import 'package:casttime/features/profile/presentation/cubit/joined_locations_cubit.dart'
+    as _i660;
+import 'package:casttime/features/profile/presentation/cubit/liked_locations_cubit.dart'
+    as _i288;
+import 'package:casttime/features/profile/presentation/cubit/location_list_cubit.dart'
+    as _i182;
 import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
@@ -75,18 +115,25 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i994.LoggingInterceptor>(
       () => _i994.LoggingInterceptor(),
     );
-    gh.lazySingleton<_i511.TokenStorage>(
-      () => _i137.SecureTokenStorage(gh<_i558.FlutterSecureStorage>()),
+    gh.lazySingleton<_i794.LocationBoundsCalculator>(
+      () => const _i794.LocationBoundsCalculator(),
     );
-    gh.lazySingleton<_i357.AuthRepository>(() => _i17.AuthRepositoryImpl());
+    gh.lazySingleton<_i223.SheetSizeMemory>(() => _i223.SheetSizeMemory());
     gh.lazySingleton<_i993.ApiFailureMapper>(
       () => _i993.ApiFailureMapper(gh<_i974.Logger>()),
     );
     gh.lazySingleton<_i455.LocationFailureMapper>(
       () => _i455.LocationFailureMapper(gh<_i974.Logger>()),
     );
+    gh.lazySingleton<_i511.TokenStorage>(
+      () => _i137.SecureTokenStorage(gh<_i558.FlutterSecureStorage>()),
+    );
     gh.lazySingleton<_i938.AuthInterceptor>(
       () => _i938.AuthInterceptor(gh<_i511.TokenStorage>()),
+    );
+    gh.lazySingleton<_i418.LocationPermissionService>(
+      () =>
+          _i977.GeolocatorPermissionService(gh<_i455.LocationFailureMapper>()),
     );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.dio(
@@ -94,27 +141,98 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i994.LoggingInterceptor>(),
       ),
     );
-    gh.lazySingleton<_i976.AuthService>(
-      () => _i555.AuthServiceImpl(gh<_i357.AuthRepository>()),
-    );
-    gh.lazySingleton<_i418.LocationPermissionService>(
-      () =>
-          _i977.GeolocatorPermissionService(gh<_i455.LocationFailureMapper>()),
-    );
-    gh.lazySingleton<_i511.LocationApi>(
+    gh.lazySingleton<_i507.LocationApi>(
       () => networkModule.provideLocationApi(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i453.AuthBloc>(
-      () => _i453.AuthBloc(gh<_i976.AuthService>()),
+    gh.lazySingleton<_i401.AuthApi>(
+      () => networkModule.provideAuthApi(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i523.ProfileApi>(
+      () => networkModule.provideProfileApi(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i8.PlaceApi>(
+      () => networkModule.providePlaceApi(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i310.LocationRepository>(
       () => _i113.LocationRepositoryImpl(
-        gh<_i511.LocationApi>(),
+        gh<_i507.LocationApi>(),
         gh<_i993.ApiFailureMapper>(),
       ),
     );
     gh.lazySingleton<_i283.LocationService>(
-      () => _i449.LocationServiceImpl(gh<_i310.LocationRepository>()),
+      () => _i449.LocationServiceImpl(
+        gh<_i310.LocationRepository>(),
+        gh<_i418.LocationPermissionService>(),
+        gh<_i455.LocationFailureMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i751.ProfileRepository>(
+      () => _i610.ProfileRepositoryImpl(
+        gh<_i523.ProfileApi>(),
+        gh<_i993.ApiFailureMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i702.PlaceRepository>(
+      () => _i256.PlaceRepositoryImpl(
+        gh<_i8.PlaceApi>(),
+        gh<_i993.ApiFailureMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i357.AuthRepository>(
+      () => _i17.AuthRepositoryImpl(
+        gh<_i401.AuthApi>(),
+        gh<_i993.ApiFailureMapper>(),
+      ),
+    );
+    gh.factory<_i981.LocationSearchBloc>(
+      () => _i981.LocationSearchBloc(
+        gh<_i283.LocationService>(),
+        gh<_i794.LocationBoundsCalculator>(),
+      ),
+    );
+    gh.lazySingleton<_i911.PlaceService>(
+      () => _i881.PlaceServiceImpl(gh<_i702.PlaceRepository>()),
+    );
+    gh.factory<_i266.PlaceSuggestionCubit>(
+      () => _i266.PlaceSuggestionCubit(gh<_i911.PlaceService>()),
+    );
+    gh.lazySingleton<_i434.ProfileService>(
+      () => _i420.ProfileServiceImpl(
+        gh<_i751.ProfileRepository>(),
+        gh<_i455.LocationFailureMapper>(),
+      ),
+    );
+    gh.factoryParam<_i582.CreatedLocationsCubit, String, dynamic>(
+      (username, _) =>
+          _i582.CreatedLocationsCubit(gh<_i434.ProfileService>(), username),
+    );
+    gh.factoryParam<_i660.JoinedLocationsCubit, String, dynamic>(
+      (username, _) =>
+          _i660.JoinedLocationsCubit(gh<_i434.ProfileService>(), username),
+    );
+    gh.factoryParam<_i288.LikedLocationsCubit, String, dynamic>(
+      (username, _) =>
+          _i288.LikedLocationsCubit(gh<_i434.ProfileService>(), username),
+    );
+    gh.lazySingleton<_i713.AuthCubit>(
+      () =>
+          _i713.AuthCubit(gh<_i357.AuthRepository>(), gh<_i511.TokenStorage>()),
+    );
+    gh.factory<_i930.ProfileBloc>(
+      () => _i930.ProfileBloc(gh<_i434.ProfileService>()),
+    );
+    gh.lazySingleton<_i197.MapBloc>(
+      () => _i197.MapBloc(
+        gh<_i283.LocationService>(),
+        gh<_i418.LocationPermissionService>(),
+      ),
+    );
+    gh.factoryParam<_i182.LocationListCubit, String, _i607.LocationListType>(
+      (username, listType) => _i182.LocationListCubit(
+        gh<_i434.ProfileService>(),
+        username,
+        listType,
+      ),
     );
     gh.factoryParam<_i312.LocationDetailBloc, _i96.Location, dynamic>(
       (initialLocation, _) => _i312.LocationDetailBloc(
@@ -122,11 +240,8 @@ extension GetItInjectableX on _i174.GetIt {
         initialLocation,
       ),
     );
-    gh.lazySingleton<_i197.MapBloc>(
-      () => _i197.MapBloc(
-        gh<_i283.LocationService>(),
-        gh<_i418.LocationPermissionService>(),
-      ),
+    gh.lazySingleton<_i976.AuthService>(
+      () => _i555.AuthServiceImpl(gh<_i357.AuthRepository>()),
     );
     return this;
   }

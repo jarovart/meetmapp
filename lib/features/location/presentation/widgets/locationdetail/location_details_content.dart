@@ -24,16 +24,22 @@ class LocationDetailsContent extends StatelessWidget {
     final formatter = DateFormat('dd.MM.yyyy HH:mm');
     final location = detailsBloc.state.location;
     final state = detailsBloc.state;
-    List<String> imageUrls = []; // controller.imageUrls; todo
+    List<String> imageUrls =
+        detailsBloc.state.locationDetail?.images
+            .map((api) => api.imageUrl)
+            .toList() ??
+        [];
     final l10n = context.l10n;
 
     return Material(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       clipBehavior: Clip.antiAlias,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
+          Flexible(
             child: ListView(
+              shrinkWrap: true,
               padding: const EdgeInsets.all(16),
               controller: scrollController,
               children: [

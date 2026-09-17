@@ -1,7 +1,10 @@
 import 'package:casttime/app/config/api_config.dart';
 import 'package:casttime/core/network/auth_interceptor.dart';
 import 'package:casttime/core/network/logging_interceptor.dart';
-import 'package:casttime/features/location/data/api/locationapi.dart';
+import 'package:casttime/features/auth/data/api/auth_api.dart';
+import 'package:casttime/features/location/data/api/location_api.dart';
+import 'package:casttime/features/location/data/api/place_api.dart';
+import 'package:casttime/features/profile/data/api/profile_api.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
@@ -30,4 +33,13 @@ abstract class NetworkModule {
   LocationApi provideLocationApi(Dio dio) {
     return LocationApi(dio);
   }
+
+  @lazySingleton
+  AuthApi provideAuthApi(Dio dio) => AuthApi(dio);
+
+  @lazySingleton
+  ProfileApi provideProfileApi(Dio dio) => ProfileApi(dio);
+
+  @lazySingleton
+  PlaceApi providePlaceApi(Dio dio) => PlaceApi(dio);
 }

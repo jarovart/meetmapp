@@ -1,6 +1,7 @@
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 sealed class MapEvent {}
 
@@ -8,8 +9,15 @@ class MapStarted extends MapEvent {}
 
 class MapBoundsChanged extends MapEvent {
   final LatLngBounds bounds;
+  final double? zoom;
 
-  MapBoundsChanged({required this.bounds});
+  MapBoundsChanged({required this.bounds, this.zoom});
+}
+
+class MapPositionUpdated extends MapEvent {
+  final LatLng currentPosition;
+
+  MapPositionUpdated({required this.currentPosition});
 }
 
 class MapSearchChanged extends MapEvent {

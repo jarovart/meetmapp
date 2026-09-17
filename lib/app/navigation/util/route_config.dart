@@ -6,7 +6,7 @@ class RouteConfig {
   static const String locationCreateUrl = "/locationcreate";
   static const String userListUrl = "/userlist";
   static const String profileUrl = "/profile/:username";
-  static const String myProfileUrl = "/profile/me";
+  static const String myProfileUrl = "/myprofile";
   static const String editUrl = "/edit";
   static const String loginUrl = "/login";
   static const String registerUrl = "/register";

@@ -7,7 +7,9 @@ import 'package:casttime/features/map/presentation/bloc/map_event.dart';
 import 'package:casttime/features/map/presentation/bloc/map_state.dart';
 import 'package:casttime/features/map/presentation/util/debouncer.dart';
 import 'package:casttime/features/map/presentation/util/map_camera_util.dart';
-import 'package:casttime/features/map/presentation/widgets/location_marker.dart';
+import 'package:casttime/features/map/presentation/widgets/mapmarker/location_cluster.dart';
+import 'package:casttime/features/map/presentation/widgets/mapmarker/location_marker.dart';
+import 'package:casttime/features/map/presentation/widgets/mapmarker/my_location_marker.dart';
 import 'package:casttime/features/map/presentation/widgets/mapsearch/map_search_dismiss_barrier.dart';
 import 'package:casttime/features/map/presentation/widgets/mapsearch/map_search_overlay.dart';
 import 'package:flutter/material.dart';
@@ -76,8 +78,8 @@ class _MapPageState extends State<MapPage> {
         // gps moving handling
         BlocListener<MapBloc, MapState>(
           listenWhen: (previous, current) =>
-              previous.currentPosition != current.currentPosition &&
-              current.currentPosition != null,
+              current.currentPosition != null &&
+              previous.recenterRequestId != current.recenterRequestId,
           listener: (context, state) {
             mapController.move(state.currentPosition!, state.zoom);
             context.read<MapBloc>().add(
@@ -117,7 +119,8 @@ class _MapPageState extends State<MapPage> {
         buildWhen: (previous, current) =>
             previous.locations != current.locations ||
             previous.selectedLocation != current.selectedLocation ||
-            previous.currentPosition != current.currentPosition,
+            previous.currentPosition != current.currentPosition ||
+            previous.zoom != current.zoom,
         builder: (context, state) {
           debugPrint(
             "map call blocconsumer with ${state.currentPosition ?? '0.0'}",
@@ -131,6 +134,9 @@ class _MapPageState extends State<MapPage> {
               initialZoom: state.zoom,
               onMapReady: () => mapBloc.add(MapStarted()),
               onMapEvent: (event) {
+                debugPrint(
+                  'MapEvent: ${event.runtimeType}, zoom: ${mapController.camera.zoom}',
+                );
                 if (event is MapEventTap) {
                   mapBloc.add(MapLocationDeselected());
                 } else if (event is MapEventMoveEnd ||
@@ -143,6 +149,7 @@ class _MapPageState extends State<MapPage> {
                     () => mapBloc.add(
                       MapBoundsChanged(
                         bounds: mapController.camera.visibleBounds,
+                        zoom: mapController.camera.zoom,
                       ),
                     ),
                   );
@@ -176,9 +183,9 @@ class _MapPageState extends State<MapPage> {
       markers: [
         Marker(
           point: currentPosition,
-          width: 60,
-          height: 60,
-          child: Icon(Icons.my_location, color: colors.primary, size: 40),
+          width: 70,
+          height: 70,
+          child: const MyLocationMarker(),
         ),
       ],
     );
@@ -186,19 +193,54 @@ class _MapPageState extends State<MapPage> {
 
   Widget _buildLocationsLayer(BuildContext context) {
     final mapBloc = context.read<MapBloc>();
+    const clusterer = LocationClusterer(
+      markerWidth: 85,
+      markerHeight: 52,
+      spacing: 1,
+    );
+    final clusters = clusterer.cluster(
+      mapBloc.state.locations,
+      mapBloc.state.zoom,
+    );
+    debugPrint(
+      'clustering mit state.zoom=${mapBloc.state.zoom}, ${mapBloc.state.locations.length} locations',
+    );
+
+    return MarkerLayer(
+      markers: clusters.map((c) {
+        final location = c.displayLocation;
+        return Marker(
+          point: location.position, // 👈 echte Position, kein Centroid
+          width: 130,
+          height: 80,
+          alignment: Alignment.topCenter,
+          child: LocationMarker(
+            location: location,
+            isSelected: mapBloc.state.selectedLocation?.id == location.id,
+            onTap: () =>
+                _onLocationTapped(context, location, mapController.camera.zoom),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildLocationsLayer1(BuildContext context) {
+    final mapBloc = context.read<MapBloc>();
 
     return MarkerClusterLayerWidget(
       options: MarkerClusterLayerOptions(
-        maxClusterRadius: 40,
-        size: const Size(40, 40),
+        maxClusterRadius: 130,
+        size: const Size(130, 80),
         zoomToBoundsOnClick: false,
         spiderfyCluster: false,
         markers: mapBloc.state.locations
             .map(
               (loc) => Marker(
                 point: loc.position,
-                width: 30,
-                height: 30,
+                width: 130,
+                height: 80,
+                alignment: Alignment.topCenter,
                 child: LocationMarker(
                   location: loc,
                   isSelected: mapBloc.state.selectedLocation?.id == loc.id,

@@ -15,6 +15,7 @@ extension AppFailureLocalization on AppFailure {
       InvalidSearchQueryFailure() => l10n.errorSearch,
       InvalidDateRangeFailure() => l10n.infoEnddateBeforeStartdate,
       UnexpectedFailure() => l10n.unknownError,
+      NoLocationAvailable() => l10n.noLocationsFound,
       LocationPermissionDeniedFailure() => "todo error",
       LocationPermissionDeniedForeverFailure() => "todo error",
       LocationServiceDisabledFailure() => "todo error",

@@ -22,5 +22,6 @@ abstract class Location with _$Location {
     AppImage? thumbnailImage,
     bool? likedByCurrentUser,
     bool? joinedByCurrentUser,
+    @Default(0) int promotionTier,
   }) = _Location;
 }

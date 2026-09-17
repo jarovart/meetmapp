@@ -1,4 +1,5 @@
 import 'package:casttime/core/result/app_result.dart';
+import 'package:casttime/core/result/paged_result.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/domain/model/location_detail.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -29,6 +30,15 @@ abstract interface class LocationRepository {
   Future<AppResult<bool>> isLiked(int locationId);
 
   Future<AppResult<bool>> isJoined(int locationId);
+
+  Future<AppResult<PagedResult<Location>>> searchLocationsWithFilter({
+    String? query,
+    required LatLngBounds bounds,
+    required DateTime start,
+    required DateTime end,
+    required int page,
+    required int pageSize,
+  });
 }
 
 class CreateLocationCommand {}

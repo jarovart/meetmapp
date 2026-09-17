@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'app_image.dart';
@@ -9,6 +9,7 @@ part of 'app_image.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
@@ -25,16 +26,21 @@ $AppImageCopyWith<AppImage> get copyWith => _$AppImageCopyWithImpl<AppImage>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppImage&&(identical(other.id, id) || other.id == id)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl));
+  final _this = this as AppImage;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppImage&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.imageUrl, _this.imageUrl) || other.imageUrl == _this.imageUrl));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,imageUrl);
+int get hashCode {
+  final _this = this as AppImage;
+  return Object.hash(runtimeType,_this.id,_this.imageUrl);
+}
 
 @override
 String toString() {
-  return 'AppImage(id: $id, imageUrl: $imageUrl)';
+  final _this = this as AppImage;
+  return 'AppImage(id: ${_this.id}, imageUrl: ${_this.imageUrl})';
 }
 
 
@@ -63,7 +69,7 @@ class _$AppImageCopyWithImpl<$Res>
 /// Create a copy of AppImage
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? imageUrl = null,}) {
-  return _then(_self.copyWith(
+  return _then(AppImage(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,
@@ -223,16 +229,18 @@ _$AppImageCopyWith<_AppImage> get copyWith => __$AppImageCopyWithImpl<_AppImage>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppImage&&(identical(other.id, id) || other.id == id)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppImage&&(identical(other.id, id) || other.id == id)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,imageUrl);
+int get hashCode {
+    return Object.hash(runtimeType,id,imageUrl);
+}
 
 @override
 String toString() {
-  return 'AppImage(id: $id, imageUrl: $imageUrl)';
+    return 'AppImage(id: $id, imageUrl: $imageUrl)';
 }
 
 

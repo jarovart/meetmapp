@@ -17,11 +17,13 @@ import 'package:latlong2/latlong.dart';
 class MapBloc extends Bloc<MapEvent, MapState> {
   final LocationService locationService;
   final LocationPermissionService permissionService;
+  StreamSubscription<LatLng>? _positionSubscription;
   Timer? _searchDebounce;
 
   MapBloc(this.locationService, this.permissionService)
     : super(MapState.initial()) {
     on<MapStarted>(_onMapStarted);
+    on<MapPositionUpdated>(_onPositionUpdated);
     on<MapBoundsChanged>(_onBoundsChanged);
     on<MapSliderChanged>(_onSliderChanged);
     on<MapSearchChanged>(_onSearchChanged);
@@ -35,6 +37,12 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     final permissionResult = await permissionService.requestPermission();
     debugPrint('onMapStarted: permission result = $permissionResult');
 
+    _positionSubscription?.cancel();
+    _positionSubscription = locationService.watchCurrentPosition().listen(
+      (currentPosition) =>
+          add(MapPositionUpdated(currentPosition: currentPosition)),
+    );
+
     switch (permissionResult) {
       case Success<LocationPermission>():
         add(MapGeoLocationChanged());
@@ -45,20 +53,30 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     }
   }
 
+  void _onPositionUpdated(MapPositionUpdated event, Emitter<MapState> emit) {
+    emit(state.copyWith(currentPosition: event.currentPosition));
+  }
+
   Future<void> _onGeoLocationChanged(
     MapGeoLocationChanged event,
     Emitter<MapState> emit,
   ) async {
     debugPrint('onGeoLocationChanged: fetching position');
-    final positionResult = await permissionService.getCurrentPosition();
+    final positionResult = await locationService.getCurrentPosition();
     debugPrint('onGeoLocationChanged: position result = $positionResult');
     switch (positionResult) {
       case Success<LatLng>(:final data):
         debugPrint('onGeoLocationChanged: emitting currentPosition = $data');
-        emit(state.copyWith(currentPosition: data, zoom: 13));
-      case Failure<LatLng>():
+        emit(
+          state.copyWith(
+            currentPosition: data,
+            recenterRequestId: state.recenterRequestId + 1,
+            zoom: 13,
+          ),
+        );
+      case Failure<LatLng>(:final failure):
         debugPrint('onGeoLocationChanged: FAILED to get position');
-        break; // GPS-Fix fehlgeschlagen, bei Welt-Zoom bleiben
+        emit(state.copyWith(status: LoadStatus.failure, failure: failure));
     }
   }
 
@@ -66,7 +84,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     MapBoundsChanged event,
     Emitter<MapState> emit,
   ) async {
-    emit(state.copyWith(bounds: event.bounds, clearFailure: true));
+    emit(
+      state.copyWith(
+        bounds: event.bounds,
+        zoom: event.zoom,
+        clearFailure: true,
+      ),
+    );
 
     final result = await locationService.fetchLocationsWithDateRange(
       event.bounds,
@@ -156,13 +180,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   void _onLocationSelected(MapLocationSelected event, Emitter<MapState> emit) {
-    emit(
-      state.copyWith(
-        selectedLocation: event.location,
-        currentPosition: event.location.position,
-        zoom: event.zoom,
-      ),
-    );
+    emit(state.copyWith(selectedLocation: event.location, zoom: event.zoom));
   }
 
   void _onLocationDeselected(
@@ -177,6 +195,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   @override
   Future<void> close() {
     _searchDebounce?.cancel();
+    _positionSubscription?.cancel();
     return super.close();
   }
 }

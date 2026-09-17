@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -22,21 +23,23 @@ class MapCameraUtil {
     _centerBeforeShift ??= camera.center;
     final LatLng newCenter;
     if (isMobileSheetOpen) {
-      final up = camera.project(camera.visibleBounds.northEast);
-      final bottom = camera.project(camera.visibleBounds.southWest);
-      final mapWidthPx = up.y - bottom.y;
+      final up = camera.latLngToScreenOffset(camera.visibleBounds.northEast);
+      final bottom = camera.latLngToScreenOffset(
+        camera.visibleBounds.southWest,
+      );
+      final mapWidthPx = up.dy - bottom.dy;
 
-      final projected = camera.project(target);
-      final shifted = Point<double>(projected.x, projected.y - mapWidthPx / 4);
-      newCenter = camera.unproject(shifted);
+      final projected = camera.latLngToScreenOffset(target);
+      final shifted = Offset(projected.dx, projected.dy - mapWidthPx / 3.3);
+      newCenter = camera.screenOffsetToLatLng(shifted);
     } else {
-      final left = camera.project(camera.visibleBounds.southWest);
-      final right = camera.project(camera.visibleBounds.northEast);
-      final mapWidthPx = right.x - left.x;
+      final left = camera.latLngToScreenOffset(camera.visibleBounds.southWest);
+      final right = camera.latLngToScreenOffset(camera.visibleBounds.northEast);
+      final mapWidthPx = right.dx - left.dx;
 
-      final projected = camera.project(target);
-      final shifted = Point<double>(projected.x - mapWidthPx / 4, projected.y);
-      newCenter = camera.unproject(shifted);
+      final projected = camera.latLngToScreenOffset(target);
+      final shifted = Offset(projected.dx - mapWidthPx / 4, projected.dy);
+      newCenter = camera.screenOffsetToLatLng(shifted);
     }
 
     _mapController.move(newCenter, camera.zoom);

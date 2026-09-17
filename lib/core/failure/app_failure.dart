@@ -76,3 +76,7 @@ final class LocationServiceDisabledFailure extends AppFailure {
 final class LocationTimeoutFailure extends AppFailure {
   const LocationTimeoutFailure({super.requestId, super.cause});
 }
+
+final class NoLocationAvailable extends AppFailure {
+  const NoLocationAvailable({super.requestId, super.cause});
+}

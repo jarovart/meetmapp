@@ -14,6 +14,7 @@ class MapState {
   final DateTime endDate;
   final RangeValues rangeValues;
   final LatLng? currentPosition;
+  final int recenterRequestId;
   final LatLngBounds bounds;
   final double zoom;
   final LoadStatus status;
@@ -30,6 +31,7 @@ class MapState {
     required this.currentPosition,
     required this.bounds,
     required this.zoom,
+    this.recenterRequestId = 0,
     this.status = LoadStatus.initial,
     this.failure,
   });
@@ -61,6 +63,7 @@ class MapState {
     DateTime? endDate,
     RangeValues? rangeValues,
     LatLng? currentPosition,
+    int? recenterRequestId,
     LatLngBounds? bounds,
     double? zoom,
     LoadStatus? status,
@@ -78,6 +81,7 @@ class MapState {
       endDate: endDate ?? this.endDate,
       rangeValues: rangeValues ?? this.rangeValues,
       currentPosition: currentPosition ?? this.currentPosition,
+      recenterRequestId: recenterRequestId ?? this.recenterRequestId,
       bounds: bounds ?? this.bounds,
       zoom: zoom ?? this.zoom,
       status: status ?? this.status,

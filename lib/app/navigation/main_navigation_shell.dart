@@ -1,7 +1,10 @@
+import 'package:casttime/app/navigation/util/route_config.dart';
+import 'package:casttime/app/navigation/widgets/bottom_bar_extension.dart';
 import 'package:casttime/app/presentation/banner/appbottom_banner.dart';
+import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:casttime/features/auth/presentation/cubit/pages/profile_nav_icon.dart';
 import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
 import 'package:casttime/features/map/presentation/bloc/map_event.dart';
-import 'package:casttime/features/map/presentation/widgets/mapslider/map_slider_collapsible_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +22,19 @@ class MainNavigationShell extends StatelessWidget {
       debugPrint("map center function");
       context.read<MapBloc>().add(MapGeoLocationChanged());
       return;
+    }
+    const profileTabIndex = 4;
+    if (index == profileTabIndex) {
+      final isLoggedIn = context.read<AuthCubit>().state.isLoggedIn;
+      if (!isLoggedIn) {
+        context.go(RouteConfig.loginUrl);
+        return;
+      } else {
+        context.go(
+          RouteConfig.profileUrl,
+          extra: context.read<AuthCubit>().state.userId,
+        );
+      }
     }
 
     navigationShell.goBranch(index, initialLocation: isReclicked);
@@ -66,8 +82,8 @@ class MainNavigationShell extends StatelessWidget {
                   child: Column(
                     children: [
                       const AppBottomBanner(),
-                      CollapsibleFilterBar(
-                        visible: navigationShell.currentIndex == 0,
+                      BottomBarExtension(
+                        currentIndex: navigationShell.currentIndex,
                       ),
                       NavigationBar(
                         selectedIndex: navigationShell.currentIndex,
@@ -101,8 +117,8 @@ class MainNavigationShell extends StatelessWidget {
                             label: 'Meine',
                           ),
                           NavigationDestination(
-                            icon: Icon(Icons.person_outline),
-                            selectedIcon: Icon(Icons.person),
+                            icon: ProfileNavIcon(),
+                            selectedIcon: ProfileNavIcon(selected: true),
                             label: 'Profil',
                           ),
                         ],

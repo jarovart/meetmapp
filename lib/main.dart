@@ -5,8 +5,7 @@ import 'package:casttime/app/navigation/app_router.dart';
 import 'package:casttime/app/presentation/banner/appbanner_cubit.dart';
 import 'package:casttime/app/theme/appdesign.dart';
 import 'package:casttime/app/theme/themedesign.dart';
-import 'package:casttime/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:casttime/features/auth/presentation/bloc/auth_event.dart';
+import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
 import 'package:casttime/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -47,8 +46,8 @@ class CasttimeApp extends StatelessWidget {
         /*ChangeNotifierProvider(
           create: (_) => MapViewController(mapController: MapController()),
         ),*/
-        BlocProvider<AuthBloc>.value(
-          value: getIt<AuthBloc>()..add(AuthStatusRequested()),
+        BlocProvider<AuthCubit>.value(
+          value: getIt<AuthCubit>()..checkAuthStatus(),
         ),
         BlocProvider<AppBannerCubit>.value(value: getIt<AppBannerCubit>()),
         BlocProvider<MapBloc>.value(value: getIt<MapBloc>()),

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'location_detail.dart';
@@ -9,6 +9,7 @@ part of 'location_detail.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
@@ -25,16 +26,21 @@ $LocationDetailCopyWith<LocationDetail> get copyWith => _$LocationDetailCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LocationDetail&&(identical(other.location, location) || other.location == location)&&const DeepCollectionEquality().equals(other.images, images));
+  final _this = this as LocationDetail;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LocationDetail&&(identical(other.location, _this.location) || other.location == _this.location)&&const DeepCollectionEquality().equals(other.images, _this.images));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,location,const DeepCollectionEquality().hash(images));
+int get hashCode {
+  final _this = this as LocationDetail;
+  return Object.hash(runtimeType,_this.location,const DeepCollectionEquality().hash(_this.images));
+}
 
 @override
 String toString() {
-  return 'LocationDetail(location: $location, images: $images)';
+  final _this = this as LocationDetail;
+  return 'LocationDetail(location: ${_this.location}, images: ${_this.images})';
 }
 
 
@@ -63,7 +69,7 @@ class _$LocationDetailCopyWithImpl<$Res>
 /// Create a copy of LocationDetail
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? location = null,Object? images = null,}) {
-  return _then(_self.copyWith(
+  return _then(LocationDetail(
 location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as Location,images: null == images ? _self.images : images // ignore: cast_nullable_to_non_nullable
 as List<AppImage>,
@@ -216,7 +222,7 @@ return $default(_that.location,_that.images);case _:
 
 
 class _LocationDetail implements LocationDetail {
-  const _LocationDetail({required this.location, required final  List<AppImage> images}): _images = images;
+  const _LocationDetail({required this.location, required  List<AppImage> images}): _images = images;
   
 
 @override final  Location location;
@@ -238,16 +244,18 @@ _$LocationDetailCopyWith<_LocationDetail> get copyWith => __$LocationDetailCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LocationDetail&&(identical(other.location, location) || other.location == location)&&const DeepCollectionEquality().equals(other._images, _images));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LocationDetail&&(identical(other.location, location) || other.location == location)&&const DeepCollectionEquality().equals(other.images, _images));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,location,const DeepCollectionEquality().hash(_images));
+int get hashCode {
+    return Object.hash(runtimeType,location,const DeepCollectionEquality().hash(_images));
+}
 
 @override
 String toString() {
-  return 'LocationDetail(location: $location, images: $images)';
+    return 'LocationDetail(location: $location, images: $images)';
 }
 
 

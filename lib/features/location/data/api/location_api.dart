@@ -1,10 +1,11 @@
 import 'package:casttime/features/location/data/dto/request/createlocation_requestdto.dart';
 import 'package:casttime/features/location/data/dto/response/location_base_response_dto.dart';
 import 'package:casttime/features/location/data/dto/response/location_full_response_dto.dart';
+import 'package:casttime/features/location/data/dto/response/location_slice_response_dto.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
-part 'locationapi.g.dart';
+part 'location_api.g.dart';
 
 @RestApi()
 abstract class LocationApi {
@@ -26,7 +27,7 @@ abstract class LocationApi {
     @Query('query') String query,
   );
 
-  @POST('/api/locations')
+  @POST('/api/locations/create')
   Future<LocationBaseResponseDTO> createLocation(
     @Body() CreateLocationRequestDTO request,
   );
@@ -58,4 +59,17 @@ abstract class LocationApi {
 
   @GET('/api/locations/isLiked')
   Future<bool> isLiked(@Query("id") int id);
+
+  @GET('/api/locations/findByFilter')
+  Future<LocationSliceResponseDTO> searchLocationsWithFilter({
+    @Query('query') String? query,
+    @Query('minLat') required double minLat,
+    @Query('maxLat') required double maxLat,
+    @Query('minLng') required double minLng,
+    @Query('maxLng') required double maxLng,
+    @Query('rangeStart') required String rangeStart,
+    @Query('rangeEnd') required String rangeEnd,
+    @Query('page') required int page,
+    @Query('pageSize') required int pageSize,
+  });
 }

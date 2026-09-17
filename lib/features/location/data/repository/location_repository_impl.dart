@@ -1,9 +1,11 @@
 import 'package:casttime/core/failure/api_failure_mapper.dart';
 import 'package:casttime/core/result/app_result.dart';
-import 'package:casttime/features/location/data/api/locationapi.dart';
+import 'package:casttime/core/result/paged_result.dart';
+import 'package:casttime/features/location/data/api/location_api.dart';
 import 'package:casttime/features/location/data/mapper/location_detail_dto_mapper.dart';
 import 'package:casttime/features/location/data/mapper/location_dto_mapper.dart';
 import 'package:casttime/features/location/data/mapper/location_request_mapper.dart';
+import 'package:casttime/features/location/data/mapper/location_slice_dto_mapper.dart';
 import 'package:casttime/features/location/domain/model/location_detail.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
@@ -81,19 +83,6 @@ class LocationRepositoryImpl implements LocationRepository {
     );
   }
 
-  Future<AppResult<Domain>> _execute<Dto, Domain>({
-    required Future<Dto> Function() request,
-    required Domain Function(Dto dto) map,
-  }) async {
-    try {
-      final dto = await request();
-      return Success(map(dto));
-    } catch (error, stackTrace) {
-      debugPrint("repository error: $error");
-      return Failure(_failureMapper.map(error, stackTrace));
-    }
-  }
-
   @override
   Future<AppResult<void>> join(int locationId) {
     return _execute(request: () => _api.join(locationId), map: (_) => {});
@@ -125,5 +114,42 @@ class LocationRepositoryImpl implements LocationRepository {
   @override
   Future<AppResult<bool>> isLiked(int locationId) {
     return _execute(request: () => _api.isLiked(locationId), map: (dto) => dto);
+  }
+
+  @override
+  Future<AppResult<PagedResult<Location>>> searchLocationsWithFilter({
+    String? query,
+    required LatLngBounds bounds,
+    required DateTime start,
+    required DateTime end,
+    required int page,
+    required int pageSize,
+  }) {
+    return _execute(
+      request: () => _api.searchLocationsWithFilter(
+        query: query,
+        minLat: bounds.southWest.latitude,
+        maxLat: bounds.northEast.latitude,
+        minLng: bounds.southWest.longitude,
+        maxLng: bounds.northEast.longitude,
+        rangeStart: start.toIso8601String(),
+        rangeEnd: end.toIso8601String(),
+        page: page,
+        pageSize: pageSize,
+      ),
+      map: (dto) => dto.toDomain(),
+    );
+  }
+
+  Future<AppResult<Domain>> _execute<Dto, Domain>({
+    required Future<Dto> Function() request,
+    required Domain Function(Dto dto) map,
+  }) async {
+    try {
+      final dto = await request();
+      return Success(map(dto));
+    } catch (error, stackTrace) {
+      return Failure(_failureMapper.map(error, stackTrace));
+    }
   }
 }
