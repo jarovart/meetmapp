@@ -17,6 +17,8 @@ class RouteConfig {
   static const String settingsUrl = "/settings";
   static const String supportUrl = "/support";
   static const String infoUrl = "/info";
+  static const String friendsUrl = '/friends';
+  static const String editProfileUrl = '/myprofile/edit';
 
   // ─────────────────────────────────────────────
   // Testing Section

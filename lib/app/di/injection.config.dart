@@ -14,6 +14,8 @@ import 'package:casttime/app/di/modules/logger_module.dart' as _i186;
 import 'package:casttime/app/di/modules/network_module.dart' as _i585;
 import 'package:casttime/app/di/modules/storage_module.dart' as _i587;
 import 'package:casttime/app/presentation/banner/appbanner_cubit.dart' as _i711;
+import 'package:casttime/app/presentation/cubit/profile_section_cubit.dart'
+    as _i337;
 import 'package:casttime/core/failure/api_failure_mapper.dart' as _i993;
 import 'package:casttime/core/failure/geolocation_failure_mapper.dart' as _i455;
 import 'package:casttime/core/network/auth_interceptor.dart' as _i938;
@@ -112,6 +114,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => storageModule.provideFlutterSecureStorage(),
     );
     gh.lazySingleton<_i711.AppBannerCubit>(() => _i711.AppBannerCubit());
+    gh.lazySingleton<_i337.ProfileSectionCubit>(
+      () => _i337.ProfileSectionCubit(),
+    );
     gh.lazySingleton<_i994.LoggingInterceptor>(
       () => _i994.LoggingInterceptor(),
     );

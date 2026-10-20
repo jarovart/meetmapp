@@ -1,5 +1,4 @@
 import 'package:casttime/features/map/presentation/widgets/mapslider/map_slider.dart';
-import 'package:casttime/features/map/presentation/widgets/mapslider/map_slider_daterange.dart';
 import 'package:flutter/material.dart';
 
 class CollapsibleFilterBar extends StatelessWidget {

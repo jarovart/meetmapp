@@ -49,8 +49,8 @@ class CasttimeApp extends StatelessWidget {
         BlocProvider<AuthCubit>.value(
           value: getIt<AuthCubit>()..checkAuthStatus(),
         ),
-        BlocProvider<AppBannerCubit>.value(value: getIt<AppBannerCubit>()),
         BlocProvider<MapBloc>.value(value: getIt<MapBloc>()),
+        BlocProvider<AppBannerCubit>.value(value: getIt<AppBannerCubit>()),
       ],
       child: MaterialApp.router(
         //home: const MapPage(),

@@ -1,4 +1,5 @@
 import 'package:casttime/app/di/injection.dart';
+import 'package:casttime/app/navigation/app_navigation.dart';
 import 'package:casttime/app/navigation/main_navigation_shell.dart';
 import 'package:casttime/app/navigation/util/route_config.dart';
 import 'package:casttime/core/util/go_router_refresh_stream.dart';
@@ -26,114 +27,86 @@ final _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/map',
+  initialLocation: RouteConfig.mapUrl,
   refreshListenable: GoRouterRefreshStream(getIt<AuthCubit>().stream),
+  redirect: _authGuard,
   routes: [
-    /*GoRoute(
-      path: RouteConfig.loginUrl,
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) {
-        final redirect = state.uri.queryParameters['redirect'];
-        return LoginPage(redirectionUrl: redirect);
-      },
-    ),*/
-
-    // WICHTIG: literale Route VOR der parametrisierten deklarieren,
-    // sonst würde "/profile/me" fälschlich als username="me" gematcht.
     StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) {
-        return MainNavigationShell(navigationShell: navigationShell);
-      },
+      builder: (context, state, navigationShell) =>
+          MainNavigationShell(navigationShell: navigationShell),
       branches: [
         StatefulShellBranch(
           navigatorKey: _mapNavigatorKey,
           routes: [
             GoRoute(
-              path: '/map',
-              builder: (context, state) {
-                return const MapPage();
-              },
-              routes: [
-                GoRoute(
-                  path: 'locationlist',
-                  builder: (context, state) {
-                    return SizedBox(); //LocationsListPage();
-                  },
-                ),
-              ],
+              path: RouteConfig.mapUrl,
+              builder: (_, __) => const MapPage(),
             ),
           ],
         ),
-
         StatefulShellBranch(
           navigatorKey: _forYouNavigatorKey,
           routes: [
             GoRoute(
               path: RouteConfig.locationListUrl,
-              builder: (context, state) {
-                return const LocationsListPage();
-              },
+              builder: (_, __) => const LocationsListPage(),
             ),
-
             GoRoute(
               path: RouteConfig.profileUrl,
-              //parentNavigatorKey: _rootNavigatorKey,
-              builder: (context, state) {
-                final username = state.pathParameters['username']!;
-                return ProfilePage(username: username);
-              },
+              builder: (_, state) =>
+                  ProfilePage(username: state.pathParameters['username']!),
             ),
           ],
         ),
-
         StatefulShellBranch(
           navigatorKey: _createNavigatorKey,
           routes: [
             GoRoute(
               path: '/create-location',
-              builder: (context, state) {
-                return SizedBox();
-                //const UserProfilePage(); // LocationCreatePage();
-              },
+              builder: (_, __) => const SizedBox(),
             ),
           ],
         ),
-
         StatefulShellBranch(
           navigatorKey: _myLocationsNavigatorKey,
           routes: [
             GoRoute(
               path: '/my-locations',
-              builder: (context, state) {
-                return SizedBox(); //const UserProfilePage();
-              },
+              builder: (_, __) => const SizedBox(),
             ),
           ],
         ),
-
         StatefulShellBranch(
           navigatorKey: _profileNavigatorKey,
           routes: [
             GoRoute(
               path: RouteConfig.myProfileUrl,
-              //parentNavigatorKey: _rootNavigatorKey,
-              redirect: (context, state) {
-                final isLoggedIn = getIt<AuthCubit>().state.isLoggedIn;
-                if (!isLoggedIn) {
-                  return '${RouteConfig.loginUrl}?redirect=${Uri.encodeComponent(RouteConfig.myProfileUrl)}';
-                }
-                return null;
-              },
-              builder: (context, state) {
-                return ProfilePage();
-              },
+              builder: (_, __) => const ProfilePage(),
+              routes: [
+                GoRoute(path: 'edit', builder: (_, __) => const SizedBox()),
+              ],
             ),
             GoRoute(
               path: RouteConfig.loginUrl,
-              builder: (context, state) {
-                final redirect = state.uri.queryParameters['redirect'];
-                return LoginPage(redirectionUrl: redirect);
-              },
+              builder: (_, state) => LoginPage(
+                redirectionUrl: RouteConfig.getRedirectUrlFromLogin(state.uri),
+              ),
+            ),
+            GoRoute(
+              path: RouteConfig.infoUrl,
+              builder: (_, __) => const SizedBox(),
+            ),
+            GoRoute(
+              path: RouteConfig.supportUrl,
+              builder: (_, __) => const SizedBox(),
+            ),
+            GoRoute(
+              path: RouteConfig.friendsUrl,
+              builder: (_, __) => const SizedBox(),
+            ),
+            GoRoute(
+              path: RouteConfig.settingsUrl,
+              builder: (_, __) => const SizedBox(),
             ),
           ],
         ),
@@ -141,3 +114,17 @@ final appRouter = GoRouter(
     ),
   ],
 );
+
+String? _authGuard(BuildContext context, GoRouterState state) {
+  final isLoggedIn = getIt<AuthCubit>().state.isLoggedIn;
+  final path = state.uri.path;
+
+  if (!isLoggedIn && AppNavigation.isProtected(path)) {
+    return RouteConfig.getLoginUrlWithRedirect(state.uri.toString());
+  }
+  if (isLoggedIn && path == RouteConfig.loginUrl) {
+    return RouteConfig.getRedirectUrlFromLogin(state.uri) ??
+        RouteConfig.myProfileUrl;
+  }
+  return null;
+}
