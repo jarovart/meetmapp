@@ -33,6 +33,13 @@ import 'package:casttime/features/auth/domain/service/auth_service.dart'
     as _i976;
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart'
     as _i713;
+import 'package:casttime/features/info/data/api/info_api.dart' as _i248;
+import 'package:casttime/features/info/data/service/info_service_impl.dart'
+    as _i559;
+import 'package:casttime/features/info/domain/service/info_service.dart'
+    as _i1030;
+import 'package:casttime/features/info/presentation/bloc/info_bloc.dart'
+    as _i144;
 import 'package:casttime/features/location/data/api/location_api.dart' as _i507;
 import 'package:casttime/features/location/data/api/place_api.dart' as _i8;
 import 'package:casttime/features/location/data/repository/location_repository_impl.dart'
@@ -158,6 +165,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i8.PlaceApi>(
       () => networkModule.providePlaceApi(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i248.InfoApi>(
+      () => networkModule.provideInfoApi(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i310.LocationRepository>(
       () => _i113.LocationRepositoryImpl(
         gh<_i507.LocationApi>(),
@@ -169,6 +179,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i310.LocationRepository>(),
         gh<_i418.LocationPermissionService>(),
         gh<_i455.LocationFailureMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i1030.InfoService>(
+      () => _i559.InfoServiceImpl(
+        gh<_i248.InfoApi>(),
+        gh<_i993.ApiFailureMapper>(),
       ),
     );
     gh.lazySingleton<_i751.ProfileRepository>(
@@ -239,6 +255,7 @@ extension GetItInjectableX on _i174.GetIt {
         listType,
       ),
     );
+    gh.factory<_i144.InfoBloc>(() => _i144.InfoBloc(gh<_i1030.InfoService>()));
     gh.factoryParam<_i312.LocationDetailBloc, _i96.Location, dynamic>(
       (initialLocation, _) => _i312.LocationDetailBloc(
         gh<_i283.LocationService>(),
