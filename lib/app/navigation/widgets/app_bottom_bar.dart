@@ -19,7 +19,10 @@ class AppBottomBar extends StatelessWidget {
     );
     final ctx = NavContext(location: location, isLoggedIn: isLoggedIn);
 
-    final chain = AppNavigation.chainForLocation(location);
+    final chain = AppNavigation.chainForLocation(
+      location,
+      fallbackBranchIndex: navigationShell.currentIndex,
+    );
     final replacing = chain
         .where((d) => d.replacesBar && d.hasChildren)
         .lastOrNull;

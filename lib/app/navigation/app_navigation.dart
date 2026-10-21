@@ -1,5 +1,6 @@
 import 'package:casttime/app/navigation/model/nav_destination.dart';
 import 'package:casttime/app/navigation/util/route_config.dart';
+import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:casttime/features/auth/presentation/cubit/pages/profile_nav_icon.dart';
 import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
 import 'package:casttime/features/map/presentation/bloc/map_event.dart';
@@ -57,9 +58,10 @@ abstract final class AppNavigation {
       children: [
         NavDestination(
           id: 'login',
-          label: 'Anmelden',
-          icon: Icons.login,
-          routePath: RouteConfig.loginUrl,
+          label: 'Logout',
+          icon: Icons.logout,
+          //routePath: RouteConfig.loginUrl,
+          onSelected: _logout,
           visibleWhen: _loggedIn,
         ),
         NavDestination(
@@ -140,12 +142,20 @@ abstract final class AppNavigation {
 
   static void _saveForm(BuildContext context) => debugPrint('save editprofile');
 
+  static void _logout(BuildContext context) {
+    context.read<AuthCubit>().logout();
+    //context.go(RouteConfig.loginUrl);
+  }
+
   // ── Ableitung aus der URL ──────────────────────────────
 
   /// Tiefste Kette, deren letzter Knoten auf [location] passt.
   /// Eltern müssen selbst nicht matchen — so dürfen Unterpunkte
   /// eigene, frei gewählte Pfade haben.
-  static List<NavDestination> chainForLocation(String location) {
+  static List<NavDestination> chainForLocation(
+    String location, {
+    int? fallbackBranchIndex,
+  }) {
     List<NavDestination> search(List<NavDestination> level) {
       var best = <NavDestination>[];
 
@@ -162,7 +172,12 @@ abstract final class AppNavigation {
     }
 
     final result = search(destinations);
-    return result.isEmpty ? [destinations.first] : result;
+    if (result.isNotEmpty) return result;
+
+    final fallback = destinations
+        .where((d) => d.branchIndex == fallbackBranchIndex)
+        .firstOrNull;
+    return [fallback ?? destinations.first];
   }
 
   /// Alle login-pflichtigen Pfade — Futter für den Router-Guard.
