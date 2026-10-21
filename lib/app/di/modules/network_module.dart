@@ -2,6 +2,7 @@ import 'package:casttime/app/config/api_config.dart';
 import 'package:casttime/core/network/auth_interceptor.dart';
 import 'package:casttime/core/network/logging_interceptor.dart';
 import 'package:casttime/features/auth/data/api/auth_api.dart';
+import 'package:casttime/features/info/data/api/info_api.dart';
 import 'package:casttime/features/location/data/api/location_api.dart';
 import 'package:casttime/features/location/data/api/place_api.dart';
 import 'package:casttime/features/profile/data/api/profile_api.dart';
@@ -42,4 +43,7 @@ abstract class NetworkModule {
 
   @lazySingleton
   PlaceApi providePlaceApi(Dio dio) => PlaceApi(dio);
+
+  @lazySingleton
+  InfoApi provideInfoApi(Dio dio) => InfoApi(dio);
 }

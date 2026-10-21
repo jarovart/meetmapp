@@ -5,6 +5,7 @@ import 'package:casttime/app/navigation/util/route_config.dart';
 import 'package:casttime/core/util/go_router_refresh_stream.dart';
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:casttime/features/auth/presentation/cubit/pages/login_page.dart';
+import 'package:casttime/features/info/presentation/pages/info_page.dart';
 import 'package:casttime/features/location/presentation/pages/location_list_page.dart';
 import 'package:casttime/features/map/presentation/pages/map_page.dart';
 import 'package:casttime/features/profile/presentation/pages/profile_page.dart';
@@ -94,7 +95,7 @@ final appRouter = GoRouter(
             ),
             GoRoute(
               path: RouteConfig.infoUrl,
-              builder: (_, __) => const SizedBox(),
+              builder: (_, __) => const InfoPage(),
             ),
             GoRoute(
               path: RouteConfig.supportUrl,
