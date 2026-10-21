@@ -60,7 +60,7 @@ abstract final class AppNavigation {
           label: 'Anmelden',
           icon: Icons.login,
           routePath: RouteConfig.loginUrl,
-          visibleWhen: _loggedOut,
+          visibleWhen: _loggedIn,
         ),
         NavDestination(
           id: 'info',
@@ -79,6 +79,7 @@ abstract final class AppNavigation {
           label: 'Freunde',
           icon: Icons.people_outline,
           routePath: RouteConfig.friendsUrl,
+          visibleWhen: _loggedIn,
           requiresAuth: true,
         ),
         NavDestination(
@@ -92,6 +93,7 @@ abstract final class AppNavigation {
           label: 'Bearbeiten',
           icon: Icons.edit_outlined,
           routePath: RouteConfig.editProfileUrl,
+          visibleWhen: _loggedIn,
           requiresAuth: true,
           replacesBar: true,
           children: [
@@ -120,7 +122,7 @@ abstract final class AppNavigation {
   ];
 
   // ── Sichtbarkeit ───────────────────────────────────────
-  static bool _loggedOut(NavContext ctx) => !ctx.isLoggedIn;
+  static bool _loggedIn(NavContext ctx) => ctx.isLoggedIn;
 
   // ── Darstellung ────────────────────────────────────────
   static Widget _profileIcon(bool selected) =>

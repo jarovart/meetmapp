@@ -59,3 +59,5 @@ coverage/
 *.tmp
 *.DS_Store
 lib/app/config/dev_config.dart
+linux/flutter/generated_plugins.cmake
+macos/Flutter/GeneratedPluginRegistrant.swift
