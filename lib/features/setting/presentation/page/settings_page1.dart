@@ -64,7 +64,8 @@ class _SettingsView extends StatelessWidget {
     final supported = AppLocalizations.supportedLocales;
 
     return supported.firstWhere(
-      (locale) => locale.languageCode == systemLocale.languageCode,
+      (locale) =>
+          locale.languageCode.toLowerCase() == systemLocale.languageCode,
       orElse: () => supported.first,
     );
   }

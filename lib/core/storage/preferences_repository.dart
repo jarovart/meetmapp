@@ -28,7 +28,7 @@ class PreferencesRepository {
       return AppSettings(
         locale: json[_settingsLanguageCode] == null
             ? null
-            : Locale(json[_settingsLanguageCode] as String),
+            : Locale((json[_settingsLanguageCode] as String).toLowerCase()),
         design: AppDesign.values.firstWhere(
           (d) => d.name == json[_settingsDesign],
           orElse: () => AppDesign.system,
@@ -45,7 +45,7 @@ class PreferencesRepository {
 
   Future<bool> saveLocalSettings(AppSettings settings) async {
     final settingsJson = jsonEncode({
-      _settingsLanguageCode: settings.locale?.languageCode,
+      _settingsLanguageCode: settings.locale?.languageCode.toLowerCase(),
       _settingsDesign: settings.design.name,
       _settingsUpdatedAt: DateTime.utc(1970).toIso8601String(),
     });
@@ -74,17 +74,4 @@ class PreferencesRepository {
     await saveLocalSettings(settings);
     return settings;
   }
-
-  String? getString(String key) => _prefs.getString(key);
-  Future<void> setString(String key, String value) =>
-      _prefs.setString(key, value);
-
-  bool? getBool(String key) => _prefs.getBool(key);
-  Future<void> setBool(String key, bool value) => _prefs.setBool(key, value);
-
-  double? getDouble(String key) => _prefs.getDouble(key);
-  Future<void> setDouble(String key, double value) =>
-      _prefs.setDouble(key, value);
-
-  Future<void> remove(String key) => _prefs.remove(key);
 }

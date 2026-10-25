@@ -12,7 +12,7 @@ extension SettingsResponseDtoMapper on SettingsResponseDTO {
               languageCode!.isEmpty ||
               languageCode!.toLowerCase() == 'sys'
           ? null
-          : Locale(languageCode!),
+          : Locale(languageCode!.toLowerCase()),
       design: AppDesign.values.firstWhere(
         (d) => d.name.toLowerCase() == design.toLowerCase(),
         orElse: () => AppDesign.system,
