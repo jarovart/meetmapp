@@ -5,6 +5,7 @@ import 'package:casttime/app/navigation/util/route_config.dart';
 import 'package:casttime/core/failure/app_failure.dart';
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:casttime/features/setting/presentation/cubit/app_settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -49,6 +50,8 @@ class _LoginPageState extends State<LoginPage> {
     switch (result) {
       case Success<void>():
         TextInput.finishAutofillContext(shouldSave: true);
+        await context.read<AppSettingsCubit>().syncFromServer();
+        if (!mounted) return;
         _navigateAfterLogin(context.read<AuthCubit>().state.userId!);
       case Failure<void>(:final failure):
         setState(() {

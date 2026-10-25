@@ -6,6 +6,7 @@ import 'package:casttime/features/info/data/api/info_api.dart';
 import 'package:casttime/features/location/data/api/location_api.dart';
 import 'package:casttime/features/location/data/api/place_api.dart';
 import 'package:casttime/features/profile/data/api/profile_api.dart';
+import 'package:casttime/features/setting/data/api/settings_api.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
@@ -46,4 +47,7 @@ abstract class NetworkModule {
 
   @lazySingleton
   InfoApi provideInfoApi(Dio dio) => InfoApi(dio);
+
+  @lazySingleton
+  SettingsApi provideSettingsApi(Dio dio) => SettingsApi(dio);
 }

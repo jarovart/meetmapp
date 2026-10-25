@@ -75,4 +75,8 @@ class AuthCubit extends Cubit<AuthState> {
         return false;
     }
   }
+
+  bool isAuthenticated() {
+    return state.isLoggedIn;
+  }
 }

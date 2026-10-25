@@ -16,12 +16,15 @@ class ProfileNavIcon extends StatelessWidget {
           previous.status != current.status ||
           previous.username != current.username,
       builder: (context, state) {
+        final colors = Theme.of(context).colorScheme;
         if (!state.isLoggedIn) {
-          return Icon(selected ? Icons.person : Icons.person_outline);
+          return Icon(
+            selected ? Icons.person : Icons.person_outline,
+            color: colors.primary,
+          );
         }
 
         final initials = _initialsFrom(state.username);
-        final colors = Theme.of(context).colorScheme;
 
         return CircleAvatar(
           radius: 14,

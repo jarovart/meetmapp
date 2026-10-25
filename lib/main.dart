@@ -1,15 +1,6 @@
-import 'package:casttime/app/config/app_config.dart';
-import 'package:casttime/app/config/appscrollbehavior.dart';
+import 'package:casttime/app/app.dart';
 import 'package:casttime/app/di/injection.dart';
-import 'package:casttime/app/navigation/app_router.dart';
-import 'package:casttime/app/presentation/banner/appbanner_cubit.dart';
-import 'package:casttime/app/theme/appdesign.dart';
-import 'package:casttime/app/theme/themedesign.dart';
-import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
-import 'package:casttime/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 void main() async {
@@ -19,7 +10,9 @@ void main() async {
   await setupDependencies();
 
   runApp(CasttimeApp());
-  /*runApp(
+}
+
+/*runApp(
     MaterialApp(
       home: const MapPage(),
       title: AppConfig.appName,
@@ -31,44 +24,6 @@ void main() async {
       locale: null, // null system language
     ),
   );*/
-}
-
-class CasttimeApp extends StatelessWidget {
-  const CasttimeApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final design = AppDesign.system;
-    return MultiBlocProvider(
-      providers: [
-        //ChangeNotifierProvider(create: (_) => LocationListController()),
-        //ChangeNotifierProvider(create: (_) => AuthController("initmain")),
-        /*ChangeNotifierProvider(
-          create: (_) => MapViewController(mapController: MapController()),
-        ),*/
-        BlocProvider<AuthCubit>.value(
-          value: getIt<AuthCubit>()..checkAuthStatus(),
-        ),
-        BlocProvider<MapBloc>.value(value: getIt<MapBloc>()),
-        BlocProvider<AppBannerCubit>.value(value: getIt<AppBannerCubit>()),
-      ],
-      child: MaterialApp.router(
-        //home: const MapPage(),
-        title: AppConfig.appName,
-        debugShowCheckedModeBanner: false,
-        routerConfig: appRouter,
-        scrollBehavior: const AppScrollBehavior(),
-
-        theme: ThemeDesign.mapLightTheme(design),
-        darkTheme: ThemeDesign.mapDarkTheme(design),
-        themeMode: ThemeDesign.getThemeModeByAppDesign(design),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: null, // null system language
-      ),
-    );
-  }
-}
 
 /*
 void mains2() async {

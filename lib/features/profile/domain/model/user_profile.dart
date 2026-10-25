@@ -1,5 +1,5 @@
 import 'package:casttime/features/location/domain/model/app_image.dart';
-import 'package:casttime/features/setting/domain/model/settings_profile.dart';
+import 'package:casttime/features/setting/domain/model/app_settings.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'user_profile.freezed.dart';
@@ -18,6 +18,6 @@ abstract class UserProfile with _$UserProfile {
     required int joinedLocationCount,
     required int likedLocationCount,
     int? createdLocationCount, // nur bei eigenem Profil sichtbar
-    SettingsProfile? settings,
+    AppSettings? settings,
   }) = _UserProfile;
 }
