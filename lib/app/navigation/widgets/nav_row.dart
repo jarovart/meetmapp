@@ -41,9 +41,12 @@ class NavRow extends StatelessWidget {
       destinations: [
         for (final d in destinations)
           NavigationDestination(
-            icon: d.customIcon?.call(false) ?? Icon(d.icon),
+            icon:
+                d.customIcon?.call(false) ??
+                Icon(d.icon, color: colors.primary),
             selectedIcon:
-                d.customIcon?.call(true) ?? Icon(d.selectedIcon ?? d.icon),
+                d.customIcon?.call(true) ??
+                Icon(d.selectedIcon ?? d.icon, color: colors.primary),
             label: d.label,
             tooltip: d.label,
           ),

@@ -1,3 +1,4 @@
+import 'package:casttime/core/network/auth_interceptor.dart';
 import 'package:casttime/features/auth/data/dto/login_request_dto.dart';
 import 'package:casttime/features/auth/data/dto/login_response_dto.dart';
 import 'package:casttime/features/auth/data/dto/refresh_token_request_dto.dart';
@@ -15,10 +16,12 @@ abstract class AuthApi {
   Future<LoginResponseDTO> login(@Body() LoginRequestDTO loginRequest);
 
   @POST('/api/auth/refreshToken')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
   Future<RefreshTokenResponseDTO> refreshToken(
     @Body() RefreshTokenRequestDTO request,
   );
 
   @POST('/api/auth/logout')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
   Future<void> logout();
 }

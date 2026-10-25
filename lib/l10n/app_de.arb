@@ -200,5 +200,11 @@
   "messageFailed": "Nachricht konnte nicht gesendet werden.",
   "errorForbidden": "Diese Aktion ist nicht erlaubt.",
   "searchNoLocationsTitle": "Keine Locations gefunden",
-  "searchNoLocationsDescription": "Versuche einen anderen Suchbegriff."
+  "searchNoLocationsDescription": "Versuche einen anderen Suchbegriff.",
+  "designLightBlack": "Light Black",
+  "designLightRose": "Light Rose",
+  "designLightWine": "Light Wine",
+  "designDarkGold": "Dark Gold",
+  "designDarkPink": "Dark Pink",
+  "designDefault": "System Design"
 }

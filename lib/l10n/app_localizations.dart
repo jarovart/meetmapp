@@ -1297,6 +1297,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try a different search term.'**
   String get searchNoLocationsDescription;
+
+  /// No description provided for @designLightBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Light Black'**
+  String get designLightBlack;
+
+  /// No description provided for @designLightRose.
+  ///
+  /// In en, this message translates to:
+  /// **'Light Rose'**
+  String get designLightRose;
+
+  /// No description provided for @designLightWine.
+  ///
+  /// In en, this message translates to:
+  /// **'Light Wine'**
+  String get designLightWine;
+
+  /// No description provided for @designDarkGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Gold'**
+  String get designDarkGold;
+
+  /// No description provided for @designDarkPink.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Pink'**
+  String get designDarkPink;
+
+  /// No description provided for @designDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'system design'**
+  String get designDefault;
 }
 
 class _AppLocalizationsDelegate

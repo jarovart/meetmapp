@@ -20,17 +20,14 @@ import 'package:casttime/core/failure/api_failure_mapper.dart' as _i993;
 import 'package:casttime/core/failure/geolocation_failure_mapper.dart' as _i455;
 import 'package:casttime/core/network/auth_interceptor.dart' as _i938;
 import 'package:casttime/core/network/logging_interceptor.dart' as _i994;
+import 'package:casttime/core/storage/preferences_repository.dart' as _i297;
 import 'package:casttime/core/storage/secure_token_storage.dart' as _i137;
 import 'package:casttime/core/storage/token_storage.dart' as _i511;
 import 'package:casttime/features/auth/data/api/auth_api.dart' as _i401;
 import 'package:casttime/features/auth/data/repository/auth_repository_impl.dart'
     as _i17;
-import 'package:casttime/features/auth/data/service/auth_service_impl.dart'
-    as _i555;
 import 'package:casttime/features/auth/domain/repository/auth_repository.dart'
     as _i357;
-import 'package:casttime/features/auth/domain/service/auth_service.dart'
-    as _i976;
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart'
     as _i713;
 import 'package:casttime/features/info/data/api/info_api.dart' as _i248;
@@ -95,6 +92,15 @@ import 'package:casttime/features/profile/presentation/cubit/liked_locations_cub
     as _i288;
 import 'package:casttime/features/profile/presentation/cubit/location_list_cubit.dart'
     as _i182;
+import 'package:casttime/features/setting/data/api/settings_api.dart' as _i871;
+import 'package:casttime/features/setting/data/repository/settings_repository_impl.dart'
+    as _i226;
+import 'package:casttime/features/setting/domain/repository/settings_repository.dart'
+    as _i287;
+import 'package:casttime/features/setting/presentation/bloc/settings_form_bloc.dart'
+    as _i207;
+import 'package:casttime/features/setting/presentation/cubit/app_settings_cubit.dart'
+    as _i101;
 import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
@@ -131,6 +137,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => const _i794.LocationBoundsCalculator(),
     );
     gh.lazySingleton<_i223.SheetSizeMemory>(() => _i223.SheetSizeMemory());
+    gh.lazySingleton<_i297.PreferencesRepository>(
+      () => _i297.PreferencesRepository(gh<_i460.SharedPreferences>()),
+    );
     gh.lazySingleton<_i993.ApiFailureMapper>(
       () => _i993.ApiFailureMapper(gh<_i974.Logger>()),
     );
@@ -167,6 +176,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i248.InfoApi>(
       () => networkModule.provideInfoApi(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i871.SettingsApi>(
+      () => networkModule.provideSettingsApi(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i287.SettingsRepository>(
+      () => _i226.SettingsRepositoryImpl(
+        gh<_i871.SettingsApi>(),
+        gh<_i993.ApiFailureMapper>(),
+      ),
     );
     gh.lazySingleton<_i310.LocationRepository>(
       () => _i113.LocationRepositoryImpl(
@@ -262,8 +280,20 @@ extension GetItInjectableX on _i174.GetIt {
         initialLocation,
       ),
     );
-    gh.lazySingleton<_i976.AuthService>(
-      () => _i555.AuthServiceImpl(gh<_i357.AuthRepository>()),
+    gh.lazySingleton<_i101.AppSettingsCubit>(
+      () => _i101.AppSettingsCubit(
+        gh<_i713.AuthCubit>(),
+        gh<_i287.SettingsRepository>(),
+        gh<_i297.PreferencesRepository>(),
+      ),
+    );
+    gh.factory<_i207.SettingsFormBloc>(
+      () => _i207.SettingsFormBloc(
+        gh<_i713.AuthCubit>(),
+        gh<_i101.AppSettingsCubit>(),
+        gh<_i287.SettingsRepository>(),
+        gh<_i297.PreferencesRepository>(),
+      ),
     );
     return this;
   }

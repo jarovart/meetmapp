@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserProfile {
 
- int get id; String get username; String get firstName; String get lastName; String? get aboutMe; String? get email; DateTime? get createdAt; AppImage? get profileImage; int get joinedLocationCount; int get likedLocationCount; int? get createdLocationCount; SettingsProfile? get settings;
+ int get id; String get username; String get firstName; String get lastName; String? get aboutMe; String? get email; DateTime? get createdAt; AppImage? get profileImage; int get joinedLocationCount; int get likedLocationCount; int? get createdLocationCount; AppSettings? get settings;
 /// Create a copy of UserProfile
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -51,11 +51,11 @@ abstract mixin class $UserProfileCopyWith<$Res>  {
   factory $UserProfileCopyWith(UserProfile value, $Res Function(UserProfile) _then) = _$UserProfileCopyWithImpl;
 @useResult
 $Res call({
- int id, String username, String firstName, String lastName, String? aboutMe, String? email, DateTime? createdAt, AppImage? profileImage, int joinedLocationCount, int likedLocationCount, int? createdLocationCount, SettingsProfile? settings
+ int id, String username, String firstName, String lastName, String? aboutMe, String? email, DateTime? createdAt, AppImage? profileImage, int joinedLocationCount, int likedLocationCount, int? createdLocationCount, AppSettings? settings
 });
 
 
-$AppImageCopyWith<$Res>? get profileImage;$SettingsProfileCopyWith<$Res>? get settings;
+$AppImageCopyWith<$Res>? get profileImage;$AppSettingsCopyWith<$Res>? get settings;
 
 }
 /// @nodoc
@@ -82,7 +82,7 @@ as AppImage?,joinedLocationCount: null == joinedLocationCount ? _self.joinedLoca
 as int,likedLocationCount: null == likedLocationCount ? _self.likedLocationCount : likedLocationCount // ignore: cast_nullable_to_non_nullable
 as int,createdLocationCount: freezed == createdLocationCount ? _self.createdLocationCount : createdLocationCount // ignore: cast_nullable_to_non_nullable
 as int?,settings: freezed == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
-as SettingsProfile?,
+as AppSettings?,
   ));
 }
 /// Create a copy of UserProfile
@@ -101,12 +101,12 @@ $AppImageCopyWith<$Res>? get profileImage {
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$SettingsProfileCopyWith<$Res>? get settings {
+$AppSettingsCopyWith<$Res>? get settings {
     if (_self.settings == null) {
     return null;
   }
 
-  return $SettingsProfileCopyWith<$Res>(_self.settings!, (value) {
+  return $AppSettingsCopyWith<$Res>(_self.settings!, (value) {
     return _then(_self.copyWith(settings: value));
   });
 }
@@ -191,7 +191,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String username,  String firstName,  String lastName,  String? aboutMe,  String? email,  DateTime? createdAt,  AppImage? profileImage,  int joinedLocationCount,  int likedLocationCount,  int? createdLocationCount,  SettingsProfile? settings)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String username,  String firstName,  String lastName,  String? aboutMe,  String? email,  DateTime? createdAt,  AppImage? profileImage,  int joinedLocationCount,  int likedLocationCount,  int? createdLocationCount,  AppSettings? settings)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserProfile() when $default != null:
 return $default(_that.id,_that.username,_that.firstName,_that.lastName,_that.aboutMe,_that.email,_that.createdAt,_that.profileImage,_that.joinedLocationCount,_that.likedLocationCount,_that.createdLocationCount,_that.settings);case _:
@@ -212,7 +212,7 @@ return $default(_that.id,_that.username,_that.firstName,_that.lastName,_that.abo
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String username,  String firstName,  String lastName,  String? aboutMe,  String? email,  DateTime? createdAt,  AppImage? profileImage,  int joinedLocationCount,  int likedLocationCount,  int? createdLocationCount,  SettingsProfile? settings)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String username,  String firstName,  String lastName,  String? aboutMe,  String? email,  DateTime? createdAt,  AppImage? profileImage,  int joinedLocationCount,  int likedLocationCount,  int? createdLocationCount,  AppSettings? settings)  $default,) {final _that = this;
 switch (_that) {
 case _UserProfile():
 return $default(_that.id,_that.username,_that.firstName,_that.lastName,_that.aboutMe,_that.email,_that.createdAt,_that.profileImage,_that.joinedLocationCount,_that.likedLocationCount,_that.createdLocationCount,_that.settings);case _:
@@ -232,7 +232,7 @@ return $default(_that.id,_that.username,_that.firstName,_that.lastName,_that.abo
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String username,  String firstName,  String lastName,  String? aboutMe,  String? email,  DateTime? createdAt,  AppImage? profileImage,  int joinedLocationCount,  int likedLocationCount,  int? createdLocationCount,  SettingsProfile? settings)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String username,  String firstName,  String lastName,  String? aboutMe,  String? email,  DateTime? createdAt,  AppImage? profileImage,  int joinedLocationCount,  int likedLocationCount,  int? createdLocationCount,  AppSettings? settings)?  $default,) {final _that = this;
 switch (_that) {
 case _UserProfile() when $default != null:
 return $default(_that.id,_that.username,_that.firstName,_that.lastName,_that.aboutMe,_that.email,_that.createdAt,_that.profileImage,_that.joinedLocationCount,_that.likedLocationCount,_that.createdLocationCount,_that.settings);case _:
@@ -261,7 +261,7 @@ class _UserProfile implements UserProfile {
 @override final  int joinedLocationCount;
 @override final  int likedLocationCount;
 @override final  int? createdLocationCount;
-@override final  SettingsProfile? settings;
+@override final  AppSettings? settings;
 
 /// Create a copy of UserProfile
 /// with the given fields replaced by the non-null parameter values.
@@ -295,11 +295,11 @@ abstract mixin class _$UserProfileCopyWith<$Res> implements $UserProfileCopyWith
   factory _$UserProfileCopyWith(_UserProfile value, $Res Function(_UserProfile) _then) = __$UserProfileCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String username, String firstName, String lastName, String? aboutMe, String? email, DateTime? createdAt, AppImage? profileImage, int joinedLocationCount, int likedLocationCount, int? createdLocationCount, SettingsProfile? settings
+ int id, String username, String firstName, String lastName, String? aboutMe, String? email, DateTime? createdAt, AppImage? profileImage, int joinedLocationCount, int likedLocationCount, int? createdLocationCount, AppSettings? settings
 });
 
 
-@override $AppImageCopyWith<$Res>? get profileImage;@override $SettingsProfileCopyWith<$Res>? get settings;
+@override $AppImageCopyWith<$Res>? get profileImage;@override $AppSettingsCopyWith<$Res>? get settings;
 
 }
 /// @nodoc
@@ -326,7 +326,7 @@ as AppImage?,joinedLocationCount: null == joinedLocationCount ? _self.joinedLoca
 as int,likedLocationCount: null == likedLocationCount ? _self.likedLocationCount : likedLocationCount // ignore: cast_nullable_to_non_nullable
 as int,createdLocationCount: freezed == createdLocationCount ? _self.createdLocationCount : createdLocationCount // ignore: cast_nullable_to_non_nullable
 as int?,settings: freezed == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
-as SettingsProfile?,
+as AppSettings?,
   ));
 }
 
@@ -346,12 +346,12 @@ $AppImageCopyWith<$Res>? get profileImage {
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$SettingsProfileCopyWith<$Res>? get settings {
+$AppSettingsCopyWith<$Res>? get settings {
     if (_self.settings == null) {
     return null;
   }
 
-  return $SettingsProfileCopyWith<$Res>(_self.settings!, (value) {
+  return $AppSettingsCopyWith<$Res>(_self.settings!, (value) {
     return _then(_self.copyWith(settings: value));
   });
 }

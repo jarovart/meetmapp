@@ -72,7 +72,6 @@ class _MapPageState extends State<MapPage> {
               (previous.failure != current.failure && current.failure != null),
           listener: (context, state) {
             context.read<AppBannerCubit>().showFailure(state.failure!);
-            context.read<MapBloc>().add(MapStarted());
           },
         ),
         // gps moving handling

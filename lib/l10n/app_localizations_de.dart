@@ -659,4 +659,22 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get searchNoLocationsDescription =>
       'Versuche einen anderen Suchbegriff.';
+
+  @override
+  String get designLightBlack => 'Light Black';
+
+  @override
+  String get designLightRose => 'Light Rose';
+
+  @override
+  String get designLightWine => 'Light Wine';
+
+  @override
+  String get designDarkGold => 'Dark Gold';
+
+  @override
+  String get designDarkPink => 'Dark Pink';
+
+  @override
+  String get designDefault => 'System Design';
 }
