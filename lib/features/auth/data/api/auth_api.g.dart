@@ -52,7 +52,7 @@ class _AuthApi implements AuthApi {
   Future<RefreshTokenResponseDTO> refreshToken(
     RefreshTokenRequestDTO request,
   ) async {
-    final _extra = <String, dynamic>{};
+    final _extra = <String, dynamic>{'withAuthentication': true};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -80,7 +80,7 @@ class _AuthApi implements AuthApi {
 
   @override
   Future<void> logout() async {
-    final _extra = <String, dynamic>{};
+    final _extra = <String, dynamic>{'withAuthentication': true};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
