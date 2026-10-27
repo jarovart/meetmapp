@@ -677,4 +677,39 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get designDefault => 'System Design';
+
+  @override
+  String get errorLocationTimeout => 'Die Standortabfrage dauert zu lange.';
+
+  @override
+  String get errorLocationPermissionDenied =>
+      'Die Standortberechtigung wurde verweigert.';
+
+  @override
+  String get errorLocationPermissionDeniedForever =>
+      'Die Standortberechtigung wurde dauerhaft verweigert.';
+
+  @override
+  String get errorLocationServiceDisabled =>
+      'Die Standortdienste sind deaktiviert.';
+
+  @override
+  String errorCooldown(Object waitSeconds) {
+    return 'Bitte warte $waitSeconds Sekunden, bevor du es erneut versuchst.';
+  }
+
+  @override
+  String get registrationSuccessful => 'Registration war erfolgreich!';
+
+  @override
+  String verificationMailSentTo(Object email) {
+    return 'Die E-Mail zur Verifikation wurde an $email gesendet.';
+  }
+
+  @override
+  String get retry => 'Wiederholen';
+
+  @override
+  String get forgotPasswordHint =>
+      'Gib deine E-Mail-Adresse ein. Wir senden dir einen Link, mit dem du dein Passwort zurücksetzen kannst.';
 }

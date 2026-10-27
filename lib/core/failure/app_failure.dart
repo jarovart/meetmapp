@@ -1,3 +1,5 @@
+import '../../app/config/app_config.dart';
+
 sealed class AppFailure {
   const AppFailure({this.requestId, this.cause});
 
@@ -79,4 +81,36 @@ final class LocationTimeoutFailure extends AppFailure {
 
 final class NoLocationAvailable extends AppFailure {
   const NoLocationAvailable({super.requestId, super.cause});
+}
+
+final class FillAllFieldsFailure extends AppFailure {
+  const FillAllFieldsFailure({super.requestId, super.cause});
+}
+
+final class PasswordsDoNotMatchFailure extends AppFailure {
+  const PasswordsDoNotMatchFailure({super.requestId, super.cause});
+}
+
+final class PasswordTooShortFailure extends AppFailure {
+  const PasswordTooShortFailure({
+    this.minLength = AppConfig.passwordMinLength,
+    super.requestId,
+    super.cause,
+  });
+
+  final int minLength;
+}
+
+final class InvalidEmailFailure extends AppFailure {
+  const InvalidEmailFailure({super.requestId, super.cause});
+}
+
+final class CooldownFailure extends AppFailure {
+  const CooldownFailure({
+    required this.waitSeconds,
+    super.requestId,
+    super.cause,
+  });
+
+  final int waitSeconds;
 }

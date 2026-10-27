@@ -211,5 +211,17 @@
   "designLightWine": "Light Wine",
   "designDarkGold": "Dark Gold",
   "designDarkPink": "Dark Pink",
-  "designDefault": "system design"
+  "designDefault": "system design",
+  "errorLocationTimeout": "The location request timed out.",
+  "errorLocationPermissionDenied": "Location permission was denied.",
+  "errorLocationPermissionDeniedForever": "Location permission was permanently denied.",
+  "errorLocationServiceDisabled": "Location services are disabled.",
+  "errorCooldown": "Please wait {waitSeconds} seconds before trying again.",
+  "registrationSuccessful": "Registration was successful!",
+  "verificationMailSentTo": "Verification e-mail has been sent to {email}.",
+  "retry": "Retry",
+  "forgotPasswordHint": "Enter your email address. We'll send you a link to reset your password.",
+  "@forgotPasswordHint": {
+    "description": "Hint text on the forgot password page"
   }
+}

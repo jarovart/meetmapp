@@ -42,8 +42,11 @@ class AppSettingsCubit extends Cubit<AppSettings> {
       return;
     }
     final result = await _settingsService.loadRemote();
-    if (result case Success<AppSettings>(:final data)) {
-      await apply(data);
+    switch (result) {
+      case Success<AppSettings>(:final data):
+        apply(data);
+      case Failure<AppSettings>(:final failure):
+        debugPrint("Error loading settings from backend: $failure");
     }
   }
 }

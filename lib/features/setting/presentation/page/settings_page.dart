@@ -1,7 +1,7 @@
 import 'package:casttime/app/di/injection.dart';
-import 'package:casttime/app/localization/app_failure_localization.dart';
 import 'package:casttime/app/localization/l10n_extension.dart';
 import 'package:casttime/app/presentation/util/load_status.dart';
+import 'package:casttime/app/presentation/widget/bottombar_layout_widget.dart';
 import 'package:casttime/app/theme/themedesign.dart';
 import 'package:casttime/features/setting/presentation/bloc/settings_form_bloc.dart';
 import 'package:casttime/features/setting/presentation/bloc/settings_form_event.dart';
@@ -104,32 +104,15 @@ class _SettingsScaffold extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 550),
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              if (state.failure != null) ...[
-                Card(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      state.failure!.localizedMessage(l10n),
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onErrorContainer,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-              ],
-              LanguageCard(locale: state.draft.locale),
-              const SizedBox(height: 18),
-              DesignCard(design: state.draft.design),
-            ],
-          ),
+      body: BottomBarLayoutWidget(
+        childWidget: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            LanguageCard(locale: state.draft.locale),
+            const SizedBox(height: 18),
+            DesignCard(design: state.draft.design),
+          ],
         ),
       ),
     );

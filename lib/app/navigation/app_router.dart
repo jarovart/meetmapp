@@ -4,7 +4,12 @@ import 'package:casttime/app/navigation/main_navigation_shell.dart';
 import 'package:casttime/app/navigation/util/route_config.dart';
 import 'package:casttime/core/util/go_router_refresh_stream.dart';
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:casttime/features/auth/presentation/cubit/pages/login_page.dart';
+import 'package:casttime/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:casttime/features/auth/presentation/pages/login_page.dart';
+import 'package:casttime/features/auth/presentation/pages/register_check_email_page.dart';
+import 'package:casttime/features/auth/presentation/pages/register_page.dart';
+import 'package:casttime/features/auth/presentation/pages/reset_password_page.dart';
+import 'package:casttime/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:casttime/features/info/presentation/pages/info_page.dart';
 import 'package:casttime/features/location/presentation/pages/location_list_page.dart';
 import 'package:casttime/features/map/presentation/pages/map_page.dart';
@@ -94,6 +99,38 @@ final appRouter = GoRouter(
               builder: (_, state) => LoginPage(
                 redirectionUrl: RouteConfig.getRedirectUrlFromLogin(state.uri),
               ),
+            ),
+            GoRoute(
+              path: RouteConfig.registerUrl,
+              builder: (_, __) => const RegisterPage(),
+            ),
+            GoRoute(
+              path: RouteConfig.sendRegisterEmailUrl,
+              builder: (_, state) {
+                final email = state.extra as String?;
+                if (email == null) return const RegisterPage();
+                return RegisterCheckEmailPage(email: email);
+              },
+            ),
+            GoRoute(
+              path: RouteConfig.verifyRegisterEmailUrl,
+              builder: (_, state) {
+                final token = state.uri.queryParameters['token'];
+                if (token == null) return const RegisterPage();
+                return VerifyEmailPage(token: token);
+              },
+            ),
+            GoRoute(
+              path: RouteConfig.forgotPasswordUrl,
+              builder: (_, __) => const ForgotPasswordPage(),
+            ),
+            GoRoute(
+              path: RouteConfig.resetPasswordUrl,
+              builder: (_, state) {
+                final token = state.uri.queryParameters['token'];
+                if (token == null) return const ForgotPasswordPage();
+                return ResetPasswordPage(token: token);
+              },
             ),
             GoRoute(
               path: RouteConfig.infoUrl,
