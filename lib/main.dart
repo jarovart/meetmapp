@@ -1,6 +1,7 @@
 import 'package:casttime/app/app.dart';
 import 'package:casttime/app/di/injection.dart';
 import 'package:flutter/material.dart';
+//import 'package:flutter/rendering.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 void main() async {
@@ -9,5 +10,7 @@ void main() async {
   usePathUrlStrategy();
   await setupDependencies();
 
+  // Only for debug view
+  //debugPaintSizeEnabled = true;
   runApp(CasttimeApp());
 }

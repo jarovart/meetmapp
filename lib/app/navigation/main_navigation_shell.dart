@@ -39,6 +39,7 @@ class MainNavigationShell extends StatelessWidget {
                 ],
               ),
               child: Column(
+                key: null,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const AppBottomBanner(),
