@@ -1,7 +1,7 @@
 import 'package:casttime/app/navigation/model/nav_destination.dart';
 import 'package:casttime/app/navigation/util/route_config.dart';
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:casttime/features/auth/presentation/cubit/pages/profile_nav_icon.dart';
+import 'package:casttime/features/auth/presentation/pages/profile_nav_icon.dart';
 import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
 import 'package:casttime/features/map/presentation/bloc/map_event.dart';
 import 'package:casttime/features/map/presentation/widgets/mapslider/map_slider.dart';

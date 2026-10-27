@@ -16,7 +16,7 @@ MyProfileResponseDTO _$MyProfileResponseDTOFromJson(
   profileImage: json['profileImage'] == null
       ? null
       : ImageResponseDTO.fromJson(json['profileImage'] as Map<String, dynamic>),
-  aboutMe: json['aboutMe'] as String,
+  aboutMe: json['aboutMe'] as String?,
   likedLocationCount: (json['likedLocationCount'] as num).toInt(),
   joinedLocationCount: (json['joinedLocationCount'] as num).toInt(),
   email: json['email'] as String,

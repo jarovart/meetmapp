@@ -1333,6 +1333,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'system design'**
   String get designDefault;
+
+  /// No description provided for @errorLocationTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The location request timed out.'**
+  String get errorLocationTimeout;
+
+  /// No description provided for @errorLocationPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission was denied.'**
+  String get errorLocationPermissionDenied;
+
+  /// No description provided for @errorLocationPermissionDeniedForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission was permanently denied.'**
+  String get errorLocationPermissionDeniedForever;
+
+  /// No description provided for @errorLocationServiceDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are disabled.'**
+  String get errorLocationServiceDisabled;
+
+  /// No description provided for @errorCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait {waitSeconds} seconds before trying again.'**
+  String errorCooldown(Object waitSeconds);
+
+  /// No description provided for @registrationSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration was successful!'**
+  String get registrationSuccessful;
+
+  /// No description provided for @verificationMailSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification e-mail has been sent to {email}.'**
+  String verificationMailSentTo(Object email);
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// Hint text on the forgot password page
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address. We\'ll send you a link to reset your password.'**
+  String get forgotPasswordHint;
 }
 
 class _AppLocalizationsDelegate

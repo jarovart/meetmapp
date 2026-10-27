@@ -79,4 +79,56 @@ class AuthCubit extends Cubit<AuthState> {
   bool isAuthenticated() {
     return state.isLoggedIn;
   }
+
+  Future<AppResult<void>> register({
+    required String username,
+    required String firstname,
+    required String lastname,
+    required String email,
+    required String password,
+    required String languageCode,
+  }) {
+    return _authRepository.register(
+      username: username,
+      firstname: firstname,
+      lastname: lastname,
+      email: email,
+      password: password,
+      languageCode: languageCode,
+    );
+  }
+
+  Future<AppResult<void>> resendVerificationEmail({
+    required String email,
+    required String languageCode,
+  }) {
+    return _authRepository.resendVerificationEmail(
+      email: email,
+      languageCode: languageCode,
+    );
+  }
+
+  Future<AppResult<void>> verifyEmail(String token) {
+    return _authRepository.verifyEmail(token);
+  }
+
+  Future<AppResult<void>> forgotPassword({
+    required String email,
+    required String languageCode,
+  }) {
+    return _authRepository.forgotPassword(
+      email: email,
+      languageCode: languageCode,
+    );
+  }
+
+  Future<AppResult<void>> resetPassword({
+    required String token,
+    required String newPassword,
+  }) {
+    return _authRepository.resetPassword(
+      token: token,
+      newPassword: newPassword,
+    );
+  }
 }

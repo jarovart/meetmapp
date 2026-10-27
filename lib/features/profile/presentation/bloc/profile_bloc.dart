@@ -4,6 +4,7 @@ import 'package:casttime/features/profile/domain/model/user_profile.dart';
 import 'package:casttime/features/profile/domain/service/profile_service.dart';
 import 'package:casttime/features/profile/presentation/bloc/profile_event.dart';
 import 'package:casttime/features/profile/presentation/bloc/profile_state.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -32,6 +33,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           ),
         );
       case Failure<UserProfile>(:final failure):
+        debugPrint("error profile: $failure");
         emit(state.copyWith(status: LoadStatus.failure, failure: failure));
     }
   }

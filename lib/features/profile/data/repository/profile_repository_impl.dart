@@ -77,9 +77,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }) async {
     try {
       final dto = await request();
-      debugPrint("testartem: $dto");
       return Success(map(dto));
     } catch (error, stackTrace) {
+      debugPrint('profile repository error: $error');
       return Failure(_failureMapper.map(error, stackTrace));
     }
   }

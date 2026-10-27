@@ -668,4 +668,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get designDefault => 'system design';
+
+  @override
+  String get errorLocationTimeout => 'The location request timed out.';
+
+  @override
+  String get errorLocationPermissionDenied => 'Location permission was denied.';
+
+  @override
+  String get errorLocationPermissionDeniedForever =>
+      'Location permission was permanently denied.';
+
+  @override
+  String get errorLocationServiceDisabled => 'Location services are disabled.';
+
+  @override
+  String errorCooldown(Object waitSeconds) {
+    return 'Please wait $waitSeconds seconds before trying again.';
+  }
+
+  @override
+  String get registrationSuccessful => 'Registration was successful!';
+
+  @override
+  String verificationMailSentTo(Object email) {
+    return 'Verification e-mail has been sent to $email.';
+  }
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get forgotPasswordHint =>
+      'Enter your email address. We\'ll send you a link to reset your password.';
 }

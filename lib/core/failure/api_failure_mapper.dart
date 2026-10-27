@@ -1,4 +1,6 @@
-import 'package:casttime/core/error/apierror_dto.dart';
+import 'package:casttime/app/config/api_config.dart';
+import 'package:casttime/app/config/app_config.dart';
+import 'package:casttime/core/error/api_error_dto.dart';
 import 'package:casttime/core/failure/app_failure.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
@@ -74,6 +76,12 @@ class ApiFailureMapper {
 
       409 => ConflictFailure(
         code: errorDto?.code,
+        requestId: errorDto?.requestId ?? requestId,
+        cause: exception,
+      ),
+
+      429 => CooldownFailure(
+        waitSeconds: errorDto?.cooldownSeconds ?? AppConfig.cooldownInterval,
         requestId: errorDto?.requestId ?? requestId,
         cause: exception,
       ),

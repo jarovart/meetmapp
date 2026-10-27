@@ -206,5 +206,17 @@
   "designLightWine": "Light Wine",
   "designDarkGold": "Dark Gold",
   "designDarkPink": "Dark Pink",
-  "designDefault": "System Design"
+  "designDefault": "System Design",
+  "errorLocationTimeout": "Die Standortabfrage dauert zu lange.",
+  "errorLocationPermissionDenied": "Die Standortberechtigung wurde verweigert.",
+  "errorLocationPermissionDeniedForever": "Die Standortberechtigung wurde dauerhaft verweigert.",
+  "errorLocationServiceDisabled": "Die Standortdienste sind deaktiviert.",
+  "errorCooldown": "Bitte warte {waitSeconds} Sekunden, bevor du es erneut versuchst.",
+  "registrationSuccessful": "Registration war erfolgreich!",
+  "verificationMailSentTo": "Die E-Mail zur Verifikation wurde an {email} gesendet.",
+  "retry": "Wiederholen",
+  "forgotPasswordHint": "Gib deine E-Mail-Adresse ein. Wir senden dir einen Link, mit dem du dein Passwort zurücksetzen kannst.",
+  "@forgotPasswordHint": {
+    "description": "Hinweistext auf der Passwort-vergessen-Seite"
+  }
 }
