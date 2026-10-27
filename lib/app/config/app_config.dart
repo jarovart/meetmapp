@@ -9,6 +9,8 @@ class AppConfig {
   static const String minor = '0';
   static const String patch = '1';
   static const String appIconPath = 'assets/icon/app_icon.png';
+  static const double maxAppWidth = 520.0;
+  static const double maxNavigationDockBarHeight = 180.0;
 
   static bool isMobile() {
     if (kIsWeb) return false;
