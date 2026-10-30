@@ -1,3 +1,4 @@
+import 'package:casttime/app/config/app_config.dart';
 import 'package:casttime/app/di/injection.dart';
 import 'package:casttime/app/localization/app_failure_localization.dart';
 import 'package:casttime/app/localization/l10n_extension.dart';
@@ -26,25 +27,15 @@ class _UserListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.users), centerTitle: true),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
-          child: Column(
-            children: [
-              const _UserSearchBar(),
-              Expanded(
-                child: BlocBuilder<UserSearchBloc, UserSearchState>(
-                  builder: (context, state) => _UserListBody(state: state),
-                ),
-              ),
-            ],
+    return Column(
+      children: [
+        const _UserSearchBar(),
+        Expanded(
+          child: BlocBuilder<UserSearchBloc, UserSearchState>(
+            builder: (context, state) => _UserListBody(state: state),
           ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -66,6 +57,7 @@ class _UserListBody extends StatelessWidget {
       return _CenteredMessage(
         message: state.failure?.localizedMessage(l10n) ?? l10n.errorCallUsers,
         isError: true,
+
         onRetry: () =>
             context.read<UserSearchBloc>().add(UserSearchSubmitted()),
       );
@@ -88,7 +80,12 @@ class _UserListBody extends StatelessWidget {
         return false;
       },
       child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          AppConfig.maxNavigationDockBarHeight,
+        ),
         itemCount: state.users.length + (state.isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= state.users.length) {
@@ -97,9 +94,16 @@ class _UserListBody extends StatelessWidget {
               child: Center(child: CircularProgressIndicator()),
             );
           }
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: UserCard(user: state.users[index]),
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppConfig.maxAppWidth,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: UserCard(user: state.users[index]),
+              ),
+            ),
           );
         },
       ),
@@ -122,7 +126,12 @@ class _CenteredMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.fromLTRB(
+          32,
+          32,
+          32,
+          AppConfig.maxNavigationDockBarHeight,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -168,33 +177,38 @@ class _UserSearchBarState extends State<_UserSearchBar> {
     final l10n = context.l10n;
     final bloc = context.read<UserSearchBloc>();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: TextField(
-        controller: _searchCtrl,
-        onChanged: (value) {
-          bloc.add(UserSearchQueryChanged(value));
-          setState(() {});
-        },
-        textInputAction: TextInputAction.search,
-        onSubmitted: (_) => bloc.add(UserSearchSubmitted()),
-        decoration: InputDecoration(
-          hintText: l10n.searching,
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: _searchCtrl.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    _searchCtrl.clear();
-                    bloc.add(UserSearchCleared());
-                    setState(() {});
-                  },
-                )
-              : null,
-          filled: true,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppConfig.maxAppWidth),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: TextField(
+            controller: _searchCtrl,
+            onChanged: (value) {
+              bloc.add(UserSearchQueryChanged(value));
+              setState(() {});
+            },
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) => bloc.add(UserSearchSubmitted()),
+            decoration: InputDecoration(
+              hintText: l10n.searching,
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchCtrl.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        _searchCtrl.clear();
+                        bloc.add(UserSearchCleared());
+                        setState(() {});
+                      },
+                    )
+                  : null,
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+            ),
           ),
         ),
       ),
