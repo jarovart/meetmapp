@@ -3,20 +3,21 @@ import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
 import 'package:casttime/features/location/data/mapper/location_slice_dto_mapper.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
-import 'package:casttime/features/profile/data/api/profile_api.dart';
+import 'package:casttime/features/profile/data/api/user_profile_api.dart';
 import 'package:casttime/features/profile/data/dto/mapper/my_profile_dto_mapper.dart';
 import 'package:casttime/features/profile/data/dto/mapper/profile_dto_mapper.dart';
+import 'package:casttime/features/profile/data/dto/mapper/user_slice_dto_mapper.dart';
 import 'package:casttime/features/profile/domain/model/user_profile.dart';
-import 'package:casttime/features/profile/domain/repository/profile_repository.dart';
+import 'package:casttime/features/profile/domain/repository/user_profile_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
-@LazySingleton(as: ProfileRepository)
-class ProfileRepositoryImpl implements ProfileRepository {
-  const ProfileRepositoryImpl(this._api, this._failureMapper);
+@LazySingleton(as: UserProfileRepository)
+class UserProfileRepositoryImpl implements UserProfileRepository {
+  const UserProfileRepositoryImpl(this._api, this._failureMapper);
 
   static const int pageSize = 10;
-  final ProfileApi _api;
+  final UserProfileApi _api;
   final ApiFailureMapper _failureMapper;
 
   @override
@@ -67,6 +68,18 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }) {
     return _execute(
       request: () => _api.fetchLikedLocations(username, page, pageSize),
+      map: (dto) => dto.toDomain(),
+    );
+  }
+
+  @override
+  Future<AppResult<PagedResult<UserProfile>>> search({
+    required String query,
+    required int page,
+    int pageSize = 10,
+  }) async {
+    return _execute(
+      request: () => _api.searchUsers(query, page, pageSize),
       map: (dto) => dto.toDomain(),
     );
   }

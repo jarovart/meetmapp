@@ -5,7 +5,7 @@ import 'package:casttime/features/auth/data/api/auth_api.dart';
 import 'package:casttime/features/info/data/api/info_api.dart';
 import 'package:casttime/features/location/data/api/location_api.dart';
 import 'package:casttime/features/location/data/api/place_api.dart';
-import 'package:casttime/features/profile/data/api/profile_api.dart';
+import 'package:casttime/features/profile/data/api/user_profile_api.dart';
 import 'package:casttime/features/setting/data/api/settings_api.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
@@ -40,7 +40,7 @@ abstract class NetworkModule {
   AuthApi provideAuthApi(Dio dio) => AuthApi(dio);
 
   @lazySingleton
-  ProfileApi provideProfileApi(Dio dio) => ProfileApi(dio);
+  UserProfileApi provideProfileApi(Dio dio) => UserProfileApi(dio);
 
   @lazySingleton
   PlaceApi providePlaceApi(Dio dio) => PlaceApi(dio);

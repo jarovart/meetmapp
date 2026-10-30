@@ -3,16 +3,15 @@ import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/profile/domain/model/user_profile.dart';
-import 'package:casttime/features/profile/domain/repository/profile_repository.dart';
-import 'package:casttime/features/profile/domain/service/profile_service.dart';
+import 'package:casttime/features/profile/domain/repository/user_profile_repository.dart';
+import 'package:casttime/features/profile/domain/service/user_profile_service.dart';
 import 'package:injectable/injectable.dart';
 
-@LazySingleton(as: ProfileService)
-class ProfileServiceImpl implements ProfileService {
-  final ProfileRepository repository;
-  final LocationFailureMapper failureMapper;
+@LazySingleton(as: UserProfileService)
+class UserProfileServiceImpl implements UserProfileService {
+  final UserProfileRepository repository;
 
-  ProfileServiceImpl(this.repository, this.failureMapper);
+  UserProfileServiceImpl(this.repository);
 
   @override
   Future<AppResult<UserProfile>> fetchProfile(String? username) async {

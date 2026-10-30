@@ -10,9 +10,9 @@ class ProfileResponseDTO {
   final String firstName;
   final String lastName;
   final ImageResponseDTO? profileImage;
-  final String aboutMe;
-  final int likedLocationCount;
-  final int joinedLocationCount;
+  final String? aboutMe;
+  final int? likedLocationCount;
+  final int? joinedLocationCount;
 
   ProfileResponseDTO({
     required this.id,

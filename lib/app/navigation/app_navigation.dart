@@ -78,9 +78,9 @@ abstract final class AppNavigation {
         ),
         NavDestination(
           id: 'friends',
-          label: 'Freunde',
+          label: 'Benutzer',
           icon: Icons.people_outline,
-          routePath: RouteConfig.friendsUrl,
+          routePath: RouteConfig.userListUrl,
           visibleWhen: _loggedIn,
           requiresAuth: true,
         ),

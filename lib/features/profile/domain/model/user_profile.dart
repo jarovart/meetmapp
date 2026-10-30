@@ -15,8 +15,8 @@ abstract class UserProfile with _$UserProfile {
     String? email, // nur bei eigenem Profil vom Backend geliefert
     DateTime? createdAt, // nur bei eigenem Profil
     AppImage? profileImage,
-    required int joinedLocationCount,
-    required int likedLocationCount,
+    int? joinedLocationCount,
+    int? likedLocationCount,
     int? createdLocationCount, // nur bei eigenem Profil sichtbar
     AppSettings? settings,
   }) = _UserProfile;

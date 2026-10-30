@@ -17,9 +17,9 @@ ProfileResponseDTO _$ProfileResponseDTOFromJson(Map<String, dynamic> json) =>
           : ImageResponseDTO.fromJson(
               json['profileImage'] as Map<String, dynamic>,
             ),
-      aboutMe: json['aboutMe'] as String,
-      likedLocationCount: (json['likedLocationCount'] as num).toInt(),
-      joinedLocationCount: (json['joinedLocationCount'] as num).toInt(),
+      aboutMe: json['aboutMe'] as String?,
+      likedLocationCount: (json['likedLocationCount'] as num?)?.toInt(),
+      joinedLocationCount: (json['joinedLocationCount'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$ProfileResponseDTOToJson(ProfileResponseDTO instance) =>

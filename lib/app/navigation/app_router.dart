@@ -14,6 +14,7 @@ import 'package:casttime/features/info/presentation/pages/info_page.dart';
 import 'package:casttime/features/location/presentation/pages/location_list_page.dart';
 import 'package:casttime/features/map/presentation/pages/map_page.dart';
 import 'package:casttime/features/profile/presentation/pages/profile_page.dart';
+import 'package:casttime/features/profile/presentation/pages/user_list_page.dart';
 import 'package:casttime/features/setting/presentation/page/settings_page.dart';
 import 'package:casttime/features/support/presentation/support_page.dart';
 import 'package:flutter/material.dart';
@@ -141,8 +142,8 @@ final appRouter = GoRouter(
               builder: (_, __) => const SupportPage(),
             ),
             GoRoute(
-              path: RouteConfig.friendsUrl,
-              builder: (_, __) => const SizedBox(),
+              path: RouteConfig.userListUrl,
+              builder: (_, __) => const UserListPage(),
             ),
             GoRoute(
               path: RouteConfig.settingsUrl,

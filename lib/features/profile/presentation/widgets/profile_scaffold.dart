@@ -3,8 +3,8 @@ import 'package:casttime/app/localization/l10n_extension.dart';
 import 'package:casttime/app/navigation/util/route_config.dart';
 import 'package:casttime/features/profile/domain/model/location_list_type.dart';
 import 'package:casttime/features/profile/domain/model/user_profile.dart';
-import 'package:casttime/features/profile/presentation/bloc/profile_bloc.dart';
-import 'package:casttime/features/profile/presentation/bloc/profile_event.dart';
+import 'package:casttime/features/profile/presentation/bloc/user_profile_bloc.dart';
+import 'package:casttime/features/profile/presentation/bloc/user_profile_event.dart';
 import 'package:casttime/features/profile/presentation/cubit/created_locations_cubit.dart';
 import 'package:casttime/features/profile/presentation/cubit/joined_locations_cubit.dart';
 import 'package:casttime/features/profile/presentation/cubit/liked_locations_cubit.dart';
@@ -62,8 +62,8 @@ class ProfileScaffold extends StatelessWidget {
                         extra: profile,
                       );
                       if (result == true && context.mounted) {
-                        context.read<ProfileBloc>().add(
-                          ProfileRequested(profile.username),
+                        context.read<UserProfileBloc>().add(
+                          UserProfileRequested(profile.username),
                         );
                       }
                     },

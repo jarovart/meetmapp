@@ -21,12 +21,12 @@ class StatsSection extends StatelessWidget {
         ),
       StatCard(
         title: l10n.joined,
-        locationsCount: profile.joinedLocationCount,
+        locationsCount: profile.joinedLocationCount ?? 0,
         icon: Icons.group,
       ),
       StatCard(
         title: l10n.liked,
-        locationsCount: profile.likedLocationCount,
+        locationsCount: profile.likedLocationCount ?? 0,
         icon: Icons.favorite,
       ),
     ];

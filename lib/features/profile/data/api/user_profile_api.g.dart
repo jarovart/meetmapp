@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'profile_api.dart';
+part of 'user_profile_api.dart';
 
 // dart format off
 
@@ -11,8 +11,8 @@ part of 'profile_api.dart';
 // ignore_for_file: type=lint
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main,avoid_redundant_argument_values
 
-class _ProfileApi implements ProfileApi {
-  _ProfileApi(this._dio, {this.baseUrl, this.errorLogger});
+class _UserProfileApi implements UserProfileApi {
+  _UserProfileApi(this._dio, {this.baseUrl, this.errorLogger});
 
   final Dio _dio;
 
@@ -169,6 +169,41 @@ class _ProfileApi implements ProfileApi {
     late LocationSliceResponseDTO _value;
     try {
       _value = LocationSliceResponseDTO.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<UserSliceResponseDTO> searchUsers(
+    String query,
+    int page,
+    int pageSize,
+  ) async {
+    final _extra = <String, dynamic>{'withAuthentication': true};
+    final queryParameters = <String, dynamic>{
+      r'query': query,
+      r'page': page,
+      r'pageSize': pageSize,
+    };
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<UserSliceResponseDTO>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/users/findByQuery',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late UserSliceResponseDTO _value;
+    try {
+      _value = UserSliceResponseDTO.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

@@ -3,13 +3,13 @@ import 'package:casttime/core/failure/app_failure.dart';
 import 'package:casttime/features/profile/domain/model/user_profile.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'profile_state.freezed.dart';
+part 'user_profile_state.freezed.dart';
 
 @freezed
-abstract class ProfileState with _$ProfileState {
-  const factory ProfileState({
+abstract class UserProfileState with _$UserProfileState {
+  const factory UserProfileState({
     @Default(LoadStatus.initial) LoadStatus status,
     UserProfile? profile,
     AppFailure? failure,
-  }) = _ProfileState;
+  }) = _UserProfileState;
 }
