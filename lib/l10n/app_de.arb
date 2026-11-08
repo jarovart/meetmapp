@@ -218,5 +218,18 @@
   "forgotPasswordHint": "Gib deine E-Mail-Adresse ein. Wir senden dir einen Link, mit dem du dein Passwort zurücksetzen kannst.",
   "@forgotPasswordHint": {
     "description": "Hinweistext auf der Passwort-vergessen-Seite"
-  }
+  },
+  "datesMissing": "Die Daten und Uhrzeiten fehlen",
+  "noImagesYet": "Keine Fotos verfügbar",
+  "savingLocation": "Location speichern...",
+  "uploadingImages": "Bilder werden hochgeladen...",
+  "settingThumbnail": "Profilfoto hinzufügen",
+  "geopositionMissing": "Position der Location fehlt",
+  "mapTitle": "Map",
+  "forYouTitle": "For You",
+  "createTitle": "Create",
+  "myLocationsTitle": "Meine Locations",
+  "myProfileTitle": "Mein Profil",
+  "infoTitle": "Information",
+  "returnTitle": "Zurück"
 }

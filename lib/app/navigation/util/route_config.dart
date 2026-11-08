@@ -3,7 +3,7 @@ class RouteConfig {
   static const String mapUrl = "/map";
   static const String locationListUrl = "/locationlist";
   static const String locationUrl = "/location/:locationId";
-  static const String locationCreateUrl = "/locationcreate";
+  static const String createLocationUrl = "/createLocation";
   static const String userListUrl = "/userlist";
   static const String profileUrl = "/profile/:username";
   static const String myProfileUrl = "/myprofile";
@@ -53,22 +53,7 @@ class RouteConfig {
   }
 
   static String getLocationCreateUrl({
-    double? lat,
-    double? lng,
-    String? geoAddress,
-  }) {
-    final queryParams = <String, String>{};
-    if (lat != null) queryParams['lat'] = lat.toString();
-    if (lng != null) queryParams['lng'] = lng.toString();
-
-    if (geoAddress != null && geoAddress.isNotEmpty) {
-      queryParams['geoaddress'] = geoAddress;
-    }
-
-    final uri = Uri.parse(
-      locationCreateUrl,
-    ).replace(queryParameters: queryParams.isEmpty ? null : queryParams);
-
-    return uri.toString();
-  }
+    required double lat,
+    required double lng,
+  }) => '$createLocationUrl?lat=$lat&lng=$lng';
 }

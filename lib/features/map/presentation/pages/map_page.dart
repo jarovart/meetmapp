@@ -1,3 +1,4 @@
+import 'package:casttime/app/navigation/util/route_config.dart';
 import 'package:casttime/app/presentation/banner/appbanner_cubit.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/presentation/widgets/locationdetail/bottomsheet_mobile.dart';
@@ -7,6 +8,7 @@ import 'package:casttime/features/map/presentation/bloc/map_event.dart';
 import 'package:casttime/features/map/presentation/bloc/map_state.dart';
 import 'package:casttime/features/map/presentation/util/debouncer.dart';
 import 'package:casttime/features/map/presentation/util/map_camera_util.dart';
+import 'package:casttime/features/map/presentation/widgets/map_tile_layer_widget.dart';
 import 'package:casttime/features/map/presentation/widgets/mapmarker/location_cluster.dart';
 import 'package:casttime/features/map/presentation/widgets/mapmarker/location_marker.dart';
 import 'package:casttime/features/map/presentation/widgets/mapmarker/my_location_marker.dart';
@@ -15,8 +17,8 @@ import 'package:casttime/features/map/presentation/widgets/mapsearch/map_search_
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapPage extends StatefulWidget {
@@ -29,7 +31,6 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   late final MapController mapController;
   late final MapCameraUtil mapCameraUtil;
-  late final TileProvider tileProvider;
   late final Debouncer debouncer;
 
   @override
@@ -37,14 +38,12 @@ class _MapPageState extends State<MapPage> {
     super.initState();
     mapController = MapController();
     mapCameraUtil = MapCameraUtil(mapController);
-    tileProvider = CancellableNetworkTileProvider();
     debouncer = Debouncer(delay: const Duration(milliseconds: 450));
   }
 
   @override
   void dispose() {
     mapController.dispose();
-    tileProvider.dispose();
     super.dispose();
   }
 
@@ -113,6 +112,20 @@ class _MapPageState extends State<MapPage> {
             });
           },
         ),
+        BlocListener<MapBloc, MapState>(
+          listenWhen: (previous, current) =>
+              (previous.tapPosition != current.tapPosition &&
+              current.tapPosition != null &&
+              current.failure == null),
+          listener: (context, state) {
+            context.go(
+              RouteConfig.getLocationCreateUrl(
+                lat: state.tapPosition!.latitude,
+                lng: state.tapPosition!.longitude,
+              ),
+            );
+          },
+        ),
       ],
       child: BlocBuilder<MapBloc, MapState>(
         buildWhen: (previous, current) =>
@@ -143,6 +156,11 @@ class _MapPageState extends State<MapPage> {
                   final bounds = mapController.camera.visibleBounds;
                   debugPrint("Bounds changed: $bounds");
                   mapBloc.add(MapBoundsChanged(bounds: bounds));
+                } else if (event is MapEventLongPress) {
+                  debugPrint('submit positionmap=${event.tapPosition}');
+                  context.read<MapBloc>().add(
+                    MapCreateLocation(event.tapPosition),
+                  );
                 } else if (event is MapEventScrollWheelZoom) {
                   debouncer.run(
                     () => mapBloc.add(
@@ -156,7 +174,7 @@ class _MapPageState extends State<MapPage> {
               },
             ),
             children: [
-              _buildTileLayer(),
+              const AppTileLayer(),
               if (state.currentPosition != null)
                 _buildMyLocationMarker(context, state.currentPosition!),
               _buildLocationsLayer(context),
@@ -164,14 +182,6 @@ class _MapPageState extends State<MapPage> {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildTileLayer() {
-    return TileLayer(
-      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      tileProvider: tileProvider,
-      userAgentPackageName: 'de.jarovart.casttime',
     );
   }
 

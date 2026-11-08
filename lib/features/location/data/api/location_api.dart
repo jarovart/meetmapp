@@ -1,4 +1,6 @@
-import 'package:casttime/features/location/data/dto/request/createlocation_requestdto.dart';
+import 'package:casttime/core/network/auth_interceptor.dart';
+import 'package:casttime/features/location/data/dto/request/create_location_request_dto.dart';
+import 'package:casttime/features/location/data/dto/request/update_thumbnail_request_dto.dart';
 import 'package:casttime/features/location/data/dto/response/location_base_response_dto.dart';
 import 'package:casttime/features/location/data/dto/response/location_full_response_dto.dart';
 import 'package:casttime/features/location/data/dto/response/location_slice_response_dto.dart';
@@ -27,7 +29,8 @@ abstract class LocationApi {
     @Query('query') String query,
   );
 
-  @POST('/api/locations/create')
+  @POST('/api/locations/createLocation')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
   Future<LocationBaseResponseDTO> createLocation(
     @Body() CreateLocationRequestDTO request,
   );
@@ -72,4 +75,11 @@ abstract class LocationApi {
     @Query('page') required int page,
     @Query('pageSize') required int pageSize,
   });
+
+  @PATCH('/api/locations/{locationId}/thumbnail')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<LocationBaseResponseDTO> patchThumbnail(
+    @Path('locationId') int locationId,
+    @Body() UpdateThumbnailRequestDTO request,
+  );
 }

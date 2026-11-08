@@ -701,4 +701,40 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get forgotPasswordHint =>
       'Enter your email address. We\'ll send you a link to reset your password.';
+
+  @override
+  String get datesMissing => 'Dates are missing';
+
+  @override
+  String get noImagesYet => 'No images available';
+
+  @override
+  String get savingLocation => 'Saving location...';
+
+  @override
+  String get uploadingImages => 'Uploading images...';
+
+  @override
+  String get settingThumbnail => 'Setting up thumbnail';
+
+  @override
+  String get geopositionMissing => 'geoposition of location is missing';
+
+  @override
+  String get mapTitle => 'Map';
+
+  @override
+  String get forYouTitle => 'For You';
+
+  @override
+  String get createTitle => 'Create';
+
+  @override
+  String get myLocationsTitle => 'My Locations';
+
+  @override
+  String get myProfileTitle => 'My Profile';
+
+  @override
+  String get returnTitle => 'Return';
 }

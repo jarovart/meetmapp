@@ -1,6 +1,8 @@
 import 'package:casttime/app/navigation/app_navigation.dart';
 import 'package:casttime/app/navigation/model/nav_destination.dart';
+import 'package:casttime/app/navigation/widgets/edit_bar_row.dart';
 import 'package:casttime/app/navigation/widgets/nav_row.dart';
+import 'package:casttime/app/presentation/cubit/edit_bar_cubit.dart';
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,19 +19,24 @@ class AppBottomBar extends StatelessWidget {
     final isLoggedIn = context.select<AuthCubit, bool>(
       (c) => c.state.isLoggedIn,
     );
+    final handler = context.watch<EditBarCubit>().state;
     final ctx = NavContext(location: location, isLoggedIn: isLoggedIn);
-
     final chain = AppNavigation.chainForLocation(
       location,
       fallbackBranchIndex: navigationShell.currentIndex,
     );
-    final replacing = chain
-        .where((d) => d.replacesBar && d.hasChildren)
-        .lastOrNull;
 
+    final replacing = chain
+        .where((d) => d.replacesBar && (d.usesEditBar || d.hasChildren))
+        .lastOrNull;
     final rows = <Widget>[];
 
-    if (replacing != null) {
+    if (replacing != null && replacing.usesEditBar) {
+      if (handler == null) return const SizedBox(height: 64);
+      rows.add(
+        EditBarRow(key: ValueKey('edit_${handler.ownerId}'), handler: handler),
+      );
+    } else if (replacing != null && replacing.hasChildren) {
       rows.add(
         NavRow(
           key: ValueKey('row_${replacing.id}'),

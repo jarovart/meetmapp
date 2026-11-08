@@ -14,6 +14,8 @@ import 'package:casttime/app/di/modules/logger_module.dart' as _i186;
 import 'package:casttime/app/di/modules/network_module.dart' as _i585;
 import 'package:casttime/app/di/modules/storage_module.dart' as _i587;
 import 'package:casttime/app/presentation/banner/appbanner_cubit.dart' as _i711;
+import 'package:casttime/app/presentation/cubit/app_busy_cubit.dart' as _i975;
+import 'package:casttime/app/presentation/cubit/edit_bar_cubit.dart' as _i134;
 import 'package:casttime/app/presentation/cubit/profile_section_cubit.dart'
     as _i337;
 import 'package:casttime/core/failure/api_failure_mapper.dart' as _i993;
@@ -30,6 +32,9 @@ import 'package:casttime/features/auth/domain/repository/auth_repository.dart'
     as _i357;
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart'
     as _i713;
+import 'package:casttime/features/image/data/api/image_api.dart' as _i606;
+import 'package:casttime/features/image/domain/service/image_compressor_service.dart'
+    as _i796;
 import 'package:casttime/features/info/data/api/info_api.dart' as _i248;
 import 'package:casttime/features/info/data/service/info_service_impl.dart'
     as _i559;
@@ -37,8 +42,11 @@ import 'package:casttime/features/info/domain/service/info_service.dart'
     as _i1030;
 import 'package:casttime/features/info/presentation/bloc/info_bloc.dart'
     as _i144;
+import 'package:casttime/features/location/data/api/geocoding_api.dart' as _i86;
 import 'package:casttime/features/location/data/api/location_api.dart' as _i507;
 import 'package:casttime/features/location/data/api/place_api.dart' as _i8;
+import 'package:casttime/features/location/data/repository/geocoding_repository_impl.dart'
+    as _i466;
 import 'package:casttime/features/location/data/repository/location_repository_impl.dart'
     as _i113;
 import 'package:casttime/features/location/data/repository/place_repository_impl.dart'
@@ -48,6 +56,8 @@ import 'package:casttime/features/location/data/service/location_service_impl.da
 import 'package:casttime/features/location/data/service/place_service_impl.dart'
     as _i881;
 import 'package:casttime/features/location/domain/model/location.dart' as _i96;
+import 'package:casttime/features/location/domain/repositoryinterface/geocoding_repository.dart'
+    as _i493;
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart'
     as _i310;
 import 'package:casttime/features/location/domain/repositoryinterface/place_repository.dart'
@@ -58,6 +68,8 @@ import 'package:casttime/features/location/domain/serviceinterface/place_service
     as _i911;
 import 'package:casttime/features/location/domain/util/location_bounds_calculator.dart'
     as _i794;
+import 'package:casttime/features/location/presentation/bloc/location_create_bloc.dart'
+    as _i190;
 import 'package:casttime/features/location/presentation/bloc/locationdetail_bloc.dart'
     as _i312;
 import 'package:casttime/features/location/presentation/bloc/locationlist_bloc.dart'
@@ -108,6 +120,7 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:latlong2/latlong.dart' as _i9;
 import 'package:logger/logger.dart' as _i974;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
@@ -130,16 +143,30 @@ extension GetItInjectableX on _i174.GetIt {
       () => storageModule.provideFlutterSecureStorage(),
     );
     gh.lazySingleton<_i711.AppBannerCubit>(() => _i711.AppBannerCubit());
+    gh.lazySingleton<_i975.AppBusyCubit>(() => _i975.AppBusyCubit());
+    gh.lazySingleton<_i134.EditBarCubit>(() => _i134.EditBarCubit());
     gh.lazySingleton<_i337.ProfileSectionCubit>(
       () => _i337.ProfileSectionCubit(),
     );
     gh.lazySingleton<_i994.LoggingInterceptor>(
       () => _i994.LoggingInterceptor(),
     );
+    gh.lazySingleton<_i796.ImageCompressorService>(
+      () => const _i796.ImageCompressorService(),
+    );
     gh.lazySingleton<_i794.LocationBoundsCalculator>(
       () => const _i794.LocationBoundsCalculator(),
     );
     gh.lazySingleton<_i223.SheetSizeMemory>(() => _i223.SheetSizeMemory());
+    gh.lazySingleton<_i361.Dio>(
+      () => networkModule.provideGeocodingDio(),
+      instanceName: 'geocoding',
+    );
+    gh.lazySingleton<_i86.GeocodingApi>(
+      () => networkModule.provideGeocodingApi(
+        gh<_i361.Dio>(instanceName: 'geocoding'),
+      ),
+    );
     gh.lazySingleton<_i297.PreferencesRepository>(
       () => _i297.PreferencesRepository(gh<_i460.SharedPreferences>()),
     );
@@ -158,6 +185,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i418.LocationPermissionService>(
       () =>
           _i977.GeolocatorPermissionService(gh<_i455.LocationFailureMapper>()),
+    );
+    gh.lazySingleton<_i493.GeocodingRepository>(
+      () => _i466.GeocodingRepositoryImpl(
+        gh<_i86.GeocodingApi>(),
+        gh<_i993.ApiFailureMapper>(),
+      ),
     );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.dio(
@@ -183,23 +216,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i871.SettingsApi>(
       () => networkModule.provideSettingsApi(gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i606.ImageApi>(
+      () => networkModule.provideImageApi(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i287.SettingsRepository>(
       () => _i226.SettingsRepositoryImpl(
         gh<_i871.SettingsApi>(),
         gh<_i993.ApiFailureMapper>(),
-      ),
-    );
-    gh.lazySingleton<_i310.LocationRepository>(
-      () => _i113.LocationRepositoryImpl(
-        gh<_i507.LocationApi>(),
-        gh<_i993.ApiFailureMapper>(),
-      ),
-    );
-    gh.lazySingleton<_i283.LocationService>(
-      () => _i449.LocationServiceImpl(
-        gh<_i310.LocationRepository>(),
-        gh<_i418.LocationPermissionService>(),
-        gh<_i455.LocationFailureMapper>(),
       ),
     );
     gh.lazySingleton<_i1030.InfoService>(
@@ -226,10 +249,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i993.ApiFailureMapper>(),
       ),
     );
-    gh.factory<_i981.LocationSearchBloc>(
-      () => _i981.LocationSearchBloc(
-        gh<_i283.LocationService>(),
-        gh<_i794.LocationBoundsCalculator>(),
+    gh.lazySingleton<_i310.LocationRepository>(
+      () => _i113.LocationRepositoryImpl(
+        gh<_i507.LocationApi>(),
+        gh<_i606.ImageApi>(),
+        gh<_i993.ApiFailureMapper>(),
       ),
     );
     gh.lazySingleton<_i911.PlaceService>(
@@ -242,15 +266,17 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i713.AuthCubit(gh<_i357.AuthRepository>(), gh<_i511.TokenStorage>()),
     );
-    gh.lazySingleton<_i197.MapBloc>(
-      () => _i197.MapBloc(
-        gh<_i283.LocationService>(),
-        gh<_i418.LocationPermissionService>(),
-      ),
-    );
     gh.factory<_i144.InfoBloc>(() => _i144.InfoBloc(gh<_i1030.InfoService>()));
     gh.factory<_i576.UserSearchBloc>(
       () => _i576.UserSearchBloc(gh<_i78.UserProfileRepository>()),
+    );
+    gh.lazySingleton<_i283.LocationService>(
+      () => _i449.LocationServiceImpl(
+        gh<_i310.LocationRepository>(),
+        gh<_i493.GeocodingRepository>(),
+        gh<_i418.LocationPermissionService>(),
+        gh<_i455.LocationFailureMapper>(),
+      ),
     );
     gh.factoryParam<_i312.LocationDetailBloc, _i96.Location, dynamic>(
       (initialLocation, _) => _i312.LocationDetailBloc(
@@ -268,6 +294,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i297.PreferencesRepository>(),
       ),
     );
+    gh.factory<_i981.LocationSearchBloc>(
+      () => _i981.LocationSearchBloc(
+        gh<_i283.LocationService>(),
+        gh<_i794.LocationBoundsCalculator>(),
+      ),
+    );
     gh.factoryParam<_i182.LocationListCubit, String, _i607.LocationListType>(
       (username, listType) => _i182.LocationListCubit(
         gh<_i714.UserProfileService>(),
@@ -277,6 +309,23 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i995.UserProfileBloc>(
       () => _i995.UserProfileBloc(gh<_i714.UserProfileService>()),
+    );
+    gh.factoryParam<_i190.LocationCreateBloc, _i9.LatLng?, String?>(
+      (position, initialAddress) => _i190.LocationCreateBloc(
+        gh<_i310.LocationRepository>(),
+        gh<_i796.ImageCompressorService>(),
+        gh<_i713.AuthCubit>(),
+        gh<_i975.AppBusyCubit>(),
+        gh<_i283.LocationService>(),
+        position,
+        initialAddress,
+      ),
+    );
+    gh.lazySingleton<_i197.MapBloc>(
+      () => _i197.MapBloc(
+        gh<_i283.LocationService>(),
+        gh<_i418.LocationPermissionService>(),
+      ),
     );
     gh.factory<_i207.SettingsFormBloc>(
       () => _i207.SettingsFormBloc(

@@ -26,6 +26,10 @@ extension AppFailureLocalization on AppFailure {
       PasswordTooShortFailure() => l10n.atleast8CharPassword,
       InvalidEmailFailure() => l10n.errorSendEmail,
       CooldownFailure(:final waitSeconds) => l10n.errorCooldown(waitSeconds),
+      ImageProcessingFailed() => l10n.imageCouldNotBeProcessed,
+      DatesMissing() => l10n.datesMissing,
+      EndDateBeforeStartDate() => l10n.infoEnddateBeforeStartdate,
+      GeopositionMissing() => l10n.geopositionMissing,
     };
   }
 

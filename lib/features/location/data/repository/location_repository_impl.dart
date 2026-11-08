@@ -1,23 +1,30 @@
 import 'package:casttime/core/failure/api_failure_mapper.dart';
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
+import 'package:casttime/features/image/data/api/image_api.dart';
+import 'package:casttime/features/image/data/mapper/image_dto_mapper.dart';
 import 'package:casttime/features/location/data/api/location_api.dart';
+import 'package:casttime/features/location/data/dto/request/update_thumbnail_request_dto.dart';
 import 'package:casttime/features/location/data/mapper/location_detail_dto_mapper.dart';
+import 'package:casttime/features/location/data/mapper/location_draft_to_request_mapper.dart';
 import 'package:casttime/features/location/data/mapper/location_dto_mapper.dart';
-import 'package:casttime/features/location/data/mapper/location_request_mapper.dart';
 import 'package:casttime/features/location/data/mapper/location_slice_dto_mapper.dart';
+import 'package:casttime/features/location/domain/model/app_image.dart';
 import 'package:casttime/features/location/domain/model/location_detail.dart';
+import 'package:casttime/features/location/domain/model/location_draft.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:injectable/injectable.dart';
 
 @LazySingleton(as: LocationRepository)
 class LocationRepositoryImpl implements LocationRepository {
-  const LocationRepositoryImpl(this._api, this._failureMapper);
+  const LocationRepositoryImpl(this._api, this._imageApi, this._failureMapper);
 
   final LocationApi _api;
+  final ImageApi _imageApi;
   final ApiFailureMapper _failureMapper;
 
   @override
@@ -48,14 +55,6 @@ class LocationRepositoryImpl implements LocationRepository {
     return _execute(
       request: () => _api.searchLocations(query),
       map: (dtos) => dtos.map((dto) => dto.toDomain()).toList(),
-    );
-  }
-
-  @override
-  Future<AppResult<Location>> createLocation(LocationDetail location) {
-    return _execute(
-      request: () => _api.createLocation(location.toCreateRequest()),
-      map: (dto) => dto.toDomain(),
     );
   }
 
@@ -136,6 +135,43 @@ class LocationRepositoryImpl implements LocationRepository {
         rangeEnd: end.toIso8601String(),
         page: page,
         pageSize: pageSize,
+      ),
+      map: (dto) => dto.toDomain(),
+    );
+  }
+
+  @override
+  Future<AppResult<Location>> createLocation(LocationDraft location) {
+    return _execute(
+      request: () => _api.createLocation(location.toCreateRequest()),
+      map: (dto) => dto.toDomain(),
+    );
+  }
+
+  @override
+  Future<AppResult<List<AppImage>>> uploadImages(
+    List<Uint8List> images,
+    int locationId,
+  ) async {
+    return _execute(
+      request: () => _imageApi.uploadLocationImages(
+        images
+            .map(
+              (bytes) => MultipartFile.fromBytes(bytes, filename: 'image.jpg'),
+            )
+            .toList(),
+        locationId,
+      ),
+      map: (dtos) => dtos.map((dto) => dto.toDomain()).toList(),
+    );
+  }
+
+  @override
+  Future<AppResult<Location>> setThumbnail(int locationId, int imageId) async {
+    return _execute(
+      request: () => _api.patchThumbnail(
+        locationId,
+        UpdateThumbnailRequestDTO(imageId: imageId),
       ),
       map: (dto) => dto.toDomain(),
     );

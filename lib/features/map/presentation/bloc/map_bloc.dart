@@ -31,6 +31,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     on<MapLocationSelected>(_onLocationSelected);
     on<MapLocationDeselected>(_onLocationDeselected);
     on<MapGeoLocationChanged>(_onGeoLocationChanged);
+    on<MapCreateLocation>(_onLocationCreatedLongTapped);
   }
 
   Future<void> _onMapStarted(MapStarted event, Emitter<MapState> emit) async {
@@ -180,7 +181,17 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   }
 
   void _onLocationSelected(MapLocationSelected event, Emitter<MapState> emit) {
-    emit(state.copyWith(selectedLocation: event.location, zoom: event.zoom));
+    if (event.newCreatedLocation) {
+      emit(
+        state.copyWith(
+          selectedLocation: event.location,
+          locations: [...state.locations, event.location],
+          zoom: event.zoom,
+        ),
+      );
+    } else {
+      emit(state.copyWith(selectedLocation: event.location, zoom: event.zoom));
+    }
   }
 
   void _onLocationDeselected(
@@ -197,5 +208,39 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     _searchDebounce?.cancel();
     _positionSubscription?.cancel();
     return super.close();
+  }
+
+  void _onLocationCreatedLongTapped(
+    MapCreateLocation event,
+    Emitter<MapState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        status: LoadStatus.initial,
+        tapPosition: null,
+        geoAddress: null,
+        failure: null,
+      ),
+    );
+
+    final geoAddress = await locationService.reverseGeocodeOSM(
+      event.tapPosition,
+    );
+    String? geoAddressString;
+    if (geoAddress case Failure<Location>(:final failure)) {
+      debugPrint(
+        'onLocationCreatedLongTapped: reverse geocode failed: $failure',
+      );
+    } else {
+      geoAddressString = (geoAddress as Success<String?>).data;
+    }
+    emit(
+      state.copyWith(
+        status: LoadStatus.success,
+        tapPosition: event.tapPosition,
+        geoAddress: geoAddressString,
+        clearFailure: true,
+      ),
+    );
   }
 }

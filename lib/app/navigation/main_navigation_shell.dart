@@ -1,6 +1,10 @@
 import 'package:casttime/app/navigation/widgets/app_bottom_bar.dart';
 import 'package:casttime/app/presentation/banner/appbottom_banner.dart';
+import 'package:casttime/app/presentation/cubit/app_busy_cubit.dart';
+import 'package:casttime/app/presentation/cubit/app_busy_state.dart';
+import 'package:casttime/app/presentation/widget/upload_overlay_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 class MainNavigationShell extends StatelessWidget {
@@ -17,7 +21,16 @@ class MainNavigationShell extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       extendBody: true,
-      body: Stack(children: [navigationShell]),
+      body: Stack(
+        children: [
+          navigationShell,
+          BlocBuilder<AppBusyCubit, AppBusyState>(
+            builder: (context, AppBusyState state) => state.isBusy
+                ? UploadOverlay(messageKey: state.messageKey)
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(12, 0, 12, 12),
         child: Align(

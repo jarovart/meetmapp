@@ -2,7 +2,9 @@ import 'package:casttime/app/config/api_config.dart';
 import 'package:casttime/core/network/auth_interceptor.dart';
 import 'package:casttime/core/network/logging_interceptor.dart';
 import 'package:casttime/features/auth/data/api/auth_api.dart';
+import 'package:casttime/features/image/data/api/image_api.dart';
 import 'package:casttime/features/info/data/api/info_api.dart';
+import 'package:casttime/features/location/data/api/geocoding_api.dart';
 import 'package:casttime/features/location/data/api/location_api.dart';
 import 'package:casttime/features/location/data/api/place_api.dart';
 import 'package:casttime/features/profile/data/api/user_profile_api.dart';
@@ -31,6 +33,18 @@ abstract class NetworkModule {
     return dio;
   }
 
+  @Named('geocoding')
+  @lazySingleton
+  Dio provideGeocodingDio() {
+    return Dio(
+      BaseOptions(
+        headers: {'User-Agent': 'casttime-app/1.0 (info@jarovart.de)'},
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ),
+    );
+  }
+
   @lazySingleton
   LocationApi provideLocationApi(Dio dio) {
     return LocationApi(dio);
@@ -50,4 +64,11 @@ abstract class NetworkModule {
 
   @lazySingleton
   SettingsApi provideSettingsApi(Dio dio) => SettingsApi(dio);
+
+  @lazySingleton
+  ImageApi provideImageApi(Dio dio) => ImageApi(dio);
+
+  @lazySingleton
+  GeocodingApi provideGeocodingApi(@Named('geocoding') Dio dio) =>
+      GeocodingApi(dio);
 }

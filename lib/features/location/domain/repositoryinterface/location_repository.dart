@@ -1,15 +1,17 @@
+import 'dart:typed_data';
+
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
+import 'package:casttime/features/location/domain/model/app_image.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/domain/model/location_detail.dart';
+import 'package:casttime/features/location/domain/model/location_draft.dart';
 import 'package:flutter_map/flutter_map.dart';
 
 abstract interface class LocationRepository {
   Future<AppResult<List<Location>>> fetchLocationsInView(LatLngBounds bounds);
 
   Future<AppResult<List<Location>>> searchLocations(String query);
-
-  Future<AppResult<Location>> createLocation(LocationDetail location);
 
   Future<AppResult<List<Location>>> fetchLocationsWithDateRange(
     LatLngBounds bounds,
@@ -39,6 +41,13 @@ abstract interface class LocationRepository {
     required int page,
     required int pageSize,
   });
+
+  Future<AppResult<Location>> createLocation(LocationDraft draft);
+  Future<AppResult<List<AppImage>>> uploadImages(
+    List<Uint8List> images,
+    int locationId,
+  );
+  Future<AppResult<Location>> setThumbnail(int locationId, int imageId);
 }
 
 class CreateLocationCommand {}

@@ -5,6 +5,7 @@ import 'package:casttime/core/failure/geolocation_failure_mapper.dart';
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
 import 'package:casttime/features/location/domain/model/location_detail.dart';
+import 'package:casttime/features/location/domain/repositoryinterface/geocoding_repository.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/domain/serviceinterface/location_service.dart';
@@ -18,11 +19,13 @@ import 'package:latlong2/latlong.dart';
 @LazySingleton(as: LocationService)
 class LocationServiceImpl implements LocationService {
   final LocationRepository repository;
+  final GeocodingRepository geocodingRepository;
   final LocationPermissionService _permissionService;
   final LocationFailureMapper failureMapper;
 
   LocationServiceImpl(
     this.repository,
+    this.geocodingRepository,
     this._permissionService,
     this.failureMapper,
   );
@@ -46,18 +49,18 @@ class LocationServiceImpl implements LocationService {
     }
 
     try {
-      final position =
-          await Geolocator.getCurrentPosition(
-            locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.high,
-            ),
-          ).timeout(
-            const Duration(seconds: 10),
-            onTimeout: () =>
-                throw TimeoutException('Location request timed out todo'),
-          );
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(
+          accuracy: kIsWeb ? LocationAccuracy.medium : LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 25),
+        ),
+      );
       return Success(LatLng(position.latitude, position.longitude));
     } catch (e, st) {
+      final cached = await Geolocator.getLastKnownPosition();
+      if (cached != null) {
+        return Success(LatLng(cached.latitude, cached.longitude));
+      }
       return Failure(failureMapper.map(e, st));
     }
   }
@@ -146,5 +149,10 @@ class LocationServiceImpl implements LocationService {
       page: page,
       pageSize: pageSize,
     );
+  }
+
+  @override
+  Future<AppResult<String?>> reverseGeocodeOSM(LatLng tapPosition) async {
+    return await geocodingRepository.reverseGeocode(tapPosition);
   }
 }

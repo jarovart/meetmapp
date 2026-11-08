@@ -712,4 +712,40 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get forgotPasswordHint =>
       'Gib deine E-Mail-Adresse ein. Wir senden dir einen Link, mit dem du dein Passwort zurücksetzen kannst.';
+
+  @override
+  String get datesMissing => 'Die Daten und Uhrzeiten fehlen';
+
+  @override
+  String get noImagesYet => 'Keine Fotos verfügbar';
+
+  @override
+  String get savingLocation => 'Location speichern...';
+
+  @override
+  String get uploadingImages => 'Bilder werden hochgeladen...';
+
+  @override
+  String get settingThumbnail => 'Profilfoto hinzufügen';
+
+  @override
+  String get geopositionMissing => 'Position der Location fehlt';
+
+  @override
+  String get mapTitle => 'Map';
+
+  @override
+  String get forYouTitle => 'For You';
+
+  @override
+  String get createTitle => 'Create';
+
+  @override
+  String get myLocationsTitle => 'Meine Locations';
+
+  @override
+  String get myProfileTitle => 'Mein Profil';
+
+  @override
+  String get returnTitle => 'Zurück';
 }

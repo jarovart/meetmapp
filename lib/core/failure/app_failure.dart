@@ -114,3 +114,19 @@ final class CooldownFailure extends AppFailure {
 
   final int waitSeconds;
 }
+
+final class ImageProcessingFailed extends AppFailure {
+  const ImageProcessingFailed({super.requestId, super.cause});
+}
+
+final class DatesMissing extends AppFailure {
+  const DatesMissing({super.requestId, super.cause});
+}
+
+final class EndDateBeforeStartDate extends AppFailure {
+  const EndDateBeforeStartDate({super.requestId, super.cause});
+}
+
+final class GeopositionMissing extends AppFailure {
+  const GeopositionMissing({super.requestId, super.cause});
+}

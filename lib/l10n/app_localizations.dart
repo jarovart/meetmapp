@@ -1387,6 +1387,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter your email address. We\'ll send you a link to reset your password.'**
   String get forgotPasswordHint;
+
+  /// No description provided for @datesMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates are missing'**
+  String get datesMissing;
+
+  /// No description provided for @noImagesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No images available'**
+  String get noImagesYet;
+
+  /// No description provided for @savingLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving location...'**
+  String get savingLocation;
+
+  /// No description provided for @uploadingImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading images...'**
+  String get uploadingImages;
+
+  /// No description provided for @settingThumbnail.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting up thumbnail'**
+  String get settingThumbnail;
+
+  /// No description provided for @geopositionMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'geoposition of location is missing'**
+  String get geopositionMissing;
+
+  /// No description provided for @mapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get mapTitle;
+
+  /// No description provided for @forYouTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'For You'**
+  String get forYouTitle;
+
+  /// No description provided for @createTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get createTitle;
+
+  /// No description provided for @myLocationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Locations'**
+  String get myLocationsTitle;
+
+  /// No description provided for @myProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Profile'**
+  String get myProfileTitle;
+
+  /// No description provided for @returnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Return'**
+  String get returnTitle;
 }
 
 class _AppLocalizationsDelegate

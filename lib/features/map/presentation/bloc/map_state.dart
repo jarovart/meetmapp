@@ -14,6 +14,8 @@ class MapState {
   final DateTime endDate;
   final RangeValues rangeValues;
   final LatLng? currentPosition;
+  final LatLng? tapPosition;
+  final String? geoAddress;
   final int recenterRequestId;
   final LatLngBounds bounds;
   final double zoom;
@@ -29,6 +31,8 @@ class MapState {
     required this.endDate,
     required this.rangeValues,
     required this.currentPosition,
+    required this.tapPosition,
+    required this.geoAddress,
     required this.bounds,
     required this.zoom,
     this.recenterRequestId = 0,
@@ -48,6 +52,8 @@ class MapState {
       endDate: now.add(Duration(days: 1)),
       rangeValues: RangeValues(0, 4),
       currentPosition: null, // Deutschland
+      tapPosition: null,
+      geoAddress: null,
       bounds: LatLngBounds(LatLng(51.1657, 10.4515), LatLng(51.1657, 10.4515)),
       zoom: 6,
     );
@@ -63,6 +69,8 @@ class MapState {
     DateTime? endDate,
     RangeValues? rangeValues,
     LatLng? currentPosition,
+    LatLng? tapPosition,
+    String? geoAddress,
     int? recenterRequestId,
     LatLngBounds? bounds,
     double? zoom,
@@ -81,6 +89,8 @@ class MapState {
       endDate: endDate ?? this.endDate,
       rangeValues: rangeValues ?? this.rangeValues,
       currentPosition: currentPosition ?? this.currentPosition,
+      tapPosition: tapPosition ?? this.tapPosition,
+      geoAddress: geoAddress ?? this.geoAddress,
       recenterRequestId: recenterRequestId ?? this.recenterRequestId,
       bounds: bounds ?? this.bounds,
       zoom: zoom ?? this.zoom,

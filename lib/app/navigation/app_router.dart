@@ -11,6 +11,8 @@ import 'package:casttime/features/auth/presentation/pages/register_page.dart';
 import 'package:casttime/features/auth/presentation/pages/reset_password_page.dart';
 import 'package:casttime/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:casttime/features/info/presentation/pages/info_page.dart';
+import 'package:casttime/features/location/domain/model/location.dart';
+import 'package:casttime/features/location/presentation/pages/location_create_page.dart';
 import 'package:casttime/features/location/presentation/pages/location_list_page.dart';
 import 'package:casttime/features/map/presentation/pages/map_page.dart';
 import 'package:casttime/features/profile/presentation/pages/profile_page.dart';
@@ -19,6 +21,7 @@ import 'package:casttime/features/setting/presentation/page/settings_page.dart';
 import 'package:casttime/features/support/presentation/support_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -49,7 +52,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: RouteConfig.mapUrl,
-              builder: (_, __) => const MapPage(),
+              builder: (_, _) => const MapPage(),
             ),
           ],
         ),
@@ -58,7 +61,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: RouteConfig.locationListUrl,
-              builder: (_, __) => const LocationsListPage(),
+              builder: (_, _) => const LocationsListPage(),
             ),
             GoRoute(
               path: RouteConfig.profileUrl,
@@ -71,8 +74,23 @@ final appRouter = GoRouter(
           navigatorKey: _createNavigatorKey,
           routes: [
             GoRoute(
-              path: '/create-location',
-              builder: (_, __) => const SizedBox(),
+              path: RouteConfig.createLocationUrl,
+              builder: (_, state) {
+                final lat = double.tryParse(
+                  state.uri.queryParameters['lat'] ?? '',
+                );
+                final lng = double.tryParse(
+                  state.uri.queryParameters['lng'] ?? '',
+                );
+                final position = (lat != null && lng != null)
+                    ? LatLng(lat, lng)
+                    : null;
+
+                return LocationCreatePage(
+                  key: ValueKey('create_${lat}_$lng'),
+                  position: position,
+                );
+              },
             ),
           ],
         ),

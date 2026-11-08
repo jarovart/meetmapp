@@ -10,10 +10,35 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 abstract final class AppNavigation {
+  static List<NavDestination> _editActions({
+    required NavAction onCancel,
+    required NavAction onReset,
+    required NavAction onSave,
+  }) => [
+    NavDestination(
+      id: 'cancel',
+      labelBuilder: (l10n) => l10n.returnTitle,
+      icon: Icons.close,
+      onSelected: onCancel,
+    ),
+    NavDestination(
+      id: 'reset',
+      labelBuilder: (l10n) => l10n.reset,
+      icon: Icons.restart_alt,
+      onSelected: onReset,
+    ),
+    NavDestination(
+      id: 'save',
+      labelBuilder: (l10n) => l10n.save,
+      icon: Icons.check,
+      onSelected: onSave,
+    ),
+  ];
+
   static final List<NavDestination> destinations = [
     NavDestination(
       id: 'map',
-      label: 'Map',
+      labelBuilder: (l10n) => l10n.mapTitle,
       icon: Icons.map_outlined,
       selectedIcon: Icons.map,
       routePath: RouteConfig.mapUrl,
@@ -23,7 +48,7 @@ abstract final class AppNavigation {
     ),
     NavDestination(
       id: 'forYou',
-      label: 'For You',
+      labelBuilder: (l10n) => l10n.forYouTitle,
       icon: Icons.explore_outlined,
       selectedIcon: Icons.explore,
       routePath: RouteConfig.locationListUrl,
@@ -32,15 +57,28 @@ abstract final class AppNavigation {
     ),
     NavDestination(
       id: 'create',
-      label: 'Erstellen',
+      labelBuilder: (l10n) => l10n.createTitle,
       icon: Icons.add_circle_outline,
       selectedIcon: Icons.add_circle,
-      routePath: '/create-location',
+      routePath: RouteConfig.createLocationUrl,
       branchIndex: 2,
+      onSelected: (context) {
+        final mapState = context.read<MapBloc>().state;
+        final center = mapState.currentPosition ?? mapState.bounds.center;
+        context.go(
+          RouteConfig.getLocationCreateUrl(
+            lat: center.latitude,
+            lng: center.longitude,
+          ),
+        );
+      },
+      requiresAuth: true,
+      replacesBar: true,
+      usesEditBar: true,
     ),
     NavDestination(
       id: 'myLocations',
-      label: 'Meine',
+      labelBuilder: (l10n) => l10n.myLocationsTitle,
       icon: Icons.location_on_outlined,
       selectedIcon: Icons.location_on,
       routePath: '/my-locations',
@@ -48,7 +86,7 @@ abstract final class AppNavigation {
     ),
     NavDestination(
       id: 'profile',
-      label: 'Profil',
+      labelBuilder: (l10n) => l10n.myProfileTitle,
       icon: Icons.person_outline,
       selectedIcon: Icons.person,
       customIcon: _profileIcon,
@@ -58,7 +96,7 @@ abstract final class AppNavigation {
       children: [
         NavDestination(
           id: 'login',
-          label: 'Logout',
+          labelBuilder: (l10n) => l10n.logout,
           icon: Icons.logout,
           //routePath: RouteConfig.loginUrl,
           onSelected: _logout,
@@ -66,19 +104,19 @@ abstract final class AppNavigation {
         ),
         NavDestination(
           id: 'info',
-          label: 'Info',
+          labelBuilder: (l10n) => l10n.info,
           icon: Icons.info_outline,
           routePath: RouteConfig.infoUrl,
         ),
         NavDestination(
           id: 'support',
-          label: 'Support',
+          labelBuilder: (l10n) => l10n.support,
           icon: Icons.support_agent_outlined,
           routePath: RouteConfig.supportUrl,
         ),
         NavDestination(
           id: 'friends',
-          label: 'Benutzer',
+          labelBuilder: (l10n) => l10n.users,
           icon: Icons.people_outline,
           routePath: RouteConfig.userListUrl,
           visibleWhen: _loggedIn,
@@ -86,38 +124,23 @@ abstract final class AppNavigation {
         ),
         NavDestination(
           id: 'settings',
-          label: 'Einstellungen',
+          labelBuilder: (l10n) => l10n.settings,
           icon: Icons.settings_outlined,
           routePath: RouteConfig.settingsUrl,
         ),
         NavDestination(
           id: 'edit',
-          label: 'Bearbeiten',
+          labelBuilder: (l10n) => l10n.editProfile,
           icon: Icons.edit_outlined,
           routePath: RouteConfig.editProfileUrl,
           visibleWhen: _loggedIn,
           requiresAuth: true,
           replacesBar: true,
-          children: [
-            NavDestination(
-              id: 'back',
-              label: 'Zurück',
-              icon: Icons.arrow_back,
-              onSelected: _backToProfile,
-            ),
-            NavDestination(
-              id: 'reset',
-              label: 'Reset',
-              icon: Icons.restart_alt,
-              onSelected: _resetForm,
-            ),
-            NavDestination(
-              id: 'save',
-              label: 'Speichern',
-              icon: Icons.check,
-              onSelected: _saveForm,
-            ),
-          ],
+          children: _editActions(
+            onCancel: _backToProfile,
+            onReset: _resetForm,
+            onSave: _saveForm,
+          ),
         ),
       ],
     ),

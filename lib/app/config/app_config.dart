@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 class AppConfig {
   static const int checkLoginIntervalInSeconds = 30;
+  static const String packageName = "de.jarovart.casttime";
   static const String appName = "Casttime4me";
   static const String version = '$major.$minor.$patch';
   static const String major = '0';

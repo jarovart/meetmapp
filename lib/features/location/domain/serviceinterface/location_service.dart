@@ -18,6 +18,8 @@ abstract interface class LocationService {
     DateTime endDate,
   );
 
+  Future<AppResult<String?>> reverseGeocodeOSM(LatLng tapPosition);
+
   Future<AppResult<LocationDetail>> fetchLocationDetail(int id);
 
   Future<AppResult<void>> like(int locationId);
