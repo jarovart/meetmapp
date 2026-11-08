@@ -737,4 +737,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get returnTitle => 'Return';
+
+  @override
+  String get locationNotFound => 'Location not found.';
 }

@@ -1,6 +1,6 @@
 import 'package:casttime/app/localization/l10n_extension.dart';
-import 'package:casttime/features/location/presentation/bloc/locationlist_bloc.dart';
-import 'package:casttime/features/location/presentation/bloc/locationlist_event.dart';
+import 'package:casttime/features/location/presentation/bloc/location_list_bloc.dart';
+import 'package:casttime/features/location/presentation/bloc/location_list_event.dart';
 import 'package:casttime/features/location/presentation/pages/location_filter_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

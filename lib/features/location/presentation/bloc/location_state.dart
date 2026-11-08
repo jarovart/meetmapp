@@ -1,37 +1,40 @@
 import 'package:casttime/app/presentation/util/load_status.dart';
 import 'package:casttime/core/failure/app_failure.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
-import 'package:casttime/features/location/domain/model/location_detail.dart';
 
-class LocationDetailState {
-  final Location location;
-  final LocationDetail? locationDetail;
+class LocationState {
+  final Location? location;
   final LoadStatus status;
   final AppFailure? failure;
 
-  const LocationDetailState({
+  const LocationState({
     required this.location,
-    this.locationDetail,
     this.status = LoadStatus.initial,
     this.failure,
   });
 
-  factory LocationDetailState.initial(Location location) {
-    return LocationDetailState(location: location);
+  factory LocationState.initial(Location location) {
+    return LocationState(location: location);
   }
 
-  LocationDetailState copyWith({
+  LocationState copyWith({
     Location? location,
-    LocationDetail? locationDetail,
     LoadStatus? status,
     AppFailure? failure,
     bool clearFailure = false,
   }) {
-    return LocationDetailState(
+    return LocationState(
       location: location ?? this.location,
-      locationDetail: locationDetail ?? this.locationDetail,
       status: status ?? this.status,
       failure: clearFailure ? null : failure ?? this.failure,
     );
+  }
+
+  List<String> get imageUrls {
+    final images = location?.images;
+    if (images != null && images.isNotEmpty) {
+      return images.map((img) => img.imageUrl).toList();
+    }
+    return [];
   }
 }

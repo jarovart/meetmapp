@@ -23,5 +23,10 @@ abstract class Location with _$Location {
     bool? likedByCurrentUser,
     bool? joinedByCurrentUser,
     @Default(0) int promotionTier,
+    List<AppImage>? images,
   }) = _Location;
+
+  const Location._();
+
+  bool get isDetailLoaded => images != null;
 }

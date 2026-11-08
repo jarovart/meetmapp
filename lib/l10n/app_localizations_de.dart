@@ -748,4 +748,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get returnTitle => 'Zurück';
+
+  @override
+  String get locationNotFound => 'Location konnte nicht gefunden werden.';
 }

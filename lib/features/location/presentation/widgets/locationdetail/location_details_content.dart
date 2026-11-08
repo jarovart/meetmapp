@@ -1,8 +1,11 @@
 import 'package:casttime/app/localization/app_failure_localization.dart';
 import 'package:casttime/app/localization/l10n_extension.dart';
 import 'package:casttime/app/navigation/util/route_config.dart';
+import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:casttime/features/image/presentation/widgets/gallery_widget.dart';
-import 'package:casttime/features/location/presentation/bloc/locationdetail_bloc.dart';
+import 'package:casttime/features/location/presentation/bloc/location_bloc.dart';
+import 'package:casttime/features/location/presentation/bloc/location_event.dart';
+import 'package:casttime/features/location/presentation/widgets/locationdetail/location_bottom_action.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -20,26 +23,20 @@ class LocationDetailsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final detailsBloc = context.watch<LocationDetailBloc>();
+    final locationBloc = context.watch<LocationBloc>();
     final formatter = DateFormat('dd.MM.yyyy HH:mm');
-    final location = detailsBloc.state.location;
-    final state = detailsBloc.state;
-    List<String> imageUrls =
-        detailsBloc.state.locationDetail?.images
-            .map((api) => api.imageUrl)
-            .toList() ??
-        [];
+    final location = locationBloc.state.location!;
+    final state = locationBloc.state;
+    List<String> imageUrls = state.imageUrls;
     final l10n = context.l10n;
 
     return Material(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       clipBehavior: Clip.antiAlias,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(
+          Expanded(
             child: ListView(
-              shrinkWrap: true,
               padding: const EdgeInsets.all(16),
               controller: scrollController,
               children: [
@@ -149,15 +146,19 @@ class LocationDetailsContent extends StatelessWidget {
             ),
           ),
 
-          /*LocationBottomActions( todo: artem
-            isLikeJoinAble: controller.isLikeJoinAble,
-            isLiked: controller.isLiked,
-            isJoined: controller.isJoined,
-            likeCount: controller.likedUserCount,
-            joinCount: controller.joinedUserCount,
-            onLikeTap: controller.toggleLike,
-            onJoinTap: controller.toggleJoin,
-          ),*/
+          LocationBottomActions(
+            isLikeJoinAble: context.read<AuthCubit>().state.isLoggedIn,
+            isLiked: location.likedByCurrentUser ?? false,
+            isJoined: location.joinedByCurrentUser ?? false,
+            likeCount: location.likedUserCount,
+            joinCount: location.joinedUserCount,
+            onLikeTap: () => context.read<LocationBloc>().add(
+              LocationLikeToggled(id: location.id),
+            ),
+            onJoinTap: () => context.read<LocationBloc>().add(
+              LocationJoinToggled(id: location.id),
+            ),
+          ),
         ],
       ),
     );

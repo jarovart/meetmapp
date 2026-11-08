@@ -1,9 +1,9 @@
 import 'package:casttime/app/di/injection.dart';
 import 'package:casttime/app/presentation/util/load_status.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
-import 'package:casttime/features/location/presentation/bloc/locationdetail_bloc.dart';
-import 'package:casttime/features/location/presentation/bloc/locationdetail_event.dart';
-import 'package:casttime/features/location/presentation/bloc/locationdetail_state.dart';
+import 'package:casttime/features/location/presentation/bloc/location_bloc.dart';
+import 'package:casttime/features/location/presentation/bloc/location_event.dart';
+import 'package:casttime/features/location/presentation/bloc/location_state.dart';
 import 'package:casttime/features/location/presentation/util/sheet_size_memory.dart';
 import 'package:casttime/features/location/presentation/widgets/locationdetail/location_details_content.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +29,8 @@ class LocationDetailsBottomSheet extends StatefulWidget {
       builder: (_) {
         return BlocProvider(
           create: (_) =>
-              getIt<LocationDetailBloc>(param1: location)
-                ..add(LocationDetailRequested(location: location)),
+              getIt<LocationBloc>(param1: location)
+                ..add(LocationRequested(id: location.id)),
           child: LocationDetailsBottomSheet(canOpenInNewPage: canOpenInNewPage),
         );
       },
@@ -110,7 +110,7 @@ class _LocationDetailsBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LocationDetailBloc, LocationDetailState>(
+    return BlocListener<LocationBloc, LocationState>(
       listenWhen: (previous, current) =>
           previous.status != current.status &&
           current.status == LoadStatus.success,
@@ -132,11 +132,11 @@ class _LocationDetailsBottomSheetState
         minChildSize: _dismissSize,
         maxChildSize: _maxSize,
         builder: (_, scrollController) {
-          return BlocBuilder<LocationDetailBloc, LocationDetailState>(
+          return BlocBuilder<LocationBloc, LocationState>(
             buildWhen: (previous, current) =>
                 previous.status != current.status ||
                 previous.location != current.location ||
-                previous.locationDetail != current.locationDetail ||
+                previous.location != current.location ||
                 previous.failure != current.failure,
             builder: (context, state) {
               if (state.status == LoadStatus.loading) {

@@ -1,8 +1,8 @@
 import 'package:casttime/app/di/injection.dart';
 import 'package:casttime/app/presentation/util/load_status.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
-import 'package:casttime/features/location/presentation/bloc/locationdetail_bloc.dart';
-import 'package:casttime/features/location/presentation/bloc/locationdetail_event.dart';
+import 'package:casttime/features/location/presentation/bloc/location_bloc.dart';
+import 'package:casttime/features/location/presentation/bloc/location_event.dart';
 import 'package:casttime/features/location/presentation/widgets/locationdetail/location_details_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,8 +25,8 @@ class LocationDetailsGeneralDialog extends StatelessWidget {
       pageBuilder: (dialogContext, _, _) {
         return BlocProvider(
           create: (_) =>
-              getIt<LocationDetailBloc>(param1: location)
-                ..add(LocationDetailRequested(location: location)),
+              getIt<LocationBloc>(param1: location)
+                ..add(LocationRequested(id: location.id)),
           child: SafeArea(
             left: false,
             right: true,
@@ -71,7 +71,7 @@ class LocationDetailsGeneralDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final detailBloc = context.watch<LocationDetailBloc>();
+    final detailBloc = context.watch<LocationBloc>();
     //detailBloc.canOpenInNewPage = canOpenInNewPage;
     debugPrint("super rebuild");
 

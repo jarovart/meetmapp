@@ -22,7 +22,8 @@ abstract class LocationApi {
   );
 
   @GET('/api/locations/findById')
-  Future<LocationFullResponseDTO> fetchFullLocation(@Query("id") int id);
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<LocationFullResponseDTO> fetchFullLocation(@Query('id') int id);
 
   @GET('/api/locations/search')
   Future<List<LocationBaseResponseDTO>> searchLocations(

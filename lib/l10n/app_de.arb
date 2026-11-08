@@ -231,5 +231,6 @@
   "myLocationsTitle": "Meine Locations",
   "myProfileTitle": "Mein Profil",
   "infoTitle": "Information",
-  "returnTitle": "Zurück"
+  "returnTitle": "Zurück",
+  "locationNotFound": "Location konnte nicht gefunden werden."
 }

@@ -64,7 +64,7 @@ class _LocationApi implements LocationApi {
 
   @override
   Future<LocationFullResponseDTO> fetchFullLocation(int id) async {
-    final _extra = <String, dynamic>{};
+    final _extra = <String, dynamic>{'withAuthentication': true};
     final queryParameters = <String, dynamic>{r'id': id};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;

@@ -11,7 +11,6 @@ import 'package:casttime/features/auth/presentation/pages/register_page.dart';
 import 'package:casttime/features/auth/presentation/pages/reset_password_page.dart';
 import 'package:casttime/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:casttime/features/info/presentation/pages/info_page.dart';
-import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/presentation/pages/location_create_page.dart';
 import 'package:casttime/features/location/presentation/pages/location_list_page.dart';
 import 'package:casttime/features/map/presentation/pages/map_page.dart';

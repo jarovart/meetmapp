@@ -53,6 +53,8 @@ import 'package:casttime/features/location/data/repository/place_repository_impl
     as _i256;
 import 'package:casttime/features/location/data/service/location_service_impl.dart'
     as _i449;
+import 'package:casttime/features/location/data/service/navigation_service_impl.dart'
+    as _i953;
 import 'package:casttime/features/location/data/service/place_service_impl.dart'
     as _i881;
 import 'package:casttime/features/location/domain/model/location.dart' as _i96;
@@ -64,16 +66,18 @@ import 'package:casttime/features/location/domain/repositoryinterface/place_repo
     as _i702;
 import 'package:casttime/features/location/domain/serviceinterface/location_service.dart'
     as _i283;
+import 'package:casttime/features/location/domain/serviceinterface/navigation_service.dart'
+    as _i407;
 import 'package:casttime/features/location/domain/serviceinterface/place_service.dart'
     as _i911;
 import 'package:casttime/features/location/domain/util/location_bounds_calculator.dart'
     as _i794;
+import 'package:casttime/features/location/presentation/bloc/location_bloc.dart'
+    as _i370;
 import 'package:casttime/features/location/presentation/bloc/location_create_bloc.dart'
     as _i190;
-import 'package:casttime/features/location/presentation/bloc/locationdetail_bloc.dart'
-    as _i312;
-import 'package:casttime/features/location/presentation/bloc/locationlist_bloc.dart'
-    as _i981;
+import 'package:casttime/features/location/presentation/bloc/location_list_bloc.dart'
+    as _i221;
 import 'package:casttime/features/location/presentation/bloc/place_suggestion_cubit.dart'
     as _i267;
 import 'package:casttime/features/location/presentation/util/sheet_size_memory.dart'
@@ -161,6 +165,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.provideGeocodingDio(),
       instanceName: 'geocoding',
+    );
+    gh.lazySingleton<_i407.NavigationService>(
+      () => _i953.NavigationServiceImpl(),
     );
     gh.lazySingleton<_i86.GeocodingApi>(
       () => networkModule.provideGeocodingApi(
@@ -278,11 +285,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i455.LocationFailureMapper>(),
       ),
     );
-    gh.factoryParam<_i312.LocationDetailBloc, _i96.Location, dynamic>(
-      (initialLocation, _) => _i312.LocationDetailBloc(
-        gh<_i283.LocationService>(),
-        initialLocation,
-      ),
+    gh.factoryParam<_i370.LocationBloc, _i96.Location, dynamic>(
+      (initialLocation, _) =>
+          _i370.LocationBloc(gh<_i283.LocationService>(), initialLocation),
     );
     gh.lazySingleton<_i714.UserProfileService>(
       () => _i732.UserProfileServiceImpl(gh<_i78.UserProfileRepository>()),
@@ -294,8 +299,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i297.PreferencesRepository>(),
       ),
     );
-    gh.factory<_i981.LocationSearchBloc>(
-      () => _i981.LocationSearchBloc(
+    gh.factory<_i221.LocationSearchBloc>(
+      () => _i221.LocationSearchBloc(
         gh<_i283.LocationService>(),
         gh<_i794.LocationBoundsCalculator>(),
       ),

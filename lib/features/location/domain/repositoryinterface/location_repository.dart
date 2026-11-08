@@ -4,7 +4,6 @@ import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
 import 'package:casttime/features/location/domain/model/app_image.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
-import 'package:casttime/features/location/domain/model/location_detail.dart';
 import 'package:casttime/features/location/domain/model/location_draft.dart';
 import 'package:flutter_map/flutter_map.dart';
 
@@ -19,7 +18,7 @@ abstract interface class LocationRepository {
     DateTime endDate,
   );
 
-  Future<AppResult<LocationDetail>> fetchFullLocation(int id);
+  Future<AppResult<Location>> fetchFullLocation(int id);
 
   Future<AppResult<void>> like(int locationId);
 

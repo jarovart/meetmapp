@@ -1,7 +1,6 @@
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
-import 'package:casttime/features/location/domain/model/location_detail.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -20,7 +19,7 @@ abstract interface class LocationService {
 
   Future<AppResult<String?>> reverseGeocodeOSM(LatLng tapPosition);
 
-  Future<AppResult<LocationDetail>> fetchLocationDetail(int id);
+  Future<AppResult<Location>> fetchFullLocation(int id);
 
   Future<AppResult<void>> like(int locationId);
 

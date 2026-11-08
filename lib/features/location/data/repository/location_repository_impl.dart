@@ -5,12 +5,11 @@ import 'package:casttime/features/image/data/api/image_api.dart';
 import 'package:casttime/features/image/data/mapper/image_dto_mapper.dart';
 import 'package:casttime/features/location/data/api/location_api.dart';
 import 'package:casttime/features/location/data/dto/request/update_thumbnail_request_dto.dart';
-import 'package:casttime/features/location/data/mapper/location_detail_dto_mapper.dart';
 import 'package:casttime/features/location/data/mapper/location_draft_to_request_mapper.dart';
-import 'package:casttime/features/location/data/mapper/location_dto_mapper.dart';
+import 'package:casttime/features/location/data/mapper/location_base_response_dto_mapper.dart';
+import 'package:casttime/features/location/data/mapper/location_full_response_dto_mapper.dart';
 import 'package:casttime/features/location/data/mapper/location_slice_dto_mapper.dart';
 import 'package:casttime/features/location/domain/model/app_image.dart';
-import 'package:casttime/features/location/domain/model/location_detail.dart';
 import 'package:casttime/features/location/domain/model/location_draft.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
@@ -43,7 +42,7 @@ class LocationRepositoryImpl implements LocationRepository {
   }
 
   @override
-  Future<AppResult<LocationDetail>> fetchFullLocation(int id) {
+  Future<AppResult<Location>> fetchFullLocation(int id) {
     return _execute(
       request: () => _api.fetchFullLocation(id),
       map: (dto) => dto.toDomain(),

@@ -5,7 +5,7 @@ import 'package:casttime/features/location/domain/model/location_filter.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:latlong2/latlong.dart';
 
-part 'locationlist_state.freezed.dart';
+part 'location_list_state.freezed.dart';
 
 @freezed
 abstract class LocationSearchState with _$LocationSearchState {

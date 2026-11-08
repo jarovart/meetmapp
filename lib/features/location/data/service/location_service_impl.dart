@@ -4,7 +4,6 @@ import 'package:casttime/core/failure/app_failure.dart';
 import 'package:casttime/core/failure/geolocation_failure_mapper.dart';
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
-import 'package:casttime/features/location/domain/model/location_detail.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/geocoding_repository.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
@@ -85,7 +84,7 @@ class LocationServiceImpl implements LocationService {
   }
 
   @override
-  Future<AppResult<LocationDetail>> fetchLocationDetail(int id) async {
+  Future<AppResult<Location>> fetchFullLocation(int id) async {
     return await repository.fetchFullLocation(id);
   }
 

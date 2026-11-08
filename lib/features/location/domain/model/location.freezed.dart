@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Location {
 
- int get id; String get title; String get description; String get address; DateTime get creationDateTime; DateTime get startDateTime; DateTime get endDateTime; LatLng get position; int get createdUserId; String get createdUsername; int get likedUserCount; int get joinedUserCount; AppImage? get thumbnailImage; bool? get likedByCurrentUser; bool? get joinedByCurrentUser; int get promotionTier;
+ int get id; String get title; String get description; String get address; DateTime get creationDateTime; DateTime get startDateTime; DateTime get endDateTime; LatLng get position; int get createdUserId; String get createdUsername; int get likedUserCount; int get joinedUserCount; AppImage? get thumbnailImage; bool? get likedByCurrentUser; bool? get joinedByCurrentUser; int get promotionTier; List<AppImage>? get images;
 /// Create a copy of Location
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $LocationCopyWith<Location> get copyWith => _$LocationCopyWithImpl<Location>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as Location;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Location&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.address, _this.address) || other.address == _this.address)&&(identical(other.creationDateTime, _this.creationDateTime) || other.creationDateTime == _this.creationDateTime)&&(identical(other.startDateTime, _this.startDateTime) || other.startDateTime == _this.startDateTime)&&(identical(other.endDateTime, _this.endDateTime) || other.endDateTime == _this.endDateTime)&&(identical(other.position, _this.position) || other.position == _this.position)&&(identical(other.createdUserId, _this.createdUserId) || other.createdUserId == _this.createdUserId)&&(identical(other.createdUsername, _this.createdUsername) || other.createdUsername == _this.createdUsername)&&(identical(other.likedUserCount, _this.likedUserCount) || other.likedUserCount == _this.likedUserCount)&&(identical(other.joinedUserCount, _this.joinedUserCount) || other.joinedUserCount == _this.joinedUserCount)&&(identical(other.thumbnailImage, _this.thumbnailImage) || other.thumbnailImage == _this.thumbnailImage)&&(identical(other.likedByCurrentUser, _this.likedByCurrentUser) || other.likedByCurrentUser == _this.likedByCurrentUser)&&(identical(other.joinedByCurrentUser, _this.joinedByCurrentUser) || other.joinedByCurrentUser == _this.joinedByCurrentUser)&&(identical(other.promotionTier, _this.promotionTier) || other.promotionTier == _this.promotionTier));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Location&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.address, _this.address) || other.address == _this.address)&&(identical(other.creationDateTime, _this.creationDateTime) || other.creationDateTime == _this.creationDateTime)&&(identical(other.startDateTime, _this.startDateTime) || other.startDateTime == _this.startDateTime)&&(identical(other.endDateTime, _this.endDateTime) || other.endDateTime == _this.endDateTime)&&(identical(other.position, _this.position) || other.position == _this.position)&&(identical(other.createdUserId, _this.createdUserId) || other.createdUserId == _this.createdUserId)&&(identical(other.createdUsername, _this.createdUsername) || other.createdUsername == _this.createdUsername)&&(identical(other.likedUserCount, _this.likedUserCount) || other.likedUserCount == _this.likedUserCount)&&(identical(other.joinedUserCount, _this.joinedUserCount) || other.joinedUserCount == _this.joinedUserCount)&&(identical(other.thumbnailImage, _this.thumbnailImage) || other.thumbnailImage == _this.thumbnailImage)&&(identical(other.likedByCurrentUser, _this.likedByCurrentUser) || other.likedByCurrentUser == _this.likedByCurrentUser)&&(identical(other.joinedByCurrentUser, _this.joinedByCurrentUser) || other.joinedByCurrentUser == _this.joinedByCurrentUser)&&(identical(other.promotionTier, _this.promotionTier) || other.promotionTier == _this.promotionTier)&&const DeepCollectionEquality().equals(other.images, _this.images));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Location;
-  return Object.hash(runtimeType,_this.id,_this.title,_this.description,_this.address,_this.creationDateTime,_this.startDateTime,_this.endDateTime,_this.position,_this.createdUserId,_this.createdUsername,_this.likedUserCount,_this.joinedUserCount,_this.thumbnailImage,_this.likedByCurrentUser,_this.joinedByCurrentUser,_this.promotionTier);
+  return Object.hash(runtimeType,_this.id,_this.title,_this.description,_this.address,_this.creationDateTime,_this.startDateTime,_this.endDateTime,_this.position,_this.createdUserId,_this.createdUsername,_this.likedUserCount,_this.joinedUserCount,_this.thumbnailImage,_this.likedByCurrentUser,_this.joinedByCurrentUser,_this.promotionTier,const DeepCollectionEquality().hash(_this.images));
 }
 
 @override
 String toString() {
   final _this = this as Location;
-  return 'Location(id: ${_this.id}, title: ${_this.title}, description: ${_this.description}, address: ${_this.address}, creationDateTime: ${_this.creationDateTime}, startDateTime: ${_this.startDateTime}, endDateTime: ${_this.endDateTime}, position: ${_this.position}, createdUserId: ${_this.createdUserId}, createdUsername: ${_this.createdUsername}, likedUserCount: ${_this.likedUserCount}, joinedUserCount: ${_this.joinedUserCount}, thumbnailImage: ${_this.thumbnailImage}, likedByCurrentUser: ${_this.likedByCurrentUser}, joinedByCurrentUser: ${_this.joinedByCurrentUser}, promotionTier: ${_this.promotionTier})';
+  return 'Location(id: ${_this.id}, title: ${_this.title}, description: ${_this.description}, address: ${_this.address}, creationDateTime: ${_this.creationDateTime}, startDateTime: ${_this.startDateTime}, endDateTime: ${_this.endDateTime}, position: ${_this.position}, createdUserId: ${_this.createdUserId}, createdUsername: ${_this.createdUsername}, likedUserCount: ${_this.likedUserCount}, joinedUserCount: ${_this.joinedUserCount}, thumbnailImage: ${_this.thumbnailImage}, likedByCurrentUser: ${_this.likedByCurrentUser}, joinedByCurrentUser: ${_this.joinedByCurrentUser}, promotionTier: ${_this.promotionTier}, images: ${_this.images})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $LocationCopyWith<$Res>  {
   factory $LocationCopyWith(Location value, $Res Function(Location) _then) = _$LocationCopyWithImpl;
 @useResult
 $Res call({
- int id, String title, String description, String address, DateTime creationDateTime, DateTime startDateTime, DateTime endDateTime, LatLng position, int createdUserId, String createdUsername, int likedUserCount, int joinedUserCount, AppImage? thumbnailImage, bool? likedByCurrentUser, bool? joinedByCurrentUser, int promotionTier
+ int id, String title, String description, String address, DateTime creationDateTime, DateTime startDateTime, DateTime endDateTime, LatLng position, int createdUserId, String createdUsername, int likedUserCount, int joinedUserCount, AppImage? thumbnailImage, bool? likedByCurrentUser, bool? joinedByCurrentUser, int promotionTier, List<AppImage>? images
 });
 
 
@@ -68,7 +68,7 @@ class _$LocationCopyWithImpl<$Res>
 
 /// Create a copy of Location
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = null,Object? address = null,Object? creationDateTime = null,Object? startDateTime = null,Object? endDateTime = null,Object? position = null,Object? createdUserId = null,Object? createdUsername = null,Object? likedUserCount = null,Object? joinedUserCount = null,Object? thumbnailImage = freezed,Object? likedByCurrentUser = freezed,Object? joinedByCurrentUser = freezed,Object? promotionTier = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = null,Object? address = null,Object? creationDateTime = null,Object? startDateTime = null,Object? endDateTime = null,Object? position = null,Object? createdUserId = null,Object? createdUsername = null,Object? likedUserCount = null,Object? joinedUserCount = null,Object? thumbnailImage = freezed,Object? likedByCurrentUser = freezed,Object? joinedByCurrentUser = freezed,Object? promotionTier = null,Object? images = freezed,}) {
   return _then(Location(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -86,7 +86,8 @@ as int,thumbnailImage: freezed == thumbnailImage ? _self.thumbnailImage : thumbn
 as AppImage?,likedByCurrentUser: freezed == likedByCurrentUser ? _self.likedByCurrentUser : likedByCurrentUser // ignore: cast_nullable_to_non_nullable
 as bool?,joinedByCurrentUser: freezed == joinedByCurrentUser ? _self.joinedByCurrentUser : joinedByCurrentUser // ignore: cast_nullable_to_non_nullable
 as bool?,promotionTier: null == promotionTier ? _self.promotionTier : promotionTier // ignore: cast_nullable_to_non_nullable
-as int,
+as int,images: freezed == images ? _self.images : images // ignore: cast_nullable_to_non_nullable
+as List<AppImage>?,
   ));
 }
 /// Create a copy of Location
@@ -183,10 +184,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String title,  String description,  String address,  DateTime creationDateTime,  DateTime startDateTime,  DateTime endDateTime,  LatLng position,  int createdUserId,  String createdUsername,  int likedUserCount,  int joinedUserCount,  AppImage? thumbnailImage,  bool? likedByCurrentUser,  bool? joinedByCurrentUser,  int promotionTier)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String title,  String description,  String address,  DateTime creationDateTime,  DateTime startDateTime,  DateTime endDateTime,  LatLng position,  int createdUserId,  String createdUsername,  int likedUserCount,  int joinedUserCount,  AppImage? thumbnailImage,  bool? likedByCurrentUser,  bool? joinedByCurrentUser,  int promotionTier,  List<AppImage>? images)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Location() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.address,_that.creationDateTime,_that.startDateTime,_that.endDateTime,_that.position,_that.createdUserId,_that.createdUsername,_that.likedUserCount,_that.joinedUserCount,_that.thumbnailImage,_that.likedByCurrentUser,_that.joinedByCurrentUser,_that.promotionTier);case _:
+return $default(_that.id,_that.title,_that.description,_that.address,_that.creationDateTime,_that.startDateTime,_that.endDateTime,_that.position,_that.createdUserId,_that.createdUsername,_that.likedUserCount,_that.joinedUserCount,_that.thumbnailImage,_that.likedByCurrentUser,_that.joinedByCurrentUser,_that.promotionTier,_that.images);case _:
   return orElse();
 
 }
@@ -204,10 +205,10 @@ return $default(_that.id,_that.title,_that.description,_that.address,_that.creat
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String title,  String description,  String address,  DateTime creationDateTime,  DateTime startDateTime,  DateTime endDateTime,  LatLng position,  int createdUserId,  String createdUsername,  int likedUserCount,  int joinedUserCount,  AppImage? thumbnailImage,  bool? likedByCurrentUser,  bool? joinedByCurrentUser,  int promotionTier)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String title,  String description,  String address,  DateTime creationDateTime,  DateTime startDateTime,  DateTime endDateTime,  LatLng position,  int createdUserId,  String createdUsername,  int likedUserCount,  int joinedUserCount,  AppImage? thumbnailImage,  bool? likedByCurrentUser,  bool? joinedByCurrentUser,  int promotionTier,  List<AppImage>? images)  $default,) {final _that = this;
 switch (_that) {
 case _Location():
-return $default(_that.id,_that.title,_that.description,_that.address,_that.creationDateTime,_that.startDateTime,_that.endDateTime,_that.position,_that.createdUserId,_that.createdUsername,_that.likedUserCount,_that.joinedUserCount,_that.thumbnailImage,_that.likedByCurrentUser,_that.joinedByCurrentUser,_that.promotionTier);case _:
+return $default(_that.id,_that.title,_that.description,_that.address,_that.creationDateTime,_that.startDateTime,_that.endDateTime,_that.position,_that.createdUserId,_that.createdUsername,_that.likedUserCount,_that.joinedUserCount,_that.thumbnailImage,_that.likedByCurrentUser,_that.joinedByCurrentUser,_that.promotionTier,_that.images);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -224,10 +225,10 @@ return $default(_that.id,_that.title,_that.description,_that.address,_that.creat
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String title,  String description,  String address,  DateTime creationDateTime,  DateTime startDateTime,  DateTime endDateTime,  LatLng position,  int createdUserId,  String createdUsername,  int likedUserCount,  int joinedUserCount,  AppImage? thumbnailImage,  bool? likedByCurrentUser,  bool? joinedByCurrentUser,  int promotionTier)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String title,  String description,  String address,  DateTime creationDateTime,  DateTime startDateTime,  DateTime endDateTime,  LatLng position,  int createdUserId,  String createdUsername,  int likedUserCount,  int joinedUserCount,  AppImage? thumbnailImage,  bool? likedByCurrentUser,  bool? joinedByCurrentUser,  int promotionTier,  List<AppImage>? images)?  $default,) {final _that = this;
 switch (_that) {
 case _Location() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.address,_that.creationDateTime,_that.startDateTime,_that.endDateTime,_that.position,_that.createdUserId,_that.createdUsername,_that.likedUserCount,_that.joinedUserCount,_that.thumbnailImage,_that.likedByCurrentUser,_that.joinedByCurrentUser,_that.promotionTier);case _:
+return $default(_that.id,_that.title,_that.description,_that.address,_that.creationDateTime,_that.startDateTime,_that.endDateTime,_that.position,_that.createdUserId,_that.createdUsername,_that.likedUserCount,_that.joinedUserCount,_that.thumbnailImage,_that.likedByCurrentUser,_that.joinedByCurrentUser,_that.promotionTier,_that.images);case _:
   return null;
 
 }
@@ -238,8 +239,8 @@ return $default(_that.id,_that.title,_that.description,_that.address,_that.creat
 /// @nodoc
 
 
-class _Location implements Location {
-  const _Location({required this.id, required this.title, required this.description, required this.address, required this.creationDateTime, required this.startDateTime, required this.endDateTime, required this.position, required this.createdUserId, required this.createdUsername, required this.likedUserCount, required this.joinedUserCount, this.thumbnailImage, this.likedByCurrentUser, this.joinedByCurrentUser, this.promotionTier = 0});
+class _Location extends Location {
+  const _Location({required this.id, required this.title, required this.description, required this.address, required this.creationDateTime, required this.startDateTime, required this.endDateTime, required this.position, required this.createdUserId, required this.createdUsername, required this.likedUserCount, required this.joinedUserCount, this.thumbnailImage, this.likedByCurrentUser, this.joinedByCurrentUser, this.promotionTier = 0,  List<AppImage>? images}): _images = images,super._();
   
 
 @override final  int id;
@@ -258,6 +259,15 @@ class _Location implements Location {
 @override final  bool? likedByCurrentUser;
 @override final  bool? joinedByCurrentUser;
 @override@JsonKey() final  int promotionTier;
+ final  List<AppImage>? _images;
+@override List<AppImage>? get images {
+  final value = _images;
+  if (value == null) return null;
+  if (_images is EqualUnmodifiableListView) return _images;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(value);
+}
+
 
 /// Create a copy of Location
 /// with the given fields replaced by the non-null parameter values.
@@ -269,18 +279,18 @@ _$LocationCopyWith<_Location> get copyWith => __$LocationCopyWithImpl<_Location>
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Location&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.address, address) || other.address == address)&&(identical(other.creationDateTime, creationDateTime) || other.creationDateTime == creationDateTime)&&(identical(other.startDateTime, startDateTime) || other.startDateTime == startDateTime)&&(identical(other.endDateTime, endDateTime) || other.endDateTime == endDateTime)&&(identical(other.position, position) || other.position == position)&&(identical(other.createdUserId, createdUserId) || other.createdUserId == createdUserId)&&(identical(other.createdUsername, createdUsername) || other.createdUsername == createdUsername)&&(identical(other.likedUserCount, likedUserCount) || other.likedUserCount == likedUserCount)&&(identical(other.joinedUserCount, joinedUserCount) || other.joinedUserCount == joinedUserCount)&&(identical(other.thumbnailImage, thumbnailImage) || other.thumbnailImage == thumbnailImage)&&(identical(other.likedByCurrentUser, likedByCurrentUser) || other.likedByCurrentUser == likedByCurrentUser)&&(identical(other.joinedByCurrentUser, joinedByCurrentUser) || other.joinedByCurrentUser == joinedByCurrentUser)&&(identical(other.promotionTier, promotionTier) || other.promotionTier == promotionTier));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Location&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.address, address) || other.address == address)&&(identical(other.creationDateTime, creationDateTime) || other.creationDateTime == creationDateTime)&&(identical(other.startDateTime, startDateTime) || other.startDateTime == startDateTime)&&(identical(other.endDateTime, endDateTime) || other.endDateTime == endDateTime)&&(identical(other.position, position) || other.position == position)&&(identical(other.createdUserId, createdUserId) || other.createdUserId == createdUserId)&&(identical(other.createdUsername, createdUsername) || other.createdUsername == createdUsername)&&(identical(other.likedUserCount, likedUserCount) || other.likedUserCount == likedUserCount)&&(identical(other.joinedUserCount, joinedUserCount) || other.joinedUserCount == joinedUserCount)&&(identical(other.thumbnailImage, thumbnailImage) || other.thumbnailImage == thumbnailImage)&&(identical(other.likedByCurrentUser, likedByCurrentUser) || other.likedByCurrentUser == likedByCurrentUser)&&(identical(other.joinedByCurrentUser, joinedByCurrentUser) || other.joinedByCurrentUser == joinedByCurrentUser)&&(identical(other.promotionTier, promotionTier) || other.promotionTier == promotionTier)&&const DeepCollectionEquality().equals(other.images, _images));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,title,description,address,creationDateTime,startDateTime,endDateTime,position,createdUserId,createdUsername,likedUserCount,joinedUserCount,thumbnailImage,likedByCurrentUser,joinedByCurrentUser,promotionTier);
+    return Object.hash(runtimeType,id,title,description,address,creationDateTime,startDateTime,endDateTime,position,createdUserId,createdUsername,likedUserCount,joinedUserCount,thumbnailImage,likedByCurrentUser,joinedByCurrentUser,promotionTier,const DeepCollectionEquality().hash(_images));
 }
 
 @override
 String toString() {
-    return 'Location(id: $id, title: $title, description: $description, address: $address, creationDateTime: $creationDateTime, startDateTime: $startDateTime, endDateTime: $endDateTime, position: $position, createdUserId: $createdUserId, createdUsername: $createdUsername, likedUserCount: $likedUserCount, joinedUserCount: $joinedUserCount, thumbnailImage: $thumbnailImage, likedByCurrentUser: $likedByCurrentUser, joinedByCurrentUser: $joinedByCurrentUser, promotionTier: $promotionTier)';
+    return 'Location(id: $id, title: $title, description: $description, address: $address, creationDateTime: $creationDateTime, startDateTime: $startDateTime, endDateTime: $endDateTime, position: $position, createdUserId: $createdUserId, createdUsername: $createdUsername, likedUserCount: $likedUserCount, joinedUserCount: $joinedUserCount, thumbnailImage: $thumbnailImage, likedByCurrentUser: $likedByCurrentUser, joinedByCurrentUser: $joinedByCurrentUser, promotionTier: $promotionTier, images: $images)';
 }
 
 
@@ -291,7 +301,7 @@ abstract mixin class _$LocationCopyWith<$Res> implements $LocationCopyWith<$Res>
   factory _$LocationCopyWith(_Location value, $Res Function(_Location) _then) = __$LocationCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String title, String description, String address, DateTime creationDateTime, DateTime startDateTime, DateTime endDateTime, LatLng position, int createdUserId, String createdUsername, int likedUserCount, int joinedUserCount, AppImage? thumbnailImage, bool? likedByCurrentUser, bool? joinedByCurrentUser, int promotionTier
+ int id, String title, String description, String address, DateTime creationDateTime, DateTime startDateTime, DateTime endDateTime, LatLng position, int createdUserId, String createdUsername, int likedUserCount, int joinedUserCount, AppImage? thumbnailImage, bool? likedByCurrentUser, bool? joinedByCurrentUser, int promotionTier, List<AppImage>? images
 });
 
 
@@ -308,7 +318,7 @@ class __$LocationCopyWithImpl<$Res>
 
 /// Create a copy of Location
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = null,Object? address = null,Object? creationDateTime = null,Object? startDateTime = null,Object? endDateTime = null,Object? position = null,Object? createdUserId = null,Object? createdUsername = null,Object? likedUserCount = null,Object? joinedUserCount = null,Object? thumbnailImage = freezed,Object? likedByCurrentUser = freezed,Object? joinedByCurrentUser = freezed,Object? promotionTier = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = null,Object? address = null,Object? creationDateTime = null,Object? startDateTime = null,Object? endDateTime = null,Object? position = null,Object? createdUserId = null,Object? createdUsername = null,Object? likedUserCount = null,Object? joinedUserCount = null,Object? thumbnailImage = freezed,Object? likedByCurrentUser = freezed,Object? joinedByCurrentUser = freezed,Object? promotionTier = null,Object? images = freezed,}) {
   return _then(_Location(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -326,7 +336,8 @@ as int,thumbnailImage: freezed == thumbnailImage ? _self.thumbnailImage : thumbn
 as AppImage?,likedByCurrentUser: freezed == likedByCurrentUser ? _self.likedByCurrentUser : likedByCurrentUser // ignore: cast_nullable_to_non_nullable
 as bool?,joinedByCurrentUser: freezed == joinedByCurrentUser ? _self.joinedByCurrentUser : joinedByCurrentUser // ignore: cast_nullable_to_non_nullable
 as bool?,promotionTier: null == promotionTier ? _self.promotionTier : promotionTier // ignore: cast_nullable_to_non_nullable
-as int,
+as int,images: freezed == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
+as List<AppImage>?,
   ));
 }
 

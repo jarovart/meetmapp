@@ -235,5 +235,6 @@
   "createTitle": "Create",
   "myLocationsTitle": "My Locations",
   "myProfileTitle": "My Profile",
-  "returnTitle": "Return"
+  "returnTitle": "Return",
+  "locationNotFound": "Location not found."
 }
