@@ -14,11 +14,13 @@ import 'package:intl/intl.dart';
 class LocationDetailsContent extends StatelessWidget {
   final ScrollController? scrollController;
   final bool dragHandle;
+  final bool canOpenInNewPage;
 
   const LocationDetailsContent({
     super.key,
     this.scrollController,
     this.dragHandle = false,
+    this.canOpenInNewPage = true,
   });
 
   @override
@@ -77,13 +79,17 @@ class LocationDetailsContent extends StatelessWidget {
                       ),
                     ),
 
-                    if (true /*controller.canOpenInNewPage todo*/ ) ...[
+                    if (canOpenInNewPage) ...[
                       const SizedBox(width: 16),
                       OutlinedButton.icon(
-                        onPressed: () async => context.push(
-                          RouteConfig.getLocationUrl(location.id),
-                          extra: location,
-                        ),
+                        onPressed: () {
+                          final router = GoRouter.of(context);
+                          Navigator.of(context).pop();
+                          router.push(
+                            RouteConfig.getLocationUrl(location.id),
+                            extra: location,
+                          );
+                        },
                         label: Text(l10n.openLocation),
                       ),
                     ],

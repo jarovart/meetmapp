@@ -3,9 +3,11 @@ import 'package:casttime/app/di/injection.dart';
 import 'package:casttime/app/localization/app_failure_localization.dart';
 import 'package:casttime/app/localization/l10n_extension.dart';
 import 'package:casttime/app/navigation/util/route_config.dart';
+import 'package:casttime/app/navigation/widgets/back_bar.dart';
+import 'package:casttime/app/navigation/widgets/edit_action_icon.dart';
 import 'package:casttime/app/presentation/banner/appbanner_cubit.dart';
 import 'package:casttime/app/presentation/util/load_status.dart';
-import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:casttime/app/presentation/widget/bottombar_layout_widget.dart';
 import 'package:casttime/features/image/presentation/widgets/gallery_widget.dart';
 import 'package:casttime/features/image/presentation/widgets/imageviewer_widget.dart';
 import 'package:casttime/features/image/presentation/widgets/thumbnail_image_util.dart';
@@ -55,70 +57,36 @@ class _LocationDetailView extends StatelessWidget {
         context.read<AppBannerCubit>().showFailure(state.failure!);
       },
       builder: (context, state) {
+        final location = state.location;
+
         return Scaffold(
-          appBar: AppBar(
-            title: Text(state.location?.title ?? l10n.locationNotFound),
-            centerTitle: true,
-            actions: [const _EditAction()],
+          extendBody: true,
+          bottomNavigationBar: BackBar(
+            title: location?.title ?? l10n.locationNotFound,
+            trailing: const EditAction(),
           ),
-          body: Column(
-            children: [
-              Expanded(
-                child: _DetailBody(state: state, locationId: locationId),
-              ),
-              /*SafeArea(
-                child: LocationBottomActions(
-                  isLikeJoinAble: state.canInteract,
-                  isLiked: state.isLiked,
-                  isJoined: state.isJoined,
-                  likeCount: state.likedCount,
-                  joinCount: state.joinedCount,
-                  onLikeTap: () =>
-                      context.read<LocationBloc>().add(LocationLikeToggled()),
-                  onJoinTap: () =>
-                      context.read<LocationBloc>().add(LocationJoinToggled()),
-                ),
-              ),*/
-            ],
+          body: BottomBarLayoutWidget(
+            childWidget: _DetailBody(state: state, locationId: locationId),
           ),
         );
+
+        /*SafeArea(child:
+              if (location != null)
+                LocationBottomActions(
+                  isLikeJoinAble: context.read<AuthCubit>().state.isLoggedIn,
+                  isLiked: location.likedByCurrentUser ?? false,
+                  isJoined: location.joinedByCurrentUser ?? false,
+                  likeCount: location.likedUserCount,
+                  joinCount: location.joinedUserCount,
+                  onLikeTap: () => context.read<LocationBloc>().add(
+                    LocationLikeToggled(id: location.id),
+                  ),
+                  onJoinTap: () => context.read<LocationBloc>().add(
+                    LocationJoinToggled(id: location.id),
+                  ),
+                  //),
+                ),*/
       },
-    );
-  }
-}
-
-class _EditAction extends StatelessWidget {
-  const _EditAction();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final state = context.watch<LocationBloc>().state;
-    final currentUserId = context.select<AuthCubit, int?>(
-      (c) => c.state.userId,
-    );
-
-    final canEdit =
-        currentUserId != null && currentUserId == state.location?.createdUserId;
-
-    if (!canEdit) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: OutlinedButton.icon(
-        onPressed: () async {
-          final changed = await context.push<bool>(
-            RouteConfig.getLocationEditUrl(state.location!.id),
-          );
-          if (changed == true && context.mounted) {
-            context.read<LocationBloc>().add(
-              LocationRequested(id: state.location!.id),
-            );
-          }
-        },
-        icon: const Icon(Icons.edit_outlined),
-        label: Text(l10n.edit),
-      ),
     );
   }
 }
@@ -134,131 +102,115 @@ class _DetailBody extends StatelessWidget {
     final l10n = context.l10n;
 
     if (state.status == LoadStatus.loading && state.location == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [const Center(child: CircularProgressIndicator())],
+      );
     }
 
     if (state.status == LoadStatus.failure && state.location == null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                state.failure?.localizedMessage(l10n) ??
-                    l10n.locationCouldNotBeLoaded,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: () => context.read<LocationBloc>().add(
-                  LocationRequested(id: locationId),
-                ),
-                child: Text(l10n.retry),
-              ),
-            ],
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            state.failure?.localizedMessage(l10n) ??
+                l10n.locationCouldNotBeLoaded,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
-        ),
+          const SizedBox(height: 16),
+          OutlinedButton(
+            onPressed: () => context.read<LocationBloc>().add(
+              LocationRequested(id: locationId),
+            ),
+            child: Text(l10n.retry),
+          ),
+        ],
       );
     }
 
     final location = state.location!;
     final imageUrls = state.imageUrls;
 
-    return ListView(
-      padding: EdgeInsets.zero,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _HeaderImage(location: location, imageUrls: imageUrls),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 18, 16, 110),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: AppConfig.maxAppWidth,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  InfoCard(
-                    child: InfoRow(
-                      icon: Icons.description_outlined,
-                      label: l10n.description,
-                      value: location.description,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  InfoCard(
-                    child: Column(
-                      children: [
-                        InfoRow(
-                          icon: Icons.event_available_outlined,
-                          label: l10n.chooseStartdate,
-                          value: _format(location.startDateTime),
-                        ),
-                        const Divider(height: 24),
-                        InfoRow(
-                          icon: Icons.event_busy_outlined,
-                          label: l10n.chooseEnddate,
-                          value: _format(location.endDateTime),
-                        ),
-                        const Divider(height: 24),
-                        InfoRow(
-                          icon: Icons.person_outline,
-                          label: l10n.createdBy,
-                          value: location.createdUsername,
-                          onTap: () => context.push(
-                            RouteConfig.getProfileUrl(location.createdUsername),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  InfoCard(
-                    child: Column(
-                      children: [
-                        InfoRow(
-                          icon: Icons.map_outlined,
-                          value: location.address,
-                          onTap: () {
-                            context.read<MapBloc>().add(
-                              MapLocationSelected(
-                                location,
-                                zoom: 16,
-                                newCreatedLocation: true,
-                              ),
-                            );
-                            context.go(RouteConfig.mapUrl);
-                          },
-                        ),
-                        const Divider(height: 24),
-                        InfoRow(
-                          icon: Icons.navigation_outlined,
-                          value: l10n.navigateToLocation,
-                          onTap: () => getIt<NavigationService>()
-                              .openNavigation(location.position),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (imageUrls.isNotEmpty) ...[
-                    const SizedBox(height: 20),
-                    Text(
-                      l10n.images,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 12),
-                    ImageGalleryWidget(
-                      imageUrls: imageUrls,
-                      dragHandle: AppConfig.isMobile(),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+        InfoCard(
+          child: InfoRow(
+            icon: Icons.description_outlined,
+            label: l10n.description,
+            value: location.description,
           ),
         ),
+        const SizedBox(height: 16),
+        InfoCard(
+          child: Column(
+            children: [
+              InfoRow(
+                icon: Icons.event_available_outlined,
+                label: l10n.chooseStartdate,
+                value: _format(location.startDateTime),
+              ),
+              const Divider(height: 24),
+              InfoRow(
+                icon: Icons.event_busy_outlined,
+                label: l10n.chooseEnddate,
+                value: _format(location.endDateTime),
+              ),
+              const Divider(height: 24),
+              InfoRow(
+                icon: Icons.person_outline,
+                label: l10n.createdBy,
+                value: location.createdUsername,
+                onTap: () => context.push(
+                  RouteConfig.getProfileUrl(location.createdUsername),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        InfoCard(
+          child: Column(
+            children: [
+              InfoRow(
+                icon: Icons.map_outlined,
+                value: location.address,
+                onTap: () {
+                  context.read<MapBloc>().add(
+                    MapLocationSelected(
+                      location,
+                      zoom: 16,
+                      newCreatedLocation: true,
+                    ),
+                  );
+                  context.go(RouteConfig.mapUrl);
+                },
+              ),
+              const Divider(height: 24),
+              InfoRow(
+                icon: Icons.navigation_outlined,
+                value: l10n.navigateToLocation,
+                onTap: () => getIt<NavigationService>().openNavigation(
+                  location.position,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (imageUrls.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          Text(l10n.images, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          ImageGalleryWidget(
+            imageUrls: imageUrls,
+            dragHandle: AppConfig.isMobile(),
+          ),
+        ],
       ],
     );
   }

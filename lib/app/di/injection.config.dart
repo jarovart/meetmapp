@@ -35,6 +35,8 @@ import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart'
 import 'package:casttime/features/image/data/api/image_api.dart' as _i606;
 import 'package:casttime/features/image/domain/service/image_compressor_service.dart'
     as _i796;
+import 'package:casttime/features/image/domain/service/image_loader_service.dart'
+    as _i1041;
 import 'package:casttime/features/info/data/api/info_api.dart' as _i248;
 import 'package:casttime/features/info/data/service/info_service_impl.dart'
     as _i559;
@@ -76,6 +78,8 @@ import 'package:casttime/features/location/presentation/bloc/location_bloc.dart'
     as _i370;
 import 'package:casttime/features/location/presentation/bloc/location_create_bloc.dart'
     as _i190;
+import 'package:casttime/features/location/presentation/bloc/location_edit_bloc.dart'
+    as _i549;
 import 'package:casttime/features/location/presentation/bloc/location_list_bloc.dart'
     as _i221;
 import 'package:casttime/features/location/presentation/bloc/place_suggestion_cubit.dart'
@@ -163,6 +167,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i223.SheetSizeMemory>(() => _i223.SheetSizeMemory());
     gh.lazySingleton<_i361.Dio>(
+      () => networkModule.provideImagesDio(),
+      instanceName: 'images',
+    );
+    gh.lazySingleton<_i361.Dio>(
       () => networkModule.provideGeocodingDio(),
       instanceName: 'geocoding',
     );
@@ -182,6 +190,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i455.LocationFailureMapper>(
       () => _i455.LocationFailureMapper(gh<_i974.Logger>()),
+    );
+    gh.lazySingleton<_i1041.ImageLoaderService>(
+      () => _i1041.ImageLoaderService(gh<_i361.Dio>(instanceName: 'images')),
     );
     gh.lazySingleton<_i511.TokenStorage>(
       () => _i137.SecureTokenStorage(gh<_i558.FlutterSecureStorage>()),
@@ -297,6 +308,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i713.AuthCubit>(),
         gh<_i287.SettingsRepository>(),
         gh<_i297.PreferencesRepository>(),
+      ),
+    );
+    gh.factoryParam<_i549.LocationEditBloc, int, dynamic>(
+      (locationId, _) => _i549.LocationEditBloc(
+        gh<_i310.LocationRepository>(),
+        gh<_i1041.ImageLoaderService>(),
+        gh<_i796.ImageCompressorService>(),
+        gh<_i975.AppBusyCubit>(),
+        locationId,
       ),
     );
     gh.factory<_i221.LocationSearchBloc>(

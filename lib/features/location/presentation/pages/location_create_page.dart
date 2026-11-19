@@ -291,7 +291,13 @@ class _LocationCreateViewState extends State<_LocationCreateView>
                           label: Text(l10n.addImage),
                         ),
                         const SizedBox(height: 16),
-                        PositionPicker(position: state.position, enabled: true),
+                        PositionPicker(
+                          position: state.position,
+                          enabled: true,
+                          onChanged: (position) => context
+                              .read<LocationCreateBloc>()
+                              .add(LocationPositionChanged(position)),
+                        ),
                       ],
                     ),
                   ),

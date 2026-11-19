@@ -11,8 +11,11 @@ import 'package:casttime/features/auth/presentation/pages/register_page.dart';
 import 'package:casttime/features/auth/presentation/pages/reset_password_page.dart';
 import 'package:casttime/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:casttime/features/info/presentation/pages/info_page.dart';
+import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/presentation/pages/location_create_page.dart';
+import 'package:casttime/features/location/presentation/pages/location_edit_page.dart';
 import 'package:casttime/features/location/presentation/pages/location_list_page.dart';
+import 'package:casttime/features/location/presentation/pages/location_page.dart';
 import 'package:casttime/features/map/presentation/pages/map_page.dart';
 import 'package:casttime/features/profile/presentation/pages/profile_page.dart';
 import 'package:casttime/features/profile/presentation/pages/user_list_page.dart';
@@ -42,6 +45,26 @@ final appRouter = GoRouter(
   refreshListenable: GoRouterRefreshStream(getIt<AuthCubit>().stream),
   redirect: _authGuard,
   routes: [
+    GoRoute(
+      path: RouteConfig.locationUrl,
+      builder: (_, state) {
+        final location = state.extra as Location?;
+        final id = int.tryParse(state.pathParameters['locationId'] ?? '');
+
+        if (id == null) return const SizedBox();
+        return LocationPage(locationId: id, location: location);
+      },
+      routes: [
+        GoRoute(
+          path: 'edit',
+          builder: (_, state) {
+            final id = int.tryParse(state.pathParameters['locationId'] ?? '');
+            if (id == null) return const SizedBox();
+            return LocationEditPage(locationId: id);
+          },
+        ),
+      ],
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
           MainNavigationShell(navigationShell: navigationShell),

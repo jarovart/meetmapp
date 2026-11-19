@@ -82,6 +82,6 @@ class LocationDetailsGeneralDialog extends StatelessWidget {
       );
     }
 
-    return LocationDetailsContent();
+    return LocationDetailsContent(canOpenInNewPage: canOpenInNewPage);
   }
 }

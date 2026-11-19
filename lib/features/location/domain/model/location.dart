@@ -1,4 +1,4 @@
-import 'package:casttime/features/location/domain/model/app_image.dart';
+import 'package:casttime/features/image/domain/model/app_image.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:latlong2/latlong.dart';
 

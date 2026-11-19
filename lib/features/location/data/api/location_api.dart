@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:casttime/core/network/auth_interceptor.dart';
 import 'package:casttime/features/location/data/dto/request/create_location_request_dto.dart';
+import 'package:casttime/features/location/data/dto/request/update_location_request_dto.dart';
 import 'package:casttime/features/location/data/dto/request/update_thumbnail_request_dto.dart';
 import 'package:casttime/features/location/data/dto/response/location_base_response_dto.dart';
 import 'package:casttime/features/location/data/dto/response/location_full_response_dto.dart';
@@ -82,5 +85,22 @@ abstract class LocationApi {
   Future<LocationBaseResponseDTO> patchThumbnail(
     @Path('locationId') int locationId,
     @Body() UpdateThumbnailRequestDTO request,
+  );
+
+  @PATCH('/api/locations/{locationId}/thumbnail')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<LocationBaseResponseDTO> updateMyLocation(
+    @Path('locationId') int locationId,
+    @Body() UpdateThumbnailRequestDTO request,
+  );
+
+  @PATCH('/api/locations/{locationId}')
+  @MultiPart()
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<LocationFullResponseDTO> updateLocation(
+    @Path('locationId') int locationId,
+    @Part(name: 'data', contentType: 'application/json')
+    UpdateLocationRequestDTO data,
+    @Part(name: 'files') List<MultipartFile>? files,
   );
 }

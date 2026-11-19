@@ -3,7 +3,7 @@ import 'package:casttime/core/failure/app_failure.dart';
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:casttime/features/image/domain/service/image_compressor_service.dart';
-import 'package:casttime/features/location/domain/model/app_image.dart';
+import 'package:casttime/features/image/domain/model/app_image.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/domain/model/location_draft.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart';

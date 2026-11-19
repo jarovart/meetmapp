@@ -119,6 +119,10 @@ final class ImageProcessingFailed extends AppFailure {
   const ImageProcessingFailed({super.requestId, super.cause});
 }
 
+final class FillAllFields extends AppFailure {
+  const FillAllFields({super.requestId, super.cause});
+}
+
 final class DatesMissing extends AppFailure {
   const DatesMissing({super.requestId, super.cause});
 }

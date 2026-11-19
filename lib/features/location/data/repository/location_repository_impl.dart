@@ -9,8 +9,10 @@ import 'package:casttime/features/location/data/mapper/location_draft_to_request
 import 'package:casttime/features/location/data/mapper/location_base_response_dto_mapper.dart';
 import 'package:casttime/features/location/data/mapper/location_full_response_dto_mapper.dart';
 import 'package:casttime/features/location/data/mapper/location_slice_dto_mapper.dart';
-import 'package:casttime/features/location/domain/model/app_image.dart';
+import 'package:casttime/features/image/domain/model/app_image.dart';
+import 'package:casttime/features/location/data/mapper/location_update_mapper.dart';
 import 'package:casttime/features/location/domain/model/location_draft.dart';
+import 'package:casttime/features/location/domain/model/location_update.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:dio/dio.dart';
@@ -171,6 +173,19 @@ class LocationRepositoryImpl implements LocationRepository {
       request: () => _api.patchThumbnail(
         locationId,
         UpdateThumbnailRequestDTO(imageId: imageId),
+      ),
+      map: (dto) => dto.toDomain(),
+    );
+  }
+
+  @override
+  Future<AppResult<Location>> updateLocation(LocationUpdate update) {
+    final request = update.toRequestDTO();
+    return _execute(
+      request: () => _api.updateLocation(
+        update.id,
+        request.data,
+        request.files.isEmpty ? null : request.files,
       ),
       map: (dto) => dto.toDomain(),
     );

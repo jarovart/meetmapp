@@ -2,9 +2,10 @@ import 'dart:typed_data';
 
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
-import 'package:casttime/features/location/domain/model/app_image.dart';
+import 'package:casttime/features/image/domain/model/app_image.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/location/domain/model/location_draft.dart';
+import 'package:casttime/features/location/domain/model/location_update.dart';
 import 'package:flutter_map/flutter_map.dart';
 
 abstract interface class LocationRepository {
@@ -47,6 +48,8 @@ abstract interface class LocationRepository {
     int locationId,
   );
   Future<AppResult<Location>> setThumbnail(int locationId, int imageId);
+
+  Future<AppResult<Location>> updateLocation(LocationUpdate update);
 }
 
 class CreateLocationCommand {}

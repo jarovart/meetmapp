@@ -30,37 +30,54 @@ class _ImageGalleryWidgetState extends State<ImageGalleryWidget> {
     bool dragHandle = widget.dragHandle;
 
     if (!dragHandle && !isMobile()) {
-      return GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(), // wichtig im ListView
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 180, // 🔥 max Breite pro Bild
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1, // quadratisch
-        ),
-        itemCount: imageUrls.length,
-        itemBuilder: (context, index) {
-          final url = imageUrls[index];
+      const maxExtent = 180.0;
+      const spacing = 12.0;
 
-          return GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                PageRouteBuilder(
-                  opaque: false,
-                  pageBuilder: (_, _, _) => ImageGalleryViewer(
-                    imageUrls: imageUrls,
-                    initialIndex: index,
-                  ),
-                ),
-              );
-            },
-            child: Hero(
-              tag: url,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(url, fit: BoxFit.cover),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final columns = (constraints.maxWidth / (maxExtent + spacing)).ceil();
+          final tileWidth =
+              (constraints.maxWidth - spacing * (columns - 1)) / columns;
+          final rows = (imageUrls.length / columns).ceil();
+          final height = rows * tileWidth + (rows - 1) * spacing;
+
+          return SizedBox(
+            height: height,
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics:
+                  const NeverScrollableScrollPhysics(), // wichtig im ListView
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 180, // 🔥 max Breite pro Bild
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1, // quadratisch
               ),
+              itemCount: imageUrls.length,
+              itemBuilder: (context, index) {
+                final url = imageUrls[index];
+
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      PageRouteBuilder(
+                        opaque: false,
+                        pageBuilder: (_, _, _) => ImageGalleryViewer(
+                          imageUrls: imageUrls,
+                          initialIndex: index,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Hero(
+                    tag: url,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(url, fit: BoxFit.cover),
+                    ),
+                  ),
+                );
+              },
             ),
           );
         },

@@ -71,4 +71,16 @@ abstract class NetworkModule {
   @lazySingleton
   GeocodingApi provideGeocodingApi(@Named('geocoding') Dio dio) =>
       GeocodingApi(dio);
+
+  @Named('images')
+  @lazySingleton
+  Dio provideImagesDio() {
+    return Dio(
+      BaseOptions(
+        baseUrl: ApiConfig.baseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
+    );
+  }
 }

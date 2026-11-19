@@ -1,6 +1,7 @@
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
+import 'package:casttime/features/location/domain/model/location_update.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -41,4 +42,6 @@ abstract interface class LocationService {
     required int page,
     int pageSize = 10,
   });
+
+  Future<AppResult<Location>> updateLocation(LocationUpdate update);
 }

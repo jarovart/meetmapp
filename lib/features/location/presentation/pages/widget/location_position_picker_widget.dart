@@ -12,10 +12,15 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class PositionPicker extends StatefulWidget {
-  const PositionPicker({required this.position, required this.enabled});
+  const PositionPicker({
+    required this.position,
+    required this.enabled,
+    required this.onChanged,
+  });
 
   final LatLng? position;
   final bool enabled;
+  final ValueChanged<LatLng> onChanged;
 
   @override
   State<PositionPicker> createState() => _PositionPickerState();
@@ -72,9 +77,7 @@ class _PositionPickerState extends State<PositionPicker> {
                       };
                       if (!userSources.contains(event.source)) return;
 
-                      context.read<LocationCreateBloc>().add(
-                        LocationPositionChanged(_mapController.camera.center),
-                      );
+                      widget.onChanged.call(_mapController.camera.center);
                     },
                   ),
                   children: [const AppTileLayer()],

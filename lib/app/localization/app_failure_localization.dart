@@ -30,6 +30,7 @@ extension AppFailureLocalization on AppFailure {
       DatesMissing() => l10n.datesMissing,
       EndDateBeforeStartDate() => l10n.infoEnddateBeforeStartdate,
       GeopositionMissing() => l10n.geopositionMissing,
+      FillAllFields() => l10n.fillAllFields,
     };
   }
 

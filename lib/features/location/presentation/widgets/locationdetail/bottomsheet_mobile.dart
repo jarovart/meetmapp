@@ -157,7 +157,7 @@ class _LocationDetailsBottomSheetState
 
               return LocationDetailsContent(
                 scrollController: scrollController,
-                //canOpenInNewPage: widget.canOpenInNewPage,
+                canOpenInNewPage: widget.canOpenInNewPage,
                 dragHandle: true,
               );
             },

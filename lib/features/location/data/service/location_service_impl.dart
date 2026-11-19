@@ -4,6 +4,7 @@ import 'package:casttime/core/failure/app_failure.dart';
 import 'package:casttime/core/failure/geolocation_failure_mapper.dart';
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
+import 'package:casttime/features/location/domain/model/location_update.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/geocoding_repository.dart';
 import 'package:casttime/features/location/domain/repositoryinterface/location_repository.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
@@ -153,5 +154,10 @@ class LocationServiceImpl implements LocationService {
   @override
   Future<AppResult<String?>> reverseGeocodeOSM(LatLng tapPosition) async {
     return await geocodingRepository.reverseGeocode(tapPosition);
+  }
+
+  @override
+  Future<AppResult<Location>> updateLocation(LocationUpdate update) async {
+    return await repository.updateLocation(update);
   }
 }
