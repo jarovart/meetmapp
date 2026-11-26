@@ -236,5 +236,6 @@
   "myLocationsTitle": "My Locations",
   "myProfileTitle": "My Profile",
   "returnTitle": "Return",
-  "locationNotFound": "Location not found."
+  "locationNotFound": "Location not found.",
+  "noJoinedLocations": "No pending events"
 }

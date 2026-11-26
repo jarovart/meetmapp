@@ -232,5 +232,6 @@
   "myProfileTitle": "Mein Profil",
   "infoTitle": "Information",
   "returnTitle": "Zurück",
-  "locationNotFound": "Location konnte nicht gefunden werden."
+  "locationNotFound": "Location konnte nicht gefunden werden.",
+  "noJoinedLocations": "Keine ausstehenden Locations"
 }

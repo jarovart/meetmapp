@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:casttime/core/network/auth_interceptor.dart';
 import 'package:casttime/features/location/data/dto/response/location_slice_response_dto.dart';
+import 'package:casttime/features/profile/data/dto/request/update_my_profile_request_dto.dart';
 import 'package:casttime/features/profile/data/dto/response/my_profile_response_dto.dart';
 import 'package:casttime/features/profile/data/dto/response/profile_response_dto.dart';
 import 'package:casttime/features/profile/data/dto/response/user_slice_response_dto.dart';
@@ -46,6 +49,15 @@ abstract class UserProfileApi {
   Future<UserSliceResponseDTO> searchUsers(
     @Query('query') String query,
     @Query('page') int page,
-    @Query('pageSize') int pageSize,
+    @Query('size') int size,
+  );
+
+  @PATCH('/api/users/me')
+  @MultiPart()
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<MyProfileResponseDTO> updateMyProfile(
+    @Part(name: 'data', contentType: 'application/json')
+    UpdateMyProfileRequestDTO data,
+    @Part(name: 'files') MultipartFile? file,
   );
 }

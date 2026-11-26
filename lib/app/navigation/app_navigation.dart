@@ -83,6 +83,7 @@ abstract final class AppNavigation {
       selectedIcon: Icons.location_on,
       routePath: '/my-locations',
       branchIndex: 3,
+      requiresAuth: true,
     ),
     NavDestination(
       id: 'profile',
@@ -136,11 +137,7 @@ abstract final class AppNavigation {
           visibleWhen: _loggedIn,
           requiresAuth: true,
           replacesBar: true,
-          children: _editActions(
-            onCancel: _backToProfile,
-            onReset: _resetForm,
-            onSave: _saveForm,
-          ),
+          usesEditBar: true,
         ),
       ],
     ),

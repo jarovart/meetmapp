@@ -751,4 +751,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get locationNotFound => 'Location konnte nicht gefunden werden.';
+
+  @override
+  String get noJoinedLocations => 'Keine ausstehenden Locations';
 }

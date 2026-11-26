@@ -8,6 +8,7 @@ import 'package:casttime/app/presentation/cubit/edit_bar_cubit.dart';
 import 'package:casttime/app/theme/themedesign.dart';
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:casttime/features/map/presentation/bloc/map_bloc.dart';
+import 'package:casttime/features/profile/presentation/cubit/my_profile_cubit.dart';
 import 'package:casttime/features/setting/domain/model/app_settings.dart';
 import 'package:casttime/features/setting/presentation/cubit/app_settings_cubit.dart';
 import 'package:casttime/l10n/app_localizations.dart';
@@ -28,6 +29,7 @@ class CasttimeApp extends StatelessWidget {
         ),
         BlocProvider<EditBarCubit>.value(value: getIt<EditBarCubit>()),
         BlocProvider.value(value: getIt<AppSettingsCubit>()..loadLocal()),
+        BlocProvider.value(value: getIt<MyProfileCubit>()),
         BlocProvider<MapBloc>.value(value: getIt<MapBloc>()),
       ],
       child: BlocBuilder<AppSettingsCubit, AppSettings>(

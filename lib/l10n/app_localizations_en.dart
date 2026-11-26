@@ -740,4 +740,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationNotFound => 'Location not found.';
+
+  @override
+  String get noJoinedLocations => 'No pending events';
 }

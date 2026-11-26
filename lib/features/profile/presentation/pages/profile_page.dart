@@ -1,18 +1,16 @@
 import 'package:casttime/app/di/injection.dart';
-import 'package:casttime/app/localization/l10n_extension.dart';
-import 'package:casttime/app/presentation/util/load_status.dart';
 import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:casttime/features/profile/presentation/bloc/user_profile_bloc.dart';
 import 'package:casttime/features/profile/presentation/bloc/user_profile_event.dart';
 import 'package:casttime/features/profile/presentation/bloc/user_profile_state.dart';
-import 'package:casttime/features/profile/presentation/widgets/profile_scaffold.dart';
+import 'package:casttime/features/profile/presentation/widgets/user_profile_body.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProfilePage extends StatelessWidget {
-  final String? username;
+  final String username;
 
-  const ProfilePage({super.key, this.username});
+  const ProfilePage({super.key, required this.username});
 
   @override
   Widget build(BuildContext context) {
@@ -20,38 +18,33 @@ class ProfilePage extends StatelessWidget {
     return BlocProvider(
       create: (_) =>
           getIt<UserProfileBloc>()..add(UserProfileRequested(username)),
-      child: const _ProfileView(),
+      child: _ProfileView(username: username),
     );
   }
 }
 
 class _ProfileView extends StatelessWidget {
-  const _ProfileView();
+  const _ProfileView({required this.username});
+
+  final String username;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<UserProfileBloc, UserProfileState>(
       builder: (context, state) {
-        if (state.status == LoadStatus.loading ||
-            state.status == LoadStatus.initial) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        final profile = state.profile;
-        if (profile == null) {
-          return Scaffold(
-            appBar: AppBar(title: Text(context.l10n.users)),
-            body: Center(child: Text(context.l10n.profileCouldNotBeLoaded)),
-          );
-        }
-
+        final profileId = state.profile?.id;
         final isMyProfile = context.select<AuthCubit, bool>(
-          (cubit) => cubit.state.userId == profile.id,
+          (cubit) => profileId != null && cubit.state.userId == profileId,
         );
 
-        return ProfileScaffold(profile: profile, isMyProfile: isMyProfile);
+        return ProfileBody(
+          status: state.status,
+          profile: state.profile,
+          isMyProfile: isMyProfile,
+          onRetry: () => context.read<UserProfileBloc>().add(
+            UserProfileRequested(username),
+          ),
+        );
       },
     );
   }

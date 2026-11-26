@@ -6,7 +6,9 @@ import 'package:casttime/features/location/domain/model/location.dart';
 import 'package:casttime/features/profile/data/api/user_profile_api.dart';
 import 'package:casttime/features/profile/data/dto/mapper/my_profile_dto_mapper.dart';
 import 'package:casttime/features/profile/data/dto/mapper/profile_dto_mapper.dart';
+import 'package:casttime/features/profile/data/dto/mapper/profile_update_mapper.dart';
 import 'package:casttime/features/profile/data/dto/mapper/user_slice_dto_mapper.dart';
+import 'package:casttime/features/profile/domain/model/profile_update.dart';
 import 'package:casttime/features/profile/domain/model/user_profile.dart';
 import 'package:casttime/features/profile/domain/repository/user_profile_repository.dart';
 import 'package:flutter/material.dart';
@@ -80,6 +82,16 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
   }) async {
     return _execute(
       request: () => _api.searchUsers(query, page, pageSize),
+      map: (dto) => dto.toDomain(),
+    );
+  }
+
+  @override
+  Future<AppResult<UserProfile>> updateMyProfile(ProfileUpdate update) {
+    final request = update.toRequest();
+
+    return _execute(
+      request: () => _api.updateMyProfile(request.data, request.file),
       map: (dto) => dto.toDomain(),
     );
   }

@@ -180,13 +180,13 @@ class _UserProfileApi implements UserProfileApi {
   Future<UserSliceResponseDTO> searchUsers(
     String query,
     int page,
-    int pageSize,
+    int size,
   ) async {
     final _extra = <String, dynamic>{'withAuthentication': true};
     final queryParameters = <String, dynamic>{
       r'query': query,
       r'page': page,
-      r'pageSize': pageSize,
+      r'size': size,
     };
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
@@ -204,6 +204,54 @@ class _UserProfileApi implements UserProfileApi {
     late UserSliceResponseDTO _value;
     try {
       _value = UserSliceResponseDTO.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<MyProfileResponseDTO> updateMyProfile(
+    UpdateMyProfileRequestDTO data,
+    MultipartFile? file,
+  ) async {
+    final _extra = <String, dynamic>{'withAuthentication': true};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = FormData();
+    _data.files.add(
+      MapEntry(
+        'data',
+        MultipartFile.fromString(
+          jsonEncode(data),
+          contentType: DioMediaType.parse('application/json'),
+        ),
+      ),
+    );
+    if (file != null) {
+      _data.files.add(MapEntry('files', file));
+    }
+    final _options = _setStreamType<MyProfileResponseDTO>(
+      Options(
+            method: 'PATCH',
+            headers: _headers,
+            extra: _extra,
+            contentType: 'multipart/form-data',
+          )
+          .compose(
+            _dio.options,
+            '/api/users/me',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late MyProfileResponseDTO _value;
+    try {
+      _value = MyProfileResponseDTO.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

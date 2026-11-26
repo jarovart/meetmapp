@@ -82,6 +82,8 @@ import 'package:casttime/features/location/presentation/bloc/location_edit_bloc.
     as _i549;
 import 'package:casttime/features/location/presentation/bloc/location_list_bloc.dart'
     as _i221;
+import 'package:casttime/features/location/presentation/bloc/my_locations_bloc.dart'
+    as _i582;
 import 'package:casttime/features/location/presentation/bloc/place_suggestion_cubit.dart'
     as _i267;
 import 'package:casttime/features/location/presentation/util/sheet_size_memory.dart'
@@ -102,19 +104,23 @@ import 'package:casttime/features/profile/domain/model/location_list_type.dart'
 import 'package:casttime/features/profile/domain/repository/user_profile_repository.dart'
     as _i78;
 import 'package:casttime/features/profile/domain/service/user_profile_service.dart'
-    as _i714;
+    as _i715;
+import 'package:casttime/features/profile/presentation/bloc/profile_edit_bloc.dart'
+    as _i560;
 import 'package:casttime/features/profile/presentation/bloc/user_profile_bloc.dart'
     as _i995;
 import 'package:casttime/features/profile/presentation/bloc/user_search_bloc.dart'
     as _i576;
 import 'package:casttime/features/profile/presentation/cubit/created_locations_cubit.dart'
-    as _i582;
+    as _i583;
 import 'package:casttime/features/profile/presentation/cubit/joined_locations_cubit.dart'
     as _i660;
 import 'package:casttime/features/profile/presentation/cubit/liked_locations_cubit.dart'
     as _i288;
 import 'package:casttime/features/profile/presentation/cubit/location_list_cubit.dart'
     as _i182;
+import 'package:casttime/features/profile/presentation/cubit/my_profile_cubit.dart'
+    as _i714;
 import 'package:casttime/features/setting/data/api/settings_api.dart' as _i871;
 import 'package:casttime/features/setting/data/repository/settings_repository_impl.dart'
     as _i226;
@@ -300,7 +306,13 @@ extension GetItInjectableX on _i174.GetIt {
       (initialLocation, _) =>
           _i370.LocationBloc(gh<_i283.LocationService>(), initialLocation),
     );
-    gh.lazySingleton<_i714.UserProfileService>(
+    gh.lazySingleton<_i714.MyProfileCubit>(
+      () => _i714.MyProfileCubit(
+        gh<_i78.UserProfileRepository>(),
+        gh<_i713.AuthCubit>(),
+      ),
+    );
+    gh.lazySingleton<_i715.UserProfileService>(
       () => _i732.UserProfileServiceImpl(gh<_i78.UserProfileRepository>()),
     );
     gh.lazySingleton<_i101.AppSettingsCubit>(
@@ -319,6 +331,12 @@ extension GetItInjectableX on _i174.GetIt {
         locationId,
       ),
     );
+    gh.factory<_i582.MyLocationsBloc>(
+      () => _i582.MyLocationsBloc(
+        gh<_i310.LocationRepository>(),
+        gh<_i713.AuthCubit>(),
+      ),
+    );
     gh.factory<_i221.LocationSearchBloc>(
       () => _i221.LocationSearchBloc(
         gh<_i283.LocationService>(),
@@ -327,13 +345,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factoryParam<_i182.LocationListCubit, String, _i607.LocationListType>(
       (username, listType) => _i182.LocationListCubit(
-        gh<_i714.UserProfileService>(),
+        gh<_i715.UserProfileService>(),
         username,
         listType,
       ),
     );
     gh.factory<_i995.UserProfileBloc>(
-      () => _i995.UserProfileBloc(gh<_i714.UserProfileService>()),
+      () => _i995.UserProfileBloc(gh<_i715.UserProfileService>()),
     );
     gh.factoryParam<_i190.LocationCreateBloc, _i9.LatLng?, String?>(
       (position, initialAddress) => _i190.LocationCreateBloc(
@@ -360,17 +378,25 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i297.PreferencesRepository>(),
       ),
     );
-    gh.factoryParam<_i582.CreatedLocationsCubit, String, dynamic>(
+    gh.factory<_i560.ProfileEditBloc>(
+      () => _i560.ProfileEditBloc(
+        gh<_i78.UserProfileRepository>(),
+        gh<_i796.ImageCompressorService>(),
+        gh<_i714.MyProfileCubit>(),
+        gh<_i975.AppBusyCubit>(),
+      ),
+    );
+    gh.factoryParam<_i583.CreatedLocationsCubit, String, dynamic>(
       (username, _) =>
-          _i582.CreatedLocationsCubit(gh<_i714.UserProfileService>(), username),
+          _i583.CreatedLocationsCubit(gh<_i715.UserProfileService>(), username),
     );
     gh.factoryParam<_i660.JoinedLocationsCubit, String, dynamic>(
       (username, _) =>
-          _i660.JoinedLocationsCubit(gh<_i714.UserProfileService>(), username),
+          _i660.JoinedLocationsCubit(gh<_i715.UserProfileService>(), username),
     );
     gh.factoryParam<_i288.LikedLocationsCubit, String, dynamic>(
       (username, _) =>
-          _i288.LikedLocationsCubit(gh<_i714.UserProfileService>(), username),
+          _i288.LikedLocationsCubit(gh<_i715.UserProfileService>(), username),
     );
     return this;
   }

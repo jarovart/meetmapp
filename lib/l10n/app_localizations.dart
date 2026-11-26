@@ -1465,6 +1465,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location not found.'**
   String get locationNotFound;
+
+  /// No description provided for @noJoinedLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending events'**
+  String get noJoinedLocations;
 }
 
 class _AppLocalizationsDelegate

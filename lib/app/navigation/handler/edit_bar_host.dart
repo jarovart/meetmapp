@@ -14,9 +14,17 @@ mixin EditBarHost<T extends StatefulWidget> on State<T> {
   bool get canReset => true;
   bool get isBusy => false;
 
+  EditBarCubit? _editBarCubit;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _editBarCubit = context.read<EditBarCubit>(); // 👈 solange der Baum steht
+  }
+
   void publishEditBar() {
     if (!mounted) return;
-    context.read<EditBarCubit>().register(
+    _editBarCubit?.register(
       EditBarHandler(
         ownerId: editBarOwnerId,
         onCancel: onEditBarCancel,
@@ -37,7 +45,7 @@ mixin EditBarHost<T extends StatefulWidget> on State<T> {
 
   @override
   void dispose() {
-    context.read<EditBarCubit>().unregister(editBarOwnerId);
+    _editBarCubit?.unregister(editBarOwnerId);
     super.dispose();
   }
 }

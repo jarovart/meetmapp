@@ -191,6 +191,20 @@ class LocationRepositoryImpl implements LocationRepository {
     );
   }
 
+  @override
+  Future<AppResult<PagedResult<Location>>> fetchJoinedLocations({
+    required String username,
+    required int page,
+    int pageSize = 10,
+    bool upcomingOnly = true,
+  }) {
+    return _execute(
+      request: () =>
+          _api.fetchJoinedLocations(username, page, pageSize, upcomingOnly),
+      map: (dto) => dto.toDomain(),
+    );
+  }
+
   Future<AppResult<Domain>> _execute<Dto, Domain>({
     required Future<Dto> Function() request,
     required Domain Function(Dto dto) map,

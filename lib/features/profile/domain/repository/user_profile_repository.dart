@@ -1,6 +1,7 @@
 import 'package:casttime/core/result/app_result.dart';
 import 'package:casttime/core/result/paged_result.dart';
 import 'package:casttime/features/location/domain/model/location.dart';
+import 'package:casttime/features/profile/domain/model/profile_update.dart';
 import 'package:casttime/features/profile/domain/model/user_profile.dart';
 
 abstract interface class UserProfileRepository {
@@ -23,4 +24,6 @@ abstract interface class UserProfileRepository {
     required int page,
     int pageSize = 10,
   });
+
+  Future<AppResult<UserProfile>> updateMyProfile(ProfileUpdate update);
 }

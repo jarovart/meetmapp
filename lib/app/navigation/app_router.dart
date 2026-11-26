@@ -16,7 +16,10 @@ import 'package:casttime/features/location/presentation/pages/location_create_pa
 import 'package:casttime/features/location/presentation/pages/location_edit_page.dart';
 import 'package:casttime/features/location/presentation/pages/location_list_page.dart';
 import 'package:casttime/features/location/presentation/pages/location_page.dart';
+import 'package:casttime/features/location/presentation/pages/my_locations_page.dart';
 import 'package:casttime/features/map/presentation/pages/map_page.dart';
+import 'package:casttime/features/profile/presentation/pages/my_profile_page.dart';
+import 'package:casttime/features/profile/presentation/pages/profile_edit_page.dart';
 import 'package:casttime/features/profile/presentation/pages/profile_page.dart';
 import 'package:casttime/features/profile/presentation/pages/user_list_page.dart';
 import 'package:casttime/features/setting/presentation/page/settings_page.dart';
@@ -121,7 +124,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/my-locations',
-              builder: (_, __) => const SizedBox(),
+              builder: (_, __) => const MyLocationsPage(),
             ),
           ],
         ),
@@ -130,9 +133,12 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: RouteConfig.myProfileUrl,
-              builder: (_, __) => const ProfilePage(),
+              builder: (_, __) => const MyProfilePage(),
               routes: [
-                GoRoute(path: 'edit', builder: (_, __) => const SizedBox()),
+                GoRoute(
+                  path: 'edit',
+                  builder: (_, __) => const ProfileEditPage(),
+                ),
               ],
             ),
             GoRoute(

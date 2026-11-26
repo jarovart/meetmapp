@@ -50,6 +50,13 @@ abstract interface class LocationRepository {
   Future<AppResult<Location>> setThumbnail(int locationId, int imageId);
 
   Future<AppResult<Location>> updateLocation(LocationUpdate update);
+
+  Future<AppResult<PagedResult<Location>>> fetchJoinedLocations({
+    required String username,
+    required int page,
+    int pageSize = 10,
+    bool upcomingOnly = true,
+  });
 }
 
 class CreateLocationCommand {}

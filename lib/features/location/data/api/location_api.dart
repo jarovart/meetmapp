@@ -103,4 +103,13 @@ abstract class LocationApi {
     UpdateLocationRequestDTO data,
     @Part(name: 'files') List<MultipartFile>? files,
   );
+
+  @GET('/api/users/{username}/locations/joinedList')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<LocationSliceResponseDTO> fetchJoinedLocations(
+    @Path('username') String username,
+    @Query('page') int page,
+    @Query('size') int size,
+    @Query('upcoming') bool upcoming,
+  );
 }
