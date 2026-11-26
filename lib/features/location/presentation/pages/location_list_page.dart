@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:casttime/app/config/app_config.dart';
 import 'package:casttime/app/di/injection.dart';
 import 'package:casttime/app/localization/app_failure_localization.dart';
 import 'package:casttime/app/localization/l10n_extension.dart';
@@ -125,7 +126,19 @@ class _LocationsListView extends StatelessWidget {
             );
           },
         ),
-        const SearchAndFilterBar(),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppConfig.maxAppWidth,
+              ),
+              child: const SearchAndFilterBar(),
+            ),
+          ),
+        ),
       ],
     );
   }
