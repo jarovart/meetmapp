@@ -49,23 +49,33 @@ abstract class LocationApi {
     @Query("rangeEnd") String endDate,
   );
 
-  @GET('/api/locations/join')
-  Future<void> join(@Query("id") int id);
+  @POST('/api/locations/{locationId}/join')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<void> join(@Path('locationId') int locationId);
 
-  @GET('/api/locations/like')
-  Future<void> like(@Query("id") int id);
+  @POST('/api/locations/{locationId}/like')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<void> like(@Path('locationId') int locationId);
 
-  @GET('/api/locations/unjoin')
-  Future<void> unjoin(@Query("id") int id);
+  @DELETE('/api/locations/{locationId}/unjoin')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<void> unjoin(@Path('locationId') int locationId);
 
-  @GET('/api/locations/unlike')
-  Future<void> unlike(@Query("id") int id);
+  @DELETE('/api/locations/{locationId}/unlike')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<void> unlike(@Path('locationId') int locationId);
 
-  @GET('/api/locations/isJoined')
-  Future<bool> isJoined(@Query("id") int id);
+  @GET('/api/locations/joined')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<bool> isJoined(@Path('locationId') int locationId);
 
-  @GET('/api/locations/isLiked')
-  Future<bool> isLiked(@Query("id") int id);
+  @GET('/api/locations/liked')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<bool> isLiked(@Path('locationId') int locationId);
+
+  @GET('/api/locations/created')
+  @Extra(<String, Object>{AuthInterceptor.withAuthentication: true})
+  Future<bool> isCreated(@Path('locationId') int locationId);
 
   @GET('/api/locations/findByFilter')
   Future<LocationSliceResponseDTO> searchLocationsWithFilter({

@@ -31,6 +31,9 @@ class LocationDetailsContent extends StatelessWidget {
     final state = locationBloc.state;
     List<String> imageUrls = state.imageUrls;
     final l10n = context.l10n;
+    final isLoggedIn = context.select<AuthCubit, bool>(
+      (cubit) => cubit.state.isLoggedIn,
+    );
 
     return Material(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -153,17 +156,23 @@ class LocationDetailsContent extends StatelessWidget {
           ),
 
           LocationBottomActions(
-            isLikeJoinAble: context.read<AuthCubit>().state.isLoggedIn,
+            enabled: isLoggedIn,
             isLiked: location.likedByCurrentUser ?? false,
             isJoined: location.joinedByCurrentUser ?? false,
             likeCount: location.likedUserCount,
             joinCount: location.joinedUserCount,
-            onLikeTap: () => context.read<LocationBloc>().add(
-              LocationLikeToggled(id: location.id),
-            ),
-            onJoinTap: () => context.read<LocationBloc>().add(
-              LocationJoinToggled(id: location.id),
-            ),
+            onLikeTap: () {
+              debugPrint('>>> like tapped');
+              context.read<LocationBloc>().add(
+                LocationLikeToggled(id: location.id),
+              );
+            },
+            onJoinTap: () {
+              debugPrint('>>> join tapped');
+              context.read<LocationBloc>().add(
+                LocationJoinToggled(id: location.id),
+              );
+            },
           ),
         ],
       ),

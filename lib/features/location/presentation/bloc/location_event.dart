@@ -20,6 +20,12 @@ class LocationJoinToggled extends LocationEvent {
   LocationJoinToggled({required this.id});
 }
 
-class LocationLikeSynced extends LocationEvent {}
+class LocationLikeSynced extends LocationEvent {
+  LocationLikeSynced({required this.liked});
+  final bool liked;
+}
 
-class LocationJoinSynced extends LocationEvent {}
+class LocationJoinSynced extends LocationEvent {
+  LocationJoinSynced({required this.joined});
+  final bool joined;
+}

@@ -4,10 +4,14 @@ import 'package:casttime/app/localization/app_failure_localization.dart';
 import 'package:casttime/app/localization/l10n_extension.dart';
 import 'package:casttime/app/navigation/util/route_config.dart';
 import 'package:casttime/app/navigation/widgets/back_bar.dart';
+import 'package:casttime/app/navigation/widgets/dock_container.dart';
+import 'package:casttime/app/navigation/widgets/dock_divider.dart';
 import 'package:casttime/app/navigation/widgets/edit_action_icon.dart';
+import 'package:casttime/app/navigation/widgets/locations_action_row.dart';
 import 'package:casttime/app/presentation/banner/appbanner_cubit.dart';
 import 'package:casttime/app/presentation/util/load_status.dart';
 import 'package:casttime/app/presentation/widget/bottombar_layout_widget.dart';
+import 'package:casttime/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:casttime/features/image/presentation/widgets/gallery_widget.dart';
 import 'package:casttime/features/image/presentation/widgets/imageviewer_widget.dart';
 import 'package:casttime/features/image/presentation/widgets/thumbnail_image_util.dart';
@@ -43,7 +47,7 @@ class LocationPage extends StatelessWidget {
 }
 
 class _LocationDetailView extends StatelessWidget {
-  _LocationDetailView({required this.locationId});
+  const _LocationDetailView({required this.locationId});
 
   final int locationId;
 
@@ -61,31 +65,39 @@ class _LocationDetailView extends StatelessWidget {
 
         return Scaffold(
           extendBody: true,
-          bottomNavigationBar: BackBar(
-            title: location?.title ?? l10n.locationNotFound,
-            trailing: const EditAction(),
+          bottomNavigationBar: DockContainer(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (location != null) ...[
+                  LocationActionsRow(
+                    enabled: context.select<AuthCubit, bool>(
+                      (c) => c.state.isLoggedIn,
+                    ),
+                    isLiked: location.likedByCurrentUser ?? false,
+                    isJoined: location.joinedByCurrentUser ?? false,
+                    likeCount: location.likedUserCount,
+                    joinCount: location.joinedUserCount,
+                    onLikeTap: () => context.read<LocationBloc>().add(
+                      LocationLikeToggled(id: location.id),
+                    ),
+                    onJoinTap: () => context.read<LocationBloc>().add(
+                      LocationJoinToggled(id: location.id),
+                    ),
+                  ),
+                  const DockDivider(),
+                ],
+                BackBarRow(
+                  title: location?.title ?? l10n.locationNotFound,
+                  trailing: const EditAction(),
+                ),
+              ],
+            ),
           ),
           body: BottomBarLayoutWidget(
             childWidget: _DetailBody(state: state, locationId: locationId),
           ),
         );
-
-        /*SafeArea(child:
-              if (location != null)
-                LocationBottomActions(
-                  isLikeJoinAble: context.read<AuthCubit>().state.isLoggedIn,
-                  isLiked: location.likedByCurrentUser ?? false,
-                  isJoined: location.joinedByCurrentUser ?? false,
-                  likeCount: location.likedUserCount,
-                  joinCount: location.joinedUserCount,
-                  onLikeTap: () => context.read<LocationBloc>().add(
-                    LocationLikeToggled(id: location.id),
-                  ),
-                  onJoinTap: () => context.read<LocationBloc>().add(
-                    LocationJoinToggled(id: location.id),
-                  ),
-                  //),
-                ),*/
       },
     );
   }

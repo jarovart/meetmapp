@@ -30,8 +30,15 @@ class _MyLocationsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MyLocationsBloc, MyLocationsState>(
-      builder: (context, state) => _MyLocationsBody(state: state),
+    return Column(
+      children: [
+        const _MyLocationsHeader(),
+        Expanded(
+          child: BlocBuilder<MyLocationsBloc, MyLocationsState>(
+            builder: (context, state) => _MyLocationsBody(state: state),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -120,6 +127,31 @@ class _MyLocationsBody extends StatelessWidget {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _MyLocationsHeader extends StatelessWidget {
+  const _MyLocationsHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return SafeArea(
+      bottom: false,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppConfig.maxAppWidth),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: Text(
+            l10n.myLocationsTitle,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );

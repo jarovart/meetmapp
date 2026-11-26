@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class LocationBottomActions extends StatelessWidget {
-  final bool isLikeJoinAble;
+  final bool enabled;
   final bool isLiked;
   final bool isJoined;
   final int likeCount;
@@ -14,7 +14,7 @@ class LocationBottomActions extends StatelessWidget {
 
   const LocationBottomActions({
     super.key,
-    required this.isLikeJoinAble,
+    required this.enabled,
     required this.isLiked,
     required this.isJoined,
     required this.likeCount,
@@ -49,32 +49,21 @@ class LocationBottomActions extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: isLikeJoinAble
-                  ? ElevatedButton.icon(
-                      onPressed: authCubit.state.isLoggedIn ? onLikeTap : null,
-                      icon: Icon(
-                        isLiked ? Icons.favorite : Icons.favorite_border,
-                      ),
-                      label: Text(l10n.likesCount(likeCount)),
-                    )
-                  : countInfo(
-                      Icons.favorite_border,
-                      l10n.likesCount(likeCount),
-                    ),
+              child: ElevatedButton.icon(
+                onPressed: enabled ? onLikeTap : null,
+                icon: Icon(isLiked ? Icons.favorite : Icons.favorite_border),
+                label: Text(l10n.likesCount(likeCount)),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: isLikeJoinAble
-                  ? ElevatedButton.icon(
-                      onPressed: authCubit.state.isLoggedIn ? onJoinTap : null,
-                      icon: Icon(
-                        isJoined
-                            ? Icons.check_circle
-                            : Icons.group_add_outlined,
-                      ),
-                      label: Text(l10n.joinsCount(joinCount)),
-                    )
-                  : countInfo(Icons.group_outlined, l10n.joinsCount(joinCount)),
+              child: ElevatedButton.icon(
+                onPressed: enabled ? onJoinTap : null,
+                icon: Icon(
+                  isJoined ? Icons.check_circle : Icons.group_add_outlined,
+                ),
+                label: Text(l10n.joinsCount(joinCount)),
+              ),
             ),
           ],
         ),

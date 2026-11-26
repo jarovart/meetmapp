@@ -7,6 +7,7 @@ import 'package:casttime/features/location/domain/serviceinterface/location_serv
 import 'package:casttime/features/location/presentation/bloc/location_event.dart';
 import 'package:casttime/features/location/presentation/bloc/location_state.dart';
 import 'package:casttime/features/map/presentation/util/debouncer.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -23,6 +24,10 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
 
   final LocationService _locationService;
   final Debouncer _likeDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 500),
+  );
+
+  final Debouncer _joinDebouncer = Debouncer(
     delay: const Duration(milliseconds: 500),
   );
 
@@ -48,8 +53,8 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
   }
 
   FutureOr<void> _onLikeToggled(LocationLikeToggled event, Emitter emit) {
-    if (state.location?.isDetailLoaded ?? true) return null;
-    final location = state.location!;
+    final location = state.location;
+    if (location == null) return null;
 
     final nowLiked = !(location.likedByCurrentUser ?? false);
     final delta = nowLiked ? 1 : -1;
@@ -63,12 +68,17 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
       ),
     );
 
-    _likeDebouncer.run(() => add(LocationLikeSynced()));
+    _likeDebouncer.run(() {
+      if (!isClosed) add(LocationLikeSynced(liked: nowLiked));
+    });
   }
 
   FutureOr<void> _onJoinToggled(LocationJoinToggled event, Emitter emit) {
-    if (state.location?.isDetailLoaded ?? true) return null;
-    final location = state.location!;
+    final location = state.location;
+    if (location == null) {
+      debugPrint("joined ${event.id}");
+      return null;
+    }
 
     final nowJoined = !(location.joinedByCurrentUser ?? false);
     final delta = nowJoined ? 1 : -1;
@@ -76,21 +86,23 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     emit(
       state.copyWith(
         location: location.copyWith(
-          likedByCurrentUser: nowJoined,
-          likedUserCount: location.joinedUserCount + delta,
+          joinedByCurrentUser: nowJoined,
+          joinedUserCount: location.joinedUserCount + delta,
         ),
       ),
     );
 
-    _likeDebouncer.run(() => add(LocationJoinSynced()));
+    _joinDebouncer.run(() {
+      if (!isClosed) add(LocationJoinSynced(joined: nowJoined));
+    });
   }
 
   Future<void> _onLikeSynced(
     LocationLikeSynced event,
     Emitter<LocationState> emit,
   ) async {
-    if (state.location?.isDetailLoaded ?? true) return;
-    final location = state.location!;
+    final location = state.location;
+    if (location == null) return;
 
     final isLiked = location.likedByCurrentUser ?? false;
 
@@ -115,8 +127,8 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     LocationJoinSynced event,
     Emitter<LocationState> emit,
   ) async {
-    if (state.location?.isDetailLoaded ?? true) return;
-    final location = state.location!;
+    final location = state.location;
+    if (location == null) return;
 
     final isJoined = location.joinedByCurrentUser ?? false;
 

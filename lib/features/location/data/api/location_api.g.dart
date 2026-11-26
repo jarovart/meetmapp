@@ -198,16 +198,16 @@ class _LocationApi implements LocationApi {
   }
 
   @override
-  Future<void> join(int id) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'id': id};
+  Future<void> join(int locationId) async {
+    final _extra = <String, dynamic>{'withAuthentication': true};
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
+      Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/locations/join',
+            '/api/locations/${locationId}/join',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -217,16 +217,16 @@ class _LocationApi implements LocationApi {
   }
 
   @override
-  Future<void> like(int id) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'id': id};
+  Future<void> like(int locationId) async {
+    final _extra = <String, dynamic>{'withAuthentication': true};
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
+      Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/locations/like',
+            '/api/locations/${locationId}/like',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -236,16 +236,16 @@ class _LocationApi implements LocationApi {
   }
 
   @override
-  Future<void> unjoin(int id) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'id': id};
+  Future<void> unjoin(int locationId) async {
+    final _extra = <String, dynamic>{'withAuthentication': true};
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
+      Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/locations/unjoin',
+            '/api/locations/${locationId}/unjoin',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -255,16 +255,16 @@ class _LocationApi implements LocationApi {
   }
 
   @override
-  Future<void> unlike(int id) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'id': id};
+  Future<void> unlike(int locationId) async {
+    final _extra = <String, dynamic>{'withAuthentication': true};
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
+      Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/locations/unlike',
+            '/api/locations/${locationId}/unlike',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -274,16 +274,16 @@ class _LocationApi implements LocationApi {
   }
 
   @override
-  Future<bool> isJoined(int id) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'id': id};
+  Future<bool> isJoined(int locationId) async {
+    final _extra = <String, dynamic>{'withAuthentication': true};
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<bool>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/locations/isJoined',
+            '/api/locations/joined',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -301,16 +301,43 @@ class _LocationApi implements LocationApi {
   }
 
   @override
-  Future<bool> isLiked(int id) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'id': id};
+  Future<bool> isLiked(int locationId) async {
+    final _extra = <String, dynamic>{'withAuthentication': true};
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<bool>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/locations/isLiked',
+            '/api/locations/liked',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<bool>(_options);
+    late bool _value;
+    try {
+      _value = _result.data!;
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<bool> isCreated(int locationId) async {
+    final _extra = <String, dynamic>{'withAuthentication': true};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<bool>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/locations/created',
             queryParameters: queryParameters,
             data: _data,
           )
